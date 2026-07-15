@@ -20,17 +20,34 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
--- 3. TIÊU ĐỀ MENU
+-- ========================================================
+-- 3. TIÊU ĐỀ MENU & LOGO THƯƠNG HIỆU (CẬP NHẬT)
+-- ========================================================
+
+-- A. Tạo chữ tiêu đề (Dịch sang phải một chút để nhường chỗ cho Logo)
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Title.Text = "  MENU TÍNH NĂNG CỦA TÔI"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Text = "       Tuấn Lọ PRO " 
+Title.TextColor3 = Color3.fromRGB(255, 255, 0) -- Màu vàng chuối cực nổi bật
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 16
 Title.Parent = MainFrame
 
+-- B. Tạo khung chứa LOGO (Hình ảnh)
+local Logo = Instance.new("ImageLabel")
+Logo.Name = "Logo"
+Logo.Size = UDim2.new(0, 25, 0, 25) -- Kích thước logo là 25x25 pixel (nhỏ gọn)
+Logo.Position = UDim2.new(0, 8, 0, 5) -- Đặt ở góc trái, căn giữa thanh tiêu đề
+Logo.BackgroundTransparency = 1 -- Làm trong suốt nền của ảnh
+Logo.BorderSizePixel = 0
+
+-- DÁN ID ẢNH LOGO CỦA BẠN VÀO ĐÂY:
+-- (Dưới đây là một ID ảnh quả chuối mặc định của Roblox để bạn test thử)
+Logo.Image = "rbxassetid://10850259160" 
+
+Logo.Parent = MainFrame
 -- 4. NÚT THU GỌN VÀ PHÓNG TO
 local MinimizeButton = Instance.new("TextButton")
 MinimizeButton.Size = UDim2.new(0, 35, 0, 35)
