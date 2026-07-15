@@ -1,204 +1,246 @@
-print " hello "
 -- ========================================================
--- SCRIPT TẠO MENU VÀ NHÉT CÁC NÚT CHỨC NĂNG VÀO BÊN TRONG
+-- TUẤN LỌ HUB - PHONG CÁCH REDZ HUB (CÓ CHỨC NĂNG CHUYỂN TÁB)
 -- ========================================================
 
 -- 1. TẠO SCREEN GUI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MyFeatureMenu"
+ScreenGui.Name = "TuanLoRedzHub"
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
 -- 2. KHUNG MENU CHÍNH
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 350, 0, 250)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -125)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Size = UDim2.new(0, 520, 0, 320)
+MainFrame.Position = UDim2.new(0.5, -260, 0.5, -160)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
--- Thêm bo góc cho Khung Menu Chính (MainFrame)
 MainFrame.ClipsDescendants = true
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 12) -- Số 12 là độ bo tròn góc, bạn có thể tăng lên 15 nếu muốn tròn hơn
-MainCorner.Parent = MainFrame
--- ========================================================
--- 3. TIÊU ĐỀ MENU & LOGO THƯƠNG HIỆU (CẬP NHẬT)
--- ========================================================
+MainFrame.Parent = ScreenGui
 
--- A. Tạo chữ tiêu đề (Dịch sang phải một chút để nhường chỗ cho Logo)
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 9)
+MainCorner.Parent = MainFrame
+
+-- 3. THANH TIÊU ĐỀ PHÍA TRÊN (TopBar)
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainFrame
+
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 35)
-Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Title.Text = "       Tuấn Lọ PRO " 
-Title.TextColor3 = Color3.fromRGB(255, 255, 0) 
+Title.Size = UDim2.new(1, -50, 1, 0)
+Title.Position = UDim2.new(0, 45, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "Tuấn Lọ PRO"
+Title.TextColor3 = Color3.fromRGB(255, 50, 50) -- Đỏ đặc trưng Redz
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 16
-Title.Parent = MainFrame
+Title.Parent = TopBar
 
--- B. Tạo khung chứa LOGO (Hình ảnh)
 local Logo = Instance.new("ImageLabel")
 Logo.Name = "Logo"
-Logo.Size = UDim2.new(0, 25, 0, 25) -- Kích thước logo là 25x25 pixel (nhỏ gọn)
-Logo.Position = UDim2.new(0, 8, 0, 5) -- Đặt ở góc trái, căn giữa thanh tiêu đề
-Logo.BackgroundTransparency = 1 -- Làm trong suốt nền của ảnh
-Logo.BorderSizePixel = 0
+Logo.Size = UDim2.new(0, 24, 0, 24)
+Logo.Position = UDim2.new(0, 12, 0, 8)
+Logo.BackgroundTransparency = 1
+Logo.Image = "rbxassetid://10850256191"
+Logo.Parent = TopBar
 
--- DÁN ID ẢNH LOGO CỦA BẠN VÀO ĐÂY:
--- (Dưới đây là một ID ảnh quả chuối mặc định của Roblox để bạn test thử)
-Logo.Image = "rbxassetid://10850259160" 
-
-Logo.Parent = MainFrame
--- 4. NÚT THU GỌN VÀ PHÓNG TO
 local MinimizeButton = Instance.new("TextButton")
-MinimizeButton.Size = UDim2.new(0, 35, 0, 35)
-MinimizeButton.Position = UDim2.new(1, -35, 0, 0)
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-MinimizeButton.Text = "_"
-MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinimizeButton.Parent = MainFrame
+MinimizeButton.Size = UDim2.new(0, 40, 0, 40)
+MinimizeButton.Position = UDim2.new(1, -40, 0, 0)
+MinimizeButton.BackgroundTransparency = 1
+MinimizeButton.Text = "×"
+MinimizeButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+MinimizeButton.TextSize = 20
+MinimizeButton.Font = Enum.Font.SourceSansBold
+MinimizeButton.Parent = TopBar
 
-local OpenButton = Instance.new("TextButton")
-OpenButton.Size = UDim2.new(0, 50, 0, 50)
-OpenButton.Position = UDim2.new(0, 10, 0.5, -25)
-OpenButton.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
-OpenButton.Text = "OPEN"
-OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-OpenButton.Visible = false
-OpenButton.Parent = ScreenGui
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(1, 0)
-UICorner.Parent = OpenButton
--- ========================================================
--- CODE GIÚP NÚT OPEN CÓ THỂ KÉO THẢ DI CHUYỂN
--- ========================================================
-local UserInputService = game:GetService("UserInputService")
-local draggingOpenBtn = false
-local dragInputOpenBtn, dragStartOpenBtn, startPosOpenBtn
+-- 4. THANH MENU BÊN TRÁI (Sidebar)
+local Sidebar = Instance.new("Frame")
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0, 45, 1, -40)
+Sidebar.Position = UDim2.new(0, 0, 0, 40)
+Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = MainFrame
 
-local function updateOpenBtn(input)
-    local delta = input.Position - dragStartOpenBtn
-    OpenButton.Position = UDim2.new(
-        startPosOpenBtn.X.Scale, 
-        startPosOpenBtn.X.Offset + delta.X, 
-        startPosOpenBtn.Y.Scale, 
-        startPosOpenBtn.Y.Offset + delta.Y
-    )
+local SidebarLayout = Instance.new("UIListLayout")
+SidebarLayout.Parent = Sidebar
+SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SidebarLayout.Padding = UDim.new(0, 8)
+SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+-- Khởi tạo danh sách quản lý các trang
+local Tabs = {}
+local TabButtons = {}
+local currentTab = nil
+
+-- Hàm tạo trang mới và nút Icon tương ứng
+local function CreateTab(emojiText, order)
+    -- A. Tạo khung chứa chức năng riêng cho trang này (Mặc định ẩn đi)
+    local Page = Instance.new("ScrollingFrame")
+    Page.Name = emojiText .. "_Page"
+    Page.Size = UDim2.new(1, -60, 1, -55)
+    Page.Position = UDim2.new(0, 55, 0, 48)
+    Page.BackgroundTransparency = 1
+    Page.BorderSizePixel = 0
+    Page.CanvasSize = UDim2.new(0, 0, 0, 400)
+    Page.ScrollBarThickness = 3
+    Page.ScrollBarImageColor3 = Color3.fromRGB(255, 50, 50)
+    Page.Visible = false
+    Page.Parent = MainFrame
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = Page
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 6)
+
+    -- B. Tạo nút bấm Icon trên thanh Sidebar
+    local TabBtn = Instance.new("TextButton")
+    TabBtn.Size = UDim2.new(0, 35, 0, 35)
+    TabBtn.BackgroundTransparency = 1
+    TabBtn.Text = emojiText
+    TabBtn.TextSize = 20
+    TabBtn.Font = Enum.Font.SourceSansBold
+    TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150) -- Mặc định màu xám
+    TabBtn.LayoutOrder = order
+    TabBtn.Parent = Sidebar
+
+    -- C. Xử lý logic khi bấm vào nút chuyển trang
+    local function KichHoatTab()
+        -- Ẩn trang hiện tại, đổi màu nút cũ thành xám
+        for _, p in pairs(Tabs) do p.Visible = false end
+        for _, b in pairs(TabButtons) do b.TextColor3 = Color3.fromRGB(150, 150, 150) end
+
+        -- Hiện trang mới được chọn, đổi nút sang màu đỏ phát sáng
+        Page.Visible = true
+        TabBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+    end
+
+    TabBtn.MouseButton1Click:Connect(KichHoatTab)
+
+    table.insert(Tabs, Page)
+    table.insert(TabButtons, TabBtn)
+
+    -- Trả về khung Page để chúng ta nhét nút chức năng vào đúng trang đó
+    return Page
 end
 
-OpenButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        draggingOpenBtn = true
-        dragStartOpenBtn = input.Position
-        startPosOpenBtn = OpenButton.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                draggingOpenBtn = false
-            end
-        end)
-    end
-end)
-
-OpenButton.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInputOpenBtn = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInputOpenBtn and draggingOpenBtn then
-        updateOpenBtn(input)
-    end
-end)
-
-MinimizeButton.MouseButton1Click:Connect(function() MainFrame.Visible = false; OpenButton.Visible = true end)
-OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = true; OpenButton.Visible = false end)
-
--- ========================================================
--- PHẦN MỚI: NHÉT CÁC NÚT CHỨC NĂNG VÀO ĐÂY
--- ========================================================
-
--- A. Tạo một "Khung Chứa Nút" (Bỏ vào trong MainFrame, chừa phần tiêu đề ra)
-local Container = Instance.new("ScrollingFrame")
-Container.Name = "Container"
-Container.Size = UDim2.new(1, -20, 1, -55) -- Chiếm toàn bộ chiều rộng, chừa 55 pixel phía trên
-Container.Position = UDim2.new(0, 10, 0, 45) -- Cách lề trên 45 pixel (dưới tiêu đề)
-Container.BackgroundColor3 = Color3.fromRGB(40, 40, 40) -- Màu nền nhạt hơn tí
-Container.BorderSizePixel = 0
-Container.CanvasSize = UDim2.new(0, 0, 0, 300) -- Kích thước vùng cuộn chuột
-Container.Parent = MainFrame
-
--- B. Tạo bộ tự động xếp hàng (UIListLayout) 
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Parent = Container
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 5) 
-
--- C. HÀM TẠO NÚT TÍNH NĂNG NHANH
-local function CreateFunctionButton(btnText, codeFunction)
+-- 5. HÀM TẠO NÚT CHỨC NĂNG TRONG TỪNG TRANG
+local function CreateFunctionButton(parentPage, btnText, codeFunction)
     local NewButton = Instance.new("TextButton")
-    NewButton.Size = UDim2.new(1, 0, 0, 40) -- Rộng bằng khung chứa, cao 40 pixel
-    NewButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    NewButton.Text = btnText
-    NewButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NewButton.Size = UDim2.new(1, 0, 0, 38)
+    NewButton.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+    NewButton.Text = "  " .. btnText
+    NewButton.TextColor3 = Color3.fromRGB(230, 230, 230)
     NewButton.Font = Enum.Font.SourceSans
-    NewButton.TextSize = 16
-    NewButton.Parent = Container -- Nhét nút này vào Khung Chứa (Container)
+    NewButton.TextSize = 14
+    NewButton.TextXAlignment = Enum.TextXAlignment.Left
+    NewButton.Parent = parentPage -- Nhét vào đúng trang được chỉ định
     
-    -- Khi người chơi click vào nút này, nó sẽ chạy hàm chức năng được truyền vào
-    NewButton.MouseButton1Click:Connect(codeFunction)
-    
-    -- Thêm bo góc cho nút nhìn cho chuyên nghiệp
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 6)
     btnCorner.Parent = NewButton
+    
+    local Line = Instance.new("Frame")
+    Line.Size = UDim2.new(0, 3, 1, 0)
+    Line.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    Line.BorderSizePixel = 0
+    Line.Parent = NewButton
+    local lineCorner = Instance.new("UICorner")
+    lineCorner.CornerRadius = UDim.new(0, 4)
+    lineCorner.Parent = Line
+
+    NewButton.MouseButton1Click:Connect(codeFunction)
 end
 
--- D. BẮT ĐẦU NHÉT CÁC CHỨC NĂNG THỰC TẾ VÀO MENU
+-- ========================================================
+-- KÍCH HOẠT VÀ PHÂN CHIA CÁC TRANG (TABS)
+-- ========================================================
 
--- Chức năng 1: Nhặt Rương (Mô phỏng)
-CreateFunctionButton("Bật Tự Động Nhặt Rương", function()
-    print("Đang kích hoạt chức năng nhặt rương...")
-    -- Bạn viết code dịch chuyển đến rương ở đây
+-- Tạo 3 trang chính và lưu vào 3 biến riêng biệt
+local TrangChu = CreateTab("🏠", 1)
+local AutoFarm = CreateTab("⚔️", 2)
+local DichChuyen = CreateTab("🌀", 3)
+
+-- Mặc định khi mở Hub lên sẽ hiển thị Trang Chủ trước
+Tabs[1].Visible = true
+TabButtons[1].TextColor3 = Color3.fromRGB(255, 50, 50)
+
+
+-- ========================================================
+-- DÁN CHỨC NĂNG VÀO ĐÚNG TỪNG TRANG THEO ICON
+-- ========================================================
+
+-- 🏠 CÁC NÚT Ở TRANG CHỦ
+CreateFunctionButton(TrangChu, "Chào mừng bạn đến với Tuấn Lọ PRO Hub!", function()
+    print("Thông tin Hub")
 end)
 
--- Chức năng 2: Auto Farm Level (Mô phỏng)
-CreateFunctionButton("Bật Auto Farm Level", function()
-    print("Đang chạy vòng lặp farm quái...")
-    -- Bạn viết code gom quái ở đây
+-- ⚔️ CÁC NÚT Ở TRANG AUTO FARM
+CreateFunctionButton(AutoFarm, "Bật Tự Động Nhặt Rương", function()
+    print("Đang nhặt rương...")
 end)
 
--- Chức năng 3: Dịch chuyển về Đảo Khởi Đầu (Tự động nhận diện Sea)
-CreateFunctionButton("Dịch Chuyển Về Đảo Khởi Đầu", function()
+CreateFunctionButton(AutoFarm, "Bật Auto Farm Level", function()
+    print("Đang farm...")
+end)
+
+-- 🌀 CÁC NÚT Ở TRANG DỊCH CHUYỂN
+CreateFunctionButton(DichChuyen, "Dịch Chuyển Về Đảo Khởi Đầu", function()
     local player = game.Players.LocalPlayer
     local HRT = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    
     if HRT then
-        local currentPlaceId = game.PlaceId -- Lấy ID của Server hiện tại để check xem bạn đang ở Sea mấy
-        
+        local currentPlaceId = game.PlaceId
         if currentPlaceId == 275391513 then
-            -- BẠN ĐANG Ở SEA 1 (Tọa độ Đảo Khởi Đầu Marine/Pirate Starter)
-            print("Đã nhận diện Sea 1. Đang dịch chuyển...")
-            HRT.CFrame = CFrame.new(1003, 16, 1420) -- Tọa độ khởi đầu đảo Pirate Sea 1
-            
+            HRT.CFrame = CFrame.new(1003, 16, 1420)
         elseif currentPlaceId == 444227218 then
-            -- BẠN ĐANG Ở SEA 2 (Tọa độ Đảo Khởi Đầu Sea 2 - Kingdom of Rose)
-            print("Đã nhận diện Sea 2. Đang dịch chuyển...")
-            HRT.CFrame = CFrame.new(-20, 16, 1000) -- Tọa độ bến cảng khởi đầu Sea 2
-            
+            HRT.CFrame = CFrame.new(-20, 16, 1000)
         elseif currentPlaceId == 7449423635 then
-            -- BẠN ĐANG Ở SEA 3 (Tọa độ Đảo Khởi Đầu Sea 3 - Castle on the Sea)
-            print("Đã nhận diện Sea 3. Đang dịch chuyển...")
-            HRT.CFrame = CFrame.new(-5020, 315, -3152) -- Tọa độ Lâu đài trên biển Sea 3
-            
-        else
-            -- Trường hợp bạn đang ở các server minigame hoặc phòng chờ đặc biệt
-            print("Không nhận diện được ID Sea này! Dịch chuyển về mặc định...")
-            HRT.CFrame = CFrame.new(0, 100, 0)
+            HRT.CFrame = CFrame.new(-5020, 315, -3152)
         end
     end
 end)
+
+
+-- ========================================================
+-- 7. NÚT OPEN DI CHUYỂN ĐƯỢC (Giữ nguyên cấu trúc cũ)
+-- ========================================================
+local OpenButton = Instance.new("TextButton")
+OpenButton.Size = UDim2.new(0, 45, 0, 45)
+OpenButton.Position = UDim2.new(0, 10, 0.5, -22)
+OpenButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+OpenButton.Text = "OPEN"
+OpenButton.Font = Enum.Font.SourceSansBold
+OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenButton.TextSize = 12
+OpenButton.Visible = false
+OpenButton.Parent = ScreenGui
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(1, 0)
+OpenCorner.Parent = OpenButton
+
+local UserInputService = game:GetService("UserInputService")
+local draggingOpenBtn = false
+local dragInputOpenBtn, dragStartOpenBtn, startPosOpenBtn
+local function updateOpenBtn(input)
+    local delta = input.Position - dragStartOpenBtn
+    OpenButton.Position = UDim2.new(startPosOpenBtn.X.Scale, startPosOpenBtn.X.Offset + delta.X, startPosOpenBtn.Y.Scale, startPosOpenBtn.Y.Offset + delta.Y)
+end
+OpenButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        draggingOpenBtn = true; dragStartOpenBtn = input.Position; startPosOpenBtn = OpenButton.Position
+        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then draggingOpenBtn = false end end)
+    end
+end)
+OpenButton.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInputOpenBtn = input end end)
+UserInputService.InputChanged:Connect(function(input) if input == dragInputOpenBtn and draggingOpenBtn then updateOpenBtn(input) end end)
+
+MinimizeButton.MouseButton1Click:Connect(function() MainFrame.Visible = false; OpenButton.Visible = true end)
+OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = true; OpenButton.Visible = false end)
