@@ -1,5 +1,5 @@
 -- ========================================================
--- TUẤN LỌ HUB - PHONG CÁCH REDZ HUB (CÓ CHỨC NĂNG CHUYỂN TÁB)
+-- TUẤN LỌ HUB - PHONG CÁCH REDZ HUB (8 TABS CHUYÊN NGHIỆP)
 -- ========================================================
 
 -- 1. TẠO SCREEN GUI
@@ -11,8 +11,8 @@ ScreenGui.ResetOnSpawn = false
 -- 2. KHUNG MENU CHÍNH
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 520, 0, 320)
-MainFrame.Position = UDim2.new(0.5, -260, 0.5, -160)
+MainFrame.Size = UDim2.new(0, 520, 0, 340) -- Tăng nhẹ chiều cao lên 340 để chứa đủ 8 icon cực đẹp
+MainFrame.Position = UDim2.new(0.5, -260, 0.5, -170)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -37,7 +37,7 @@ Title.Size = UDim2.new(1, -50, 1, 0)
 Title.Position = UDim2.new(0, 45, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "Tuấn Lọ PRO"
-Title.TextColor3 = Color3.fromRGB(255, 50, 50) -- Đỏ đặc trưng Redz
+Title.TextColor3 = Color3.fromRGB(255, 50, 50) -- Màu đỏ Redz
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 16
@@ -61,7 +61,7 @@ MinimizeButton.TextSize = 20
 MinimizeButton.Font = Enum.Font.SourceSansBold
 MinimizeButton.Parent = TopBar
 
--- 4. THANH MENU BÊN TRÁI (Sidebar)
+-- 4. THANH MENU BÊN TRÁI (Sidebar - Tối ưu cho 8 nút)
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, 45, 1, -40)
@@ -73,17 +73,16 @@ Sidebar.Parent = MainFrame
 local SidebarLayout = Instance.new("UIListLayout")
 SidebarLayout.Parent = Sidebar
 SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SidebarLayout.Padding = UDim.new(0, 8)
+SidebarLayout.Padding = UDim.new(0, 5) -- Khoảng cách giữa các icon là 5px để không bị chật
 SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 -- Khởi tạo danh sách quản lý các trang
 local Tabs = {}
 local TabButtons = {}
-local currentTab = nil
 
 -- Hàm tạo trang mới và nút Icon tương ứng
 local function CreateTab(emojiText, order)
-    -- A. Tạo khung chứa chức năng riêng cho trang này (Mặc định ẩn đi)
+    -- A. Khung chứa chức năng riêng cho trang này
     local Page = Instance.new("ScrollingFrame")
     Page.Name = emojiText .. "_Page"
     Page.Size = UDim2.new(1, -60, 1, -55)
@@ -101,24 +100,22 @@ local function CreateTab(emojiText, order)
     UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
     UIListLayout.Padding = UDim.new(0, 6)
 
-    -- B. Tạo nút bấm Icon trên thanh Sidebar
+    -- B. Tạo nút bấm Icon trên thanh Sidebar (Thu nhỏ lại 30x30 để xếp vừa 8 nút)
     local TabBtn = Instance.new("TextButton")
-    TabBtn.Size = UDim2.new(0, 35, 0, 35)
+    TabBtn.Size = UDim2.new(0, 30, 0, 30)
     TabBtn.BackgroundTransparency = 1
     TabBtn.Text = emojiText
-    TabBtn.TextSize = 20
+    TabBtn.TextSize = 16 -- Giảm nhẹ cỡ chữ Emoji xuống 16 cho cân đối
     TabBtn.Font = Enum.Font.SourceSansBold
-    TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150) -- Mặc định màu xám
+    TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
     TabBtn.LayoutOrder = order
     TabBtn.Parent = Sidebar
 
-    -- C. Xử lý logic khi bấm vào nút chuyển trang
+    -- C. Xử lý logic chuyển trang
     local function KichHoatTab()
-        -- Ẩn trang hiện tại, đổi màu nút cũ thành xám
         for _, p in pairs(Tabs) do p.Visible = false end
         for _, b in pairs(TabButtons) do b.TextColor3 = Color3.fromRGB(150, 150, 150) end
 
-        -- Hiện trang mới được chọn, đổi nút sang màu đỏ phát sáng
         Page.Visible = true
         TabBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
     end
@@ -128,11 +125,10 @@ local function CreateTab(emojiText, order)
     table.insert(Tabs, Page)
     table.insert(TabButtons, TabBtn)
 
-    -- Trả về khung Page để chúng ta nhét nút chức năng vào đúng trang đó
     return Page
 end
 
--- 5. HÀM TẠO NÚT CHỨC NĂNG TRONG TỪNG TRANG
+-- 5. HÀM TẠO NÚT CHỨC NĂNG
 local function CreateFunctionButton(parentPage, btnText, codeFunction)
     local NewButton = Instance.new("TextButton")
     NewButton.Size = UDim2.new(1, 0, 0, 38)
@@ -142,7 +138,7 @@ local function CreateFunctionButton(parentPage, btnText, codeFunction)
     NewButton.Font = Enum.Font.SourceSans
     NewButton.TextSize = 14
     NewButton.TextXAlignment = Enum.TextXAlignment.Left
-    NewButton.Parent = parentPage -- Nhét vào đúng trang được chỉ định
+    NewButton.Parent = parentPage
     
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 6)
@@ -161,39 +157,57 @@ local function CreateFunctionButton(parentPage, btnText, codeFunction)
 end
 
 -- ========================================================
--- KÍCH HOẠT VÀ PHÂN CHIA CÁC TRANG (TABS)
+-- KÍCH HOẠT VÀ PHÂN CHIA 8 TRANG THEO THỨ TỰ YÊU CẦU
 -- ========================================================
 
--- Tạo 3 trang chính và lưu vào 3 biến riêng biệt
-local TrangChu = CreateTab("🏠", 1)
-local AutoFarm = CreateTab("⚔️", 2)
-local DichChuyen = CreateTab("🌀", 3)
+local Tab1_TrangChu   = CreateTab("🏠", 1) -- 1. Ngôi nhà
+local Tab2_NongDan    = CreateTab("👨‍🌾", 2) -- 2. Nông dân (Nông dân cầm đinh ba)
+local Tab3_Thuyen     = CreateTab("⛵", 3) -- 3. Thuyền
+local Tab4_TraiCay    = CreateTab("🍎", 4) -- 4. Trái cây
+local Tab5_AutoFarm   = CreateTab("⚔️", 5) -- 5. Kiếm chéo
+local Tab6_DichChuyen = CreateTab("🌀", 6) -- 6. Lốc dịch chuyển
+local Tab7_CaiDat     = CreateTab("⚙️", 7) -- 7. Bánh răng cài đặt
+local Tab8_GioHang    = CreateTab("🛒", 8) -- 8. Giỏ hàng mua sắm
 
--- Mặc định khi mở Hub lên sẽ hiển thị Trang Chủ trước
+-- Mặc định mở Trang Chủ (Tab 1) đầu tiên
 Tabs[1].Visible = true
 TabButtons[1].TextColor3 = Color3.fromRGB(255, 50, 50)
 
 
 -- ========================================================
--- DÁN CHỨC NĂNG VÀO ĐÚNG TỪNG TRANG THEO ICON
+-- PHÂN CHIA CHỨC NĂNG VÀO TỪNG TAB
 -- ========================================================
 
--- 🏠 CÁC NÚT Ở TRANG CHỦ
-CreateFunctionButton(TrangChu, "Chào mừng bạn đến với Tuấn Lọ PRO Hub!", function()
-    print("Thông tin Hub")
+-- 🏠 TAB 1: TRANG CHỦ
+CreateFunctionButton(Tab1_TrangChu, "Chào mừng đến với Tuấn Lọ PRO Hub!", function()
+    print("Welcome!")
+end)
+CreateFunctionButton(Tab1_TrangChu, "Người tạo: Tuấn Lọ", function()
+    print("Creator info")
 end)
 
--- ⚔️ CÁC NÚT Ở TRANG AUTO FARM
-CreateFunctionButton(AutoFarm, "Bật Tự Động Nhặt Rương", function()
+-- 👨‍🌾 TAB 2: NÔNG DÂN (Auto Farm Level)
+CreateFunctionButton(Tab2_NongDan, "Bật Auto Farm Level", function()
+    print("Đang farm level...")
+end)
+
+-- ⛵ TAB 3: THUYỀN
+CreateFunctionButton(Tab3_Thuyen, "Tự động mua thuyền nhanh", function()
+    print("Mua thuyền...")
+end)
+
+-- 🍎 TAB 4: TRÁI CÂY (Blox Fruit)
+CreateFunctionButton(Tab4_TraiCay, "Tự động ăn/nhặt Trái Cây", function()
+    print("Nhặt trái cây...")
+end)
+
+-- ⚔️ TAB 5: SỨC MẠNH / KIẾM
+CreateFunctionButton(Tab5_AutoFarm, "Bật Tự Động Nhặt Rương", function()
     print("Đang nhặt rương...")
 end)
 
-CreateFunctionButton(AutoFarm, "Bật Auto Farm Level", function()
-    print("Đang farm...")
-end)
-
--- 🌀 CÁC NÚT Ở TRANG DỊCH CHUYỂN
-CreateFunctionButton(DichChuyen, "Dịch Chuyển Về Đảo Khởi Đầu", function()
+-- 🌀 TAB 6: DỊCH CHUYỂN
+CreateFunctionButton(Tab6_DichChuyen, "Dịch Chuyển Về Đảo Khởi Đầu", function()
     local player = game.Players.LocalPlayer
     local HRT = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if HRT then
@@ -208,9 +222,19 @@ CreateFunctionButton(DichChuyen, "Dịch Chuyển Về Đảo Khởi Đầu", fu
     end
 end)
 
+-- ⚙️ TAB 7: CÀI ĐẶT
+CreateFunctionButton(Tab7_CaiDat, "Cấu hình tốc độ bay dịch chuyển", function()
+    print("Đã chỉnh cấu hình!")
+end)
+
+-- 🛒 TAB 8: GIỎ HÀNG (Cửa hàng mua sắm)
+CreateFunctionButton(Tab8_GioHang, "Mua vũ khí/vật phẩm tự động", function()
+    print("Đang mở shop...")
+end)
+
 
 -- ========================================================
--- 7. NÚT OPEN DI CHUYỂN ĐƯỢC (Giữ nguyên cấu trúc cũ)
+-- 9. NÚT OPEN DI CHUYỂN ĐƯỢC
 -- ========================================================
 local OpenButton = Instance.new("TextButton")
 OpenButton.Size = UDim2.new(0, 45, 0, 45)
