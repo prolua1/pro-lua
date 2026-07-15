@@ -1,5 +1,5 @@
 -- ========================================================
--- TUẤN LỌ HUB - PHONG CÁCH REDZ HUB (SỬA LỖI SCALE BẰNG UISCALE)
+-- TUẤN LỌ HUB - PHONG CÁCH REDZ HUB (ĐÃ SỬA LỖI ĐƠ CODE)
 -- ========================================================
 
 -- 1. TẠO SCREEN GUI
@@ -11,22 +11,22 @@ ScreenGui.ResetOnSpawn = false
 -- 2. KHUNG MENU CHÍNH
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 520, 0, 340) -- Cố định kích thước gốc
+MainFrame.Size = UDim2.new(0, 520, 0, 340)
 MainFrame.Position = UDim2.new(0.5, -260, 0.5, -170)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
-MainFrame.ClipsDescendants = false -- Đổi thành false để UIScale hoạt động tốt hơn
+MainFrame.ClipsDescendants = false
 MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 9)
 MainCorner.Parent = MainFrame
 
--- [QUAN TRỌNG] TẠO UISCALE ĐỂ PHÓNG TO/THU NHỎ TOÀN BỘ MENU ĐỒNG BỘ
+-- TẠO UISCALE ĐỂ PHÓNG TO/THU NHỎ ĐỒNG BỘ
 local MenuScale = Instance.new("UIScale")
-MenuScale.Scale = 1.0 -- Mặc định là 100%
+MenuScale.Scale = 1.0
 MenuScale.Parent = MainFrame
 
 -- 3. THANH TIÊU ĐỀ PHÍA TRÊN (TopBar)
@@ -56,15 +56,16 @@ Logo.BackgroundTransparency = 1
 Logo.Image = "rbxassetid://10850256191"
 Logo.Parent = TopBar
 
-local MinimizeButton = Instance.new("TextButton")
-MinimizeButton.Size = UDim2.new(0, 40, 0, 40)
-MinimizeButton.Position = UDim2.new(1, -40, 0, 0)
-MinimizeButton.BackgroundTransparency = 1
-MinimizeButton.Text = "×"
-MinimizeButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-MinimizeButton.TextSize = 20
-MinimizeButton.Font = Enum.Font.SourceSansBold
-MinimizeButton.Parent = TopBar
+-- NÚT "×" ĐỂ TẮT HẲN HACK (DESTROY HOÀN TOÀN)
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 40, 0, 40)
+CloseButton.Position = UDim2.new(1, -40, 0, 0)
+CloseButton.BackgroundTransparency = 1
+CloseButton.Text = "×"
+CloseButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+CloseButton.TextSize = 22
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.Parent = TopBar
 
 -- 4. THANH MENU BÊN TRÁI (Sidebar)
 local Sidebar = Instance.new("Frame")
@@ -130,7 +131,7 @@ local function CreateTab(emojiText, order)
     return Page
 end
 
--- 5. HÀM TẠO NÚT CHỨC NĂNG
+-- 5. HÀM TẠO NÚT CHỨC NĂNG THƯỜNG
 local function CreateFunctionButton(parentPage, btnText, codeFunction)
     local NewButton = Instance.new("TextButton")
     NewButton.Size = UDim2.new(1, 0, 0, 38)
@@ -158,7 +159,67 @@ local function CreateFunctionButton(parentPage, btnText, codeFunction)
     NewButton.MouseButton1Click:Connect(codeFunction)
 end
 
--- 6. HÀM TẠO THANH KÉO (SLIDER) CHUẨN KÉO THẢ MƯỢT MÀ
+-- 6. HÀM TẠO NÚT BẬT/TẮT (TOGGLE)
+local function CreateToggleButton(parentPage, btnText, defaultState, callback)
+    local enabled = defaultState or false
+    
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Size = UDim2.new(1, 0, 0, 38)
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+    ToggleButton.Text = "  " .. btnText
+    ToggleButton.TextColor3 = Color3.fromRGB(230, 230, 230)
+    ToggleButton.Font = Enum.Font.SourceSans
+    ToggleButton.TextSize = 14
+    ToggleButton.TextXAlignment = Enum.TextXAlignment.Left
+    ToggleButton.Parent = parentPage
+    
+    local tbCorner = Instance.new("UICorner")
+    tbCorner.CornerRadius = UDim.new(0, 6)
+    tbCorner.Parent = ToggleButton
+    
+    local Line = Instance.new("Frame")
+    Line.Size = UDim2.new(0, 3, 1, 0)
+    Line.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    Line.BorderSizePixel = 0
+    Line.Parent = ToggleButton
+    local lineCorner = Instance.new("UICorner")
+    lineCorner.CornerRadius = UDim.new(0, 4)
+    lineCorner.Parent = Line
+
+    local SwitchFrame = Instance.new("Frame")
+    SwitchFrame.Size = UDim2.new(0, 34, 0, 18)
+    SwitchFrame.Position = UDim2.new(1, -45, 0.5, -9)
+    SwitchFrame.BackgroundColor3 = enabled and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(50, 50, 50)
+    SwitchFrame.BorderSizePixel = 0
+    SwitchFrame.Parent = ToggleButton
+    local sfCorner = Instance.new("UICorner")
+    sfCorner.CornerRadius = UDim.new(1, 0)
+    sfCorner.Parent = SwitchFrame
+    
+    local Circle = Instance.new("Frame")
+    Circle.Size = UDim2.new(0, 14, 0, 14)
+    Circle.Position = enabled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
+    Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Circle.BorderSizePixel = 0
+    Circle.Parent = SwitchFrame
+    local circleCorner = Instance.new("UICorner")
+    circleCorner.CornerRadius = UDim.new(1, 0)
+    circleCorner.Parent = Circle
+    
+    ToggleButton.MouseButton1Click:Connect(function()
+        enabled = not enabled
+        if enabled then
+            SwitchFrame.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+            Circle.Position = UDim2.new(1, -16, 0.5, -7)
+        else
+            SwitchFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            Circle.Position = UDim2.new(0, 2, 0.5, -7)
+        end
+        callback(enabled)
+    end)
+end
+
+-- 7. HÀM TẠO THANH KÉO (SLIDER)
 local UserInputService = game:GetService("UserInputService")
 local function CreateSlider(parentPage, sliderText, minVal, maxVal, defaultVal, callback)
     local SliderFrame = Instance.new("Frame")
@@ -186,7 +247,7 @@ local function CreateSlider(parentPage, sliderText, minVal, maxVal, defaultVal, 
     SlideBar.Position = UDim2.new(0, 10, 0, 32)
     SlideBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     SlideBar.BorderSizePixel = 0
-    SlideBar.Parent = SlideBarFrame or SliderFrame
+    SlideBar.Parent = SliderFrame -- <<< ĐÃ SỬA LỖI Ở ĐÂY (Thay vì SlideBar) >>>
     local sbCorner = Instance.new("UICorner")
     sbCorner.CornerRadius = UDim.new(1, 0)
     sbCorner.Parent = SlideBar
@@ -266,33 +327,47 @@ CreateFunctionButton(Tab1_TrangChu, "Chào mừng đến với Tuấn Lọ PRO H
     print("Welcome!")
 end)
 
--- Tạo thanh kéo chỉnh cỡ Menu bằng UIScale (Giới hạn từ 50% đến 150% cực kỳ chuẩn xác)
 CreateSlider(Tab1_TrangChu, "Độ To Nhỏ Menu", 50, 150, 100, function(percentValue)
     local scaleFactor = percentValue / 100
-    -- Thay đổi scale của UIScale thay vì đổi size của Frame vật lý!
     MenuScale.Scale = scaleFactor
 end)
 
 
 -- 👨‍🌾 TAB 2: NÔNG DÂN
-CreateFunctionButton(Tab2_NongDan, "Bật Auto Farm Level", function()
-    print("Đang farm level...")
+CreateToggleButton(Tab2_NongDan, "Tự Động Đánh Quái (Auto Farm)", false, function(state)
+    if state == true then
+        print("Đã bật Auto Farm!")
+    else
+        print("Đã tắt Auto Farm!")
+    end
 end)
+
 
 -- ⛵ TAB 3: THUYỀN
 CreateFunctionButton(Tab3_Thuyen, "Tự động mua thuyền nhanh", function()
     print("Mua thuyền...")
 end)
 
+
 -- 🍎 TAB 4: TRÁI CÂY
-CreateFunctionButton(Tab4_TraiCay, "Tự động ăn/nhặt Trái Cây", function()
-    print("Nhặt trái cây...")
+CreateToggleButton(Tab4_TraiCay, "Tự Động Nhặt Trái Ác Quỷ", false, function(state)
+    if state == true then
+        print("Đang tìm trái...")
+    else
+        print("Đã dừng!")
+    end
 end)
 
+
 -- ⚔️ TAB 5: SỨC MẠNH / KIẾM
-CreateFunctionButton(Tab5_AutoFarm, "Bật Tự Động Nhặt Rương", function()
-    print("Đang nhặt rương...")
+CreateToggleButton(Tab5_AutoFarm, "Tự Động Nhặt Rương", false, function(state)
+    if state == true then
+        print("Đang nhặt rương...")
+    else
+        print("Đã dừng nhặt rương!")
+    end
 end)
+
 
 -- 🌀 TAB 6: DỊCH CHUYỂN
 CreateFunctionButton(Tab6_DichChuyen, "Dịch Chuyển Về Đảo Khởi Đầu", function()
@@ -310,10 +385,12 @@ CreateFunctionButton(Tab6_DichChuyen, "Dịch Chuyển Về Đảo Khởi Đầu
     end
 end)
 
+
 -- ⚙️ TAB 7: CÀI ĐẶT
-CreateFunctionButton(Tab7_CaiDat, "Cấu hình tốc độ bay dịch chuyển", function()
-    print("Đã chỉnh cấu hình!")
+CreateToggleButton(Tab7_CaiDat, "Bật Nhảy Vô Hạn (Infinite Jump)", false, function(state)
+    print("Infinite Jump state: ", state)
 end)
+
 
 -- 🛒 TAB 8: GIỎ HÀNG
 CreateFunctionButton(Tab8_GioHang, "Mua vũ khí/vật phẩm tự động", function()
@@ -322,7 +399,7 @@ end)
 
 
 -- ========================================================
--- 9. NÚT OPEN DI CHUYỂN ĐƯỢC
+-- 9. NÚT OPEN (LUÔN XUẤT HIỆN NGAY TỪ ĐẦU)
 -- ========================================================
 local OpenButton = Instance.new("TextButton")
 OpenButton.Size = UDim2.new(0, 45, 0, 45)
@@ -332,12 +409,14 @@ OpenButton.Text = "OPEN"
 OpenButton.Font = Enum.Font.SourceSansBold
 OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 OpenButton.TextSize = 12
-OpenButton.Visible = false
+OpenButton.Visible = true
 OpenButton.Parent = ScreenGui
+
 local OpenCorner = Instance.new("UICorner")
 OpenCorner.CornerRadius = UDim.new(1, 0)
 OpenCorner.Parent = OpenButton
 
+-- Logic kéo thả cho nút OPEN
 local draggingOpenBtn = false
 local dragInputOpenBtn, dragStartOpenBtn, startPosOpenBtn
 local function updateOpenBtn(input)
@@ -353,5 +432,17 @@ end)
 OpenButton.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInputOpenBtn = input end end)
 UserInputService.InputChanged:Connect(function(input) if input == dragInputOpenBtn and draggingOpenBtn then updateOpenBtn(input) end end)
 
-MinimizeButton.MouseButton1Click:Connect(function() MainFrame.Visible = false; OpenButton.Visible = true end)
-OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = true; OpenButton.Visible = false end)
+
+-- ========================================================
+-- XỬ LÝ ẨN/HIỆN QUA LẠI BẰNG NÚT OPEN VÀ NÚT TẮT HẲN
+-- ========================================================
+
+-- Khi click vào nút OPEN: Ẩn/Hiện chéo nhau với Menu chính
+OpenButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- Khi click nút "×" trên Menu: Xóa sạch hoàn toàn hack ra khỏi game
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)        
