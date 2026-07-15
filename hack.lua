@@ -19,7 +19,10 @@ MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
-
+-- Thêm bo góc cho Khung Menu Chính (MainFrame)
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12) -- Số 12 là độ bo tròn góc, bạn có thể tăng lên 15 nếu muốn tròn hơn
+MainCorner.Parent = MainFrame
 -- ========================================================
 -- 3. TIÊU ĐỀ MENU & LOGO THƯƠNG HIỆU (CẬP NHẬT)
 -- ========================================================
@@ -29,7 +32,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Title.Text = "       Tuấn Lọ PRO " 
-Title.TextColor3 = Color3.fromRGB(255, 255, 0) -- Màu vàng chuối cực nổi bật
+Title.TextColor3 = Color3.fromRGB(255, 255, 0) 
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 16
