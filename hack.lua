@@ -3,13 +3,13 @@ print " hello "
 -- SCRIPT TẠO MENU VÀ NHÉT CÁC NÚT CHỨC NĂNG VÀO BÊN TRONG
 -- ========================================================
 
--- 1. TẠO SCREEN GUI (Như cũ)
+-- 1. TẠO SCREEN GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MyFeatureMenu"
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- 2. KHUNG MENU CHÍNH (Như cũ)
+-- 2. KHUNG MENU CHÍNH
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 350, 0, 250)
@@ -20,7 +20,7 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
--- 3. TIÊU ĐỀ MENU (Như cũ)
+-- 3. TIÊU ĐỀ MENU
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -31,7 +31,7 @@ Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 16
 Title.Parent = MainFrame
 
--- 4. NÚT THU GỌN VÀ PHÓNG TO (Như cũ)
+-- 4. NÚT THU GỌN VÀ PHÓNG TO
 local MinimizeButton = Instance.new("TextButton")
 MinimizeButton.Size = UDim2.new(0, 35, 0, 35)
 MinimizeButton.Position = UDim2.new(1, -35, 0, 0)
@@ -70,13 +70,12 @@ Container.CanvasSize = UDim2.new(0, 0, 0, 300) -- Kích thước vùng cuộn ch
 Container.Parent = MainFrame
 
 -- B. Tạo bộ tự động xếp hàng (UIListLayout) 
--- Cái này giúp các nút bạn tạo ra tự xếp thẳng hàng từ trên xuống dưới, cách nhau 5 pixel
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = Container
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 5) 
 
--- C. HÀM TẠO NÚT TÍNH NĂNG NHANH (Để bạn đỡ phải viết lại nhiều lần)
+-- C. HÀM TẠO NÚT TÍNH NĂNG NHANH
 local function CreateFunctionButton(btnText, codeFunction)
     local NewButton = Instance.new("TextButton")
     NewButton.Size = UDim2.new(1, 0, 0, 40) -- Rộng bằng khung chứa, cao 40 pixel
@@ -110,12 +109,33 @@ CreateFunctionButton("Bật Auto Farm Level", function()
     -- Bạn viết code gom quái ở đây
 end)
 
--- Chức năng 3: Dịch chuyển về Đảo Khởi Đầu
+-- Chức năng 3: Dịch chuyển về Đảo Khởi Đầu (Tự động nhận diện Sea)
 CreateFunctionButton("Dịch Chuyển Về Đảo Khởi Đầu", function()
-    print("Đang dịch chuyển...")
     local player = game.Players.LocalPlayer
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        -- Tọa độ hòn đảo xuất phát trong Blox Fruit (Ví dụ minh họa tọa độ 0, 100, 0)
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+    local HRT = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    
+    if HRT then
+        local currentPlaceId = game.PlaceId -- Lấy ID của Server hiện tại để check xem bạn đang ở Sea mấy
+        
+        if currentPlaceId == 275391513 then
+            -- BẠN ĐANG Ở SEA 1 (Tọa độ Đảo Khởi Đầu Marine/Pirate Starter)
+            print("Đã nhận diện Sea 1. Đang dịch chuyển...")
+            HRT.CFrame = CFrame.new(1003, 16, 1420) -- Tọa độ khởi đầu đảo Pirate Sea 1
+            
+        elseif currentPlaceId == 444227218 then
+            -- BẠN ĐANG Ở SEA 2 (Tọa độ Đảo Khởi Đầu Sea 2 - Kingdom of Rose)
+            print("Đã nhận diện Sea 2. Đang dịch chuyển...")
+            HRT.CFrame = CFrame.new(-20, 16, 1000) -- Tọa độ bến cảng khởi đầu Sea 2
+            
+        elseif currentPlaceId == 7449423635 then
+            -- BẠN ĐANG Ở SEA 3 (Tọa độ Đảo Khởi Đầu Sea 3 - Castle on the Sea)
+            print("Đã nhận diện Sea 3. Đang dịch chuyển...")
+            HRT.CFrame = CFrame.new(-5020, 315, -3152) -- Tọa độ Lâu đài trên biển Sea 3
+            
+        else
+            -- Trường hợp bạn đang ở các server minigame hoặc phòng chờ đặc biệt
+            print("Không nhận diện được ID Sea này! Dịch chuyển về mặc định...")
+            HRT.CFrame = CFrame.new(0, 100, 0)
+        end
     end
 end)
