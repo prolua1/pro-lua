@@ -20,6 +20,7 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 -- Thêm bo góc cho Khung Menu Chính (MainFrame)
+MainFrame.ClipsDescendants = true
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 12) -- Số 12 là độ bo tròn góc, bạn có thể tăng lên 15 nếu muốn tròn hơn
 MainCorner.Parent = MainFrame
