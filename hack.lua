@@ -71,6 +71,48 @@ OpenButton.Parent = ScreenGui
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(1, 0)
 UICorner.Parent = OpenButton
+-- ========================================================
+-- CODE GIÚP NÚT OPEN CÓ THỂ KÉO THẢ DI CHUYỂN
+-- ========================================================
+local UserInputService = game:GetService("UserInputService")
+local draggingOpenBtn = false
+local dragInputOpenBtn, dragStartOpenBtn, startPosOpenBtn
+
+local function updateOpenBtn(input)
+    local delta = input.Position - dragStartOpenBtn
+    OpenButton.Position = UDim2.new(
+        startPosOpenBtn.X.Scale, 
+        startPosOpenBtn.X.Offset + delta.X, 
+        startPosOpenBtn.Y.Scale, 
+        startPosOpenBtn.Y.Offset + delta.Y
+    )
+end
+
+OpenButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        draggingOpenBtn = true
+        dragStartOpenBtn = input.Position
+        startPosOpenBtn = OpenButton.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                draggingOpenBtn = false
+            end
+        end)
+    end
+end)
+
+OpenButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInputOpenBtn = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInputOpenBtn and draggingOpenBtn then
+        updateOpenBtn(input)
+    end
+end)
 
 MinimizeButton.MouseButton1Click:Connect(function() MainFrame.Visible = false; OpenButton.Visible = true end)
 OpenButton.MouseButton1Click:Connect(function() MainFrame.Visible = true; OpenButton.Visible = false end)
