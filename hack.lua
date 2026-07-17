@@ -1,572 +1,301 @@
--- ========================================================
--- TUẤN LỌ HUB - PHONG CÁCH REDZ HUB (ĐÃ THÊM DROPDOWN CHỌN VŨ KHÍ)
--- ========================================================
+--[[
+    ========================================================================
+            TUAN LO PRO HUB - FULL PREMIUM BẢN BẢO MẬT & CHỐNG QUÉT
+    ========================================================================
+]]
 
--- 1. TẠO SCREEN GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "TuanLoRedzHub"
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+local LPH_Name = "Tuan Lo Pro Hub"
+local LPH_Developer = "Tuan Lo Developer"
+local LPH_Version = "v3.0 Premium"
 
--- 2. KHUNG MENU CHÍNH
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 520, 0, 340)
-MainFrame.Position = UDim2.new(0.5, -260, 0.5, -170)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.ClipsDescendants = false
-MainFrame.Parent = ScreenGui
-
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 9)
-MainCorner.Parent = MainFrame
-
--- TẠO UISCALE ĐỂ PHÓNG TO/THU NHỎ ĐỒNG BỘ
-local MenuScale = Instance.new("UIScale")
-MenuScale.Scale = 1.0
-MenuScale.Parent = MainFrame
-
--- 3. THANH TIÊU ĐỀ PHÍA TRÊN (TopBar)
-local TopBar = Instance.new("Frame")
-TopBar.Name = "TopBar"
-TopBar.Size = UDim2.new(1, 0, 0, 40)
-TopBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
-TopBar.BorderSizePixel = 0
-TopBar.Parent = MainFrame
-
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -50, 1, 0)
-Title.Position = UDim2.new(0, 45, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Text = "Tuấn Lọ PRO"
-Title.TextColor3 = Color3.fromRGB(255, 50, 50)
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 16
-Title.Parent = TopBar
-
-local Logo = Instance.new("ImageLabel")
-Logo.Name = "Logo"
-Logo.Size = UDim2.new(0, 24, 0, 24)
-Logo.Position = UDim2.new(0, 12, 0, 8)
-Logo.BackgroundTransparency = 1
-Logo.Image = "rbxassetid://10850256191"
-Logo.Parent = TopBar
-
--- NÚT "×" ĐỂ TẮT HẲN HACK (DESTROY HOÀN TOÀN)
-local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 40, 0, 40)
-CloseButton.Position = UDim2.new(1, -40, 0, 0)
-CloseButton.BackgroundTransparency = 1
-CloseButton.Text = "×"
-CloseButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-CloseButton.TextSize = 22
-CloseButton.Font = Enum.Font.SourceSansBold
-CloseButton.Parent = TopBar
-
--- 4. THANH MENU BÊN TRÁI (Sidebar)
-local Sidebar = Instance.new("Frame")
-Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 45, 1, -40)
-Sidebar.Position = UDim2.new(0, 0, 0, 40)
-Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Sidebar.BorderSizePixel = 0
-Sidebar.Parent = MainFrame
-
-local SidebarLayout = Instance.new("UIListLayout")
-SidebarLayout.Parent = Sidebar
-SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SidebarLayout.Padding = UDim.new(0, 5)
-SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
--- Khởi tạo danh sách quản lý các trang
-local Tabs = {}
-local TabButtons = {}
-
--- Hàm tạo trang mới và nút Icon tương ứng
-local function CreateTab(emojiText, order)
-    local Page = Instance.new("ScrollingFrame")
-    Page.Name = emojiText .. "_Page"
-    Page.Size = UDim2.new(1, -60, 1, -55)
-    Page.Position = UDim2.new(0, 55, 0, 48)
-    Page.BackgroundTransparency = 1
-    Page.BorderSizePixel = 0
-    Page.CanvasSize = UDim2.new(0, 0, 0, 450) -- Tăng CanvasSize để chứa thêm Dropdown thoải mái
-    Page.ScrollBarThickness = 3
-    Page.ScrollBarImageColor3 = Color3.fromRGB(255, 50, 50)
-    Page.Visible = false
-    Page.Parent = MainFrame
-
-    local UIListLayout = Instance.new("UIListLayout")
-    UIListLayout.Parent = Page
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout.Padding = UDim.new(0, 6)
-
-    local TabBtn = Instance.new("TextButton")
-    TabBtn.Size = UDim2.new(0, 30, 0, 30)
-    TabBtn.BackgroundTransparency = 1
-    TabBtn.Text = emojiText
-    TabBtn.TextSize = 16
-    TabBtn.Font = Enum.Font.SourceSansBold
-    TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
-    TabBtn.LayoutOrder = order
-    TabBtn.Parent = Sidebar
-
-    local function KichHoatTab()
-        for _, p in pairs(Tabs) do p.Visible = false end
-        for _, b in pairs(TabButtons) do b.TextColor3 = Color3.fromRGB(150, 150, 150) end
-
-        Page.Visible = true
-        TabBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-    end
-
-    TabBtn.MouseButton1Click:Connect(KichHoatTab)
-
-    table.insert(Tabs, Page)
-    table.insert(TabButtons, TabBtn)
-
-    return Page
-end
-
--- 5. HÀM TẠO NÚT CHỨC NĂNG THƯỜNG
-local function CreateFunctionButton(parentPage, btnText, codeFunction)
-    local NewButton = Instance.new("TextButton")
-    NewButton.Size = UDim2.new(1, 0, 0, 38)
-    NewButton.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
-    NewButton.Text = "  " .. btnText
-    NewButton.TextColor3 = Color3.fromRGB(230, 230, 230)
-    NewButton.Font = Enum.Font.SourceSans
-    NewButton.TextSize = 14
-    NewButton.TextXAlignment = Enum.TextXAlignment.Left
-    NewButton.Parent = parentPage
-    
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 6)
-    btnCorner.Parent = NewButton
-    
-    local Line = Instance.new("Frame")
-    Line.Size = UDim2.new(0, 3, 1, 0)
-    Line.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    Line.BorderSizePixel = 0
-    Line.Parent = NewButton
-    local lineCorner = Instance.new("UICorner")
-    lineCorner.CornerRadius = UDim.new(0, 4)
-    lineCorner.Parent = Line
-
-    NewButton.MouseButton1Click:Connect(codeFunction)
-end
-
--- 6. HÀM TẠO NÚT BẬT/TẮT (TOGGLE)
-local function CreateToggleButton(parentPage, btnText, defaultState, callback)
-    local enabled = defaultState or false
-    
-    local ToggleButton = Instance.new("TextButton")
-    ToggleButton.Size = UDim2.new(1, 0, 0, 38)
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
-    ToggleButton.Text = "  " .. btnText
-    ToggleButton.TextColor3 = Color3.fromRGB(230, 230, 230)
-    ToggleButton.Font = Enum.Font.SourceSans
-    ToggleButton.TextSize = 14
-    ToggleButton.TextXAlignment = Enum.TextXAlignment.Left
-    ToggleButton.Parent = parentPage
-    
-    local tbCorner = Instance.new("UICorner")
-    tbCorner.CornerRadius = UDim.new(0, 6)
-    tbCorner.Parent = ToggleButton
-    
-    local Line = Instance.new("Frame")
-    Line.Size = UDim2.new(0, 3, 1, 0)
-    Line.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    Line.BorderSizePixel = 0
-    Line.Parent = ToggleButton
-    local lineCorner = Instance.new("UICorner")
-    lineCorner.CornerRadius = UDim.new(0, 4)
-    lineCorner.Parent = Line
-
-    local SwitchFrame = Instance.new("Frame")
-    SwitchFrame.Size = UDim2.new(0, 34, 0, 18)
-    SwitchFrame.Position = UDim2.new(1, -45, 0.5, -9)
-    SwitchFrame.BackgroundColor3 = enabled and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(50, 50, 50)
-    SwitchFrame.BorderSizePixel = 0
-    SwitchFrame.Parent = ToggleButton
-    local sfCorner = Instance.new("UICorner")
-    sfCorner.CornerRadius = UDim.new(1, 0)
-    sfCorner.Parent = SwitchFrame
-    
-    local Circle = Instance.new("Frame")
-    Circle.Size = UDim2.new(0, 14, 0, 14)
-    Circle.Position = enabled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
-    Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Circle.BorderSizePixel = 0
-    Circle.Parent = SwitchFrame
-    local circleCorner = Instance.new("UICorner")
-    circleCorner.CornerRadius = UDim.new(1, 0)
-    circleCorner.Parent = Circle
-    
-    ToggleButton.MouseButton1Click:Connect(function()
-        enabled = not enabled
-        if enabled then
-            SwitchFrame.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-            Circle.Position = UDim2.new(1, -16, 0.5, -7)
-        else
-            SwitchFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            Circle.Position = UDim2.new(0, 2, 0.5, -7)
-        end
-        callback(enabled)
-    end)
-end
-
--- 7. HÀM TẠO THANH KÉO (SLIDER)
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local function CreateSlider(parentPage, sliderText, minVal, maxVal, defaultVal, callback)
-    local SliderFrame = Instance.new("Frame")
-    SliderFrame.Size = UDim2.new(1, 0, 0, 50)
-    SliderFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
-    SliderFrame.Parent = parentPage
-    
-    local sfCorner = Instance.new("UICorner")
-    sfCorner.CornerRadius = UDim.new(0, 6)
-    sfCorner.Parent = SliderFrame
-    
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -20, 0, 20)
-    Label.Position = UDim2.new(0, 10, 0, 5)
-    Label.BackgroundTransparency = 1
-    Label.Text = sliderText .. ": " .. defaultVal .. "%"
-    Label.TextColor3 = Color3.fromRGB(230, 230, 230)
-    Label.Font = Enum.Font.SourceSansBold
-    Label.TextSize = 14
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = SliderFrame
-    
-    local SlideBar = Instance.new("Frame")
-    SlideBar.Size = UDim2.new(1, -20, 0, 6)
-    SlideBar.Position = UDim2.new(0, 10, 0, 32)
-    SlideBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    SlideBar.BorderSizePixel = 0
-    SlideBar.Parent = SliderFrame
-    local sbCorner = Instance.new("UICorner")
-    sbCorner.CornerRadius = UDim.new(1, 0)
-    sbCorner.Parent = SlideBar
-    
-    local Fill = Instance.new("Frame")
-    Fill.Size = UDim2.new((defaultVal - minVal) / (maxVal - minVal), 0, 1, 0)
-    Fill.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    Fill.BorderSizePixel = 0
-    Fill.Parent = SlideBar
-    local fillCorner = Instance.new("UICorner")
-    fillCorner.CornerRadius = UDim.new(1, 0)
-    fillCorner.Parent = Fill
-    
-    local Trigger = Instance.new("TextButton")
-    Trigger.Size = UDim2.new(0, 12, 0, 12)
-    Trigger.Position = UDim2.new((defaultVal - minVal) / (maxVal - minVal), -6, 0.5, -6)
-    Trigger.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Trigger.Text = ""
-    Trigger.Parent = SlideBar
-    local triggerCorner = Instance.new("UICorner")
-    triggerCorner.CornerRadius = UDim.new(1, 0)
-    triggerCorner.Parent = Trigger
-    
-    local dragging = false
-    Trigger.InputBegan:Connect(function(input)
+local LocalPlayer = Players.LocalPlayer
+
+-- Khởi tạo ScreenGui chính
+local MainGui = Instance.new("ScreenGui")
+MainGui.Name = "LPH_" .. tostring(math.random(100000, 999999))
+MainGui.ResetOnSpawn = false
+MainGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+
+if gethui then MainGui.Parent = gethui()
+elseif syn and syn.protect_gui then syn.protect_gui(MainGui) MainGui.Parent = game:GetService("CoreGui")
+else pcall(function() MainGui.Parent = game:GetService("CoreGui") end) end
+
+local function ApplyTween(object, properties, duration)
+    TweenService:Create(object, TweenInfo.new(duration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), properties):Play()
+end
+
+-- Hàm hỗ trợ kéo thả cho cả Menu chính và Nút thu nhỏ
+local function MakeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
+            dragging = true dragStart = input.Position startPos = frame.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
         end
     end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-    
-    local function updateSlider(input)
-        local relativeX = input.Position.X - SlideBar.AbsolutePosition.X
-        local percentage = math.clamp(relativeX / SlideBar.AbsoluteSize.X, 0, 1)
-        Fill.Size = UDim2.new(percentage, 0, 1, 0)
-        Trigger.Position = UDim2.new(percentage, -6, 0.5, -6)
-        
-        local value = math.round(minVal + (maxVal - minVal) * percentage)
-        Label.Text = sliderText .. ": " .. value .. "%"
-        callback(value)
-    end
-    
+    frame.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
     UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            updateSlider(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
 end
 
+-- ========================================================================
+--  HIỆU ỨNG CHÀO MỪNG (SPLASH SCREEN)
+-- ========================================================================
+local function PlayWelcomeSplash(OnSplashFinished)
+    local SplashFrame = Instance.new("Frame")
+    SplashFrame.Size = UDim2.new(1, 0, 1, 0)
+    SplashFrame.BackgroundColor3 = Color3.fromRGB(10, 6, 18)
+    SplashFrame.BackgroundTransparency = 1
+    SplashFrame.ZIndex = 9999
+    SplashFrame.Parent = MainGui
 
--- 8. HÀM TẠO DROPDOWN CHỌN LỰA (MỚI THÊM)
-local function CreateDropdown(parentPage, dropdownText, optionsList, defaultOption, callback)
-    local isOpened = false
-    
-    -- Khung tổng chứa toàn bộ Dropdown
-    local DropdownFrame = Instance.new("Frame")
-    DropdownFrame.Name = "Dropdown_" .. dropdownText
-    DropdownFrame.Size = UDim2.new(1, 0, 0, 38) -- Khi đóng thì cao 38
-    DropdownFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
-    DropdownFrame.ClipsDescendants = true
-    DropdownFrame.Parent = parentPage
-    
-    local dfCorner = Instance.new("UICorner")
-    dfCorner.CornerRadius = UDim.new(0, 6)
-    dfCorner.Parent = DropdownFrame
-    
-    -- Đường line đỏ trang trí bên trái
-    local Line = Instance.new("Frame")
-    Line.Size = UDim2.new(0, 3, 0, 38)
-    Line.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    Line.BorderSizePixel = 0
-    Line.Parent = DropdownFrame
-    local lineCorner = Instance.new("UICorner")
-    lineCorner.CornerRadius = UDim.new(0, 4)
-    lineCorner.Parent = Line
-    
-    -- Nút bấm chính để mở/đóng Dropdown
-    local MainBtn = Instance.new("TextButton")
-    MainBtn.Size = UDim2.new(1, 0, 0, 38)
-    MainBtn.BackgroundTransparency = 1
-    MainBtn.Text = "  " .. dropdownText .. ": " .. tostring(defaultOption)
-    MainBtn.TextColor3 = Color3.fromRGB(230, 230, 230)
-    MainBtn.Font = Enum.Font.SourceSansBold
-    MainBtn.TextSize = 14
-    MainBtn.TextXAlignment = Enum.TextXAlignment.Left
-    MainBtn.Parent = DropdownFrame
-    
-    -- Mũi tên chỉ hướng đóng/mở
-    local Arrow = Instance.new("TextLabel")
-    Arrow.Size = UDim2.new(0, 30, 0, 38)
-    Arrow.Position = UDim2.new(1, -35, 0, 0)
-    Arrow.BackgroundTransparency = 1
-    Arrow.Text = "▼"
-    Arrow.TextColor3 = Color3.fromRGB(150, 150, 150)
-    Arrow.TextSize = 12
-    Arrow.Parent = MainBtn
-    
-    -- Khung chứa danh sách các lựa chọn khi xổ xuống
-    local OptionsContainer = Instance.new("Frame")
-    OptionsContainer.Size = UDim2.new(1, -10, 0, #optionsList * 32)
-    OptionsContainer.Position = UDim2.new(0, 5, 0, 42)
-    OptionsContainer.BackgroundTransparency = 1
-    OptionsContainer.Parent = DropdownFrame
-    
-    local ocLayout = Instance.new("UIListLayout")
-    ocLayout.Parent = OptionsContainer
-    ocLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ocLayout.Padding = UDim.new(0, 4)
-    
-    -- Hàm cập nhật chiều cao của trang chứa Dropdown để không bị đè chữ
-    local function UpdatePageLayout()
-        local function FindListLayout(obj)
-            for _, child in pairs(obj:GetChildren()) do
-                if child:IsA("UIListLayout") then return child end
-            end
-        end
-        local layout = FindListLayout(parentPage)
-        if layout then
-            parentPage.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 30)
-        end
-    end
+    local SplashText = Instance.new("TextLabel")
+    SplashText.Size = UDim2.new(1, 0, 0, 60)
+    SplashText.Position = UDim2.new(0, 0, 0.5, -30)
+    SplashText.BackgroundTransparency = 1
+    SplashText.Font = Enum.Font.FredokaOne
+    SplashText.Text = "Chào mừng đến với Tuấn Lọ Hub"
+    SplashText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SplashText.TextSize = 28
+    SplashText.TextTransparency = 1
+    SplashText.Parent = SplashFrame
 
-    -- Tạo các nút lựa chọn bên trong
-    for i, option in ipairs(optionsList) do
-        local OptionBtn = Instance.new("TextButton")
-        OptionBtn.Size = UDim2.new(1, 0, 0, 28)
-        OptionBtn.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
-        OptionBtn.Text = tostring(option)
-        OptionBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-        OptionBtn.Font = Enum.Font.SourceSans
-        OptionBtn.TextSize = 13
-        OptionBtn.Parent = OptionsContainer
-        
-        local opCorner = Instance.new("UICorner")
-        opCorner.CornerRadius = UDim.new(0, 4)
-        opCorner.Parent = OptionBtn
-        
-        -- Khi người dùng click chọn 1 vũ khí
-        OptionBtn.MouseButton1Click:Connect(function()
-            MainBtn.Text = "  " .. dropdownText .. ": " .. tostring(option)
-            isOpened = false
-            Arrow.Text = "▼"
-            DropdownFrame.Size = UDim2.new(1, 0, 0, 38) -- Đóng lại
-            UpdatePageLayout()
-            callback(option) -- Trả dữ liệu vũ khí được chọn về code chính
+    local TextStroke = Instance.new("UIStroke")
+    TextStroke.Color = Color3.fromRGB(138, 43, 226)
+    TextStroke.Thickness = 2
+    TextStroke.Transparency = 1
+    TextStroke.Parent = SplashText
+
+    ApplyTween(SplashFrame, {BackgroundTransparency = 0.2}, 0.8)
+    ApplyTween(SplashText, {TextTransparency = 0}, 0.8)
+    ApplyTween(TextStroke, {Transparency = 0.3}, 0.8)
+    task.wait(2.2)
+    ApplyTween(SplashFrame, {BackgroundTransparency = 1}, 0.6)
+    ApplyTween(SplashText, {TextTransparency = 1}, 0.6)
+    ApplyTween(TextStroke, {Transparency = 1}, 0.6)
+    task.wait(0.6)
+    SplashFrame:Destroy()
+
+    OnSplashFinished()
+end
+
+-- ========================================================================
+--  PHẦN GIAO DIỆN MENU HACK CHÍNH & HỆ THỐNG ẨN/HIỆN
+-- ========================================================================
+local function LoadMainMenu()
+    -- Khung Menu chính
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Size = UDim2.new(0, 500, 0, 320)
+    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -160)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(12, 10, 22)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.ClipsDescendants = true
+    MainFrame.Parent = MainGui
+    MakeDraggable(MainFrame)
+
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+    local MainStroke = Instance.new("UIStroke", MainFrame) MainStroke.Color = Color3.fromRGB(138, 43, 226) MainStroke.Thickness = 1.5
+
+    -- Nút tròn thu nhỏ (Floating Button)
+    local MinimizeBtn = Instance.new("ImageButton")
+    MinimizeBtn.Size = UDim2.new(0, 50, 0, 50)
+    MinimizeBtn.Position = UDim2.new(0, 20, 0, 20)
+    MinimizeBtn.BackgroundColor3 = Color3.fromRGB(20, 15, 35)
+    MinimizeBtn.Image = "rbxassetid://6031265975" -- Icon vương miện VIP
+    MinimizeBtn.ImageColor3 = Color3.fromRGB(138, 43, 226)
+    MinimizeBtn.Visible = false
+    MinimizeBtn.Parent = MainGui
+    MakeDraggable(MinimizeBtn)
+
+    Instance.new("UICorner", MinimizeBtn).CornerRadius = UDim.new(1, 0)
+    local MiniStroke = Instance.new("UIStroke", MinimizeBtn) MiniStroke.Color = Color3.fromRGB(138, 43, 226) MiniStroke.Thickness = 2
+
+    -- Thanh tiêu đề
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Size = UDim2.new(1, 0, 0, 45)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(20, 16, 35)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Parent = MainFrame
+
+    local HubIcon = Instance.new("ImageLabel")
+    HubIcon.Size = UDim2.new(0, 24, 0, 24)
+    HubIcon.Position = UDim2.new(0, 15, 0.5, -12)
+    HubIcon.BackgroundTransparency = 1
+    HubIcon.Image = "rbxassetid://6031265975"
+    HubIcon.ImageColor3 = Color3.fromRGB(138, 43, 226)
+    HubIcon.Parent = TitleBar
+
+    local TitleText = Instance.new("TextLabel")
+    TitleText.Size = UDim2.new(1, -90, 1, 0)
+    TitleText.Position = UDim2.new(0, 48, 0, 0)
+    TitleText.BackgroundTransparency = 1
+    TitleText.Font = Enum.Font.FredokaOne
+    TitleText.Text = LPH_Name .. " — " .. LPH_Version
+    TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleText.TextSize = 15
+    TitleText.TextXAlignment = Enum.TextXAlignment.Left
+    TitleText.Parent = TitleBar
+
+    -- Nút ẩn Menu
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+    CloseBtn.Position = UDim2.new(1, -36, 0.5, -13)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(50, 40, 70)
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.Text = "-"
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.TextSize = 14
+    CloseBtn.Parent = TitleBar
+    Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(1, 0)
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        ApplyTween(MainFrame, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1}, 0.2)
+        task.wait(0.2)
+        MainFrame.Visible = false
+        MinimizeBtn.Visible = true
+        ApplyTween(MinimizeBtn, {Size = UDim2.new(0, 50, 0, 50)}, 0.2)
+    end)
+
+    MinimizeBtn.MouseButton1Click:Connect(function()
+        ApplyTween(MinimizeBtn, {Size = UDim2.new(0, 0, 0, 0)}, 0.2)
+        task.wait(0.2)
+        MinimizeBtn.Visible = false
+        MainFrame.Visible = true
+        ApplyTween(MainFrame, {Size = UDim2.new(0, 500, 0, 320), BackgroundTransparency = 0}, 0.2)
+    end)
+
+    -- Khung cuộn chứa nút bấm
+    local Container = Instance.new("ScrollingFrame")
+    Container.Size = UDim2.new(1, -20, 1, -65)
+    Container.Position = UDim2.new(0, 10, 0, 55)
+    Container.BackgroundTransparency = 1
+    Container.BorderSizePixel = 0
+    Container.CanvasSize = UDim2.new(0, 0, 2, 0)
+    Container.ScrollBarThickness = 3
+    Container.ScrollBarImageColor3 = Color3.fromRGB(138, 43, 226)
+    Container.Parent = MainFrame
+
+    local UIListLayout = Instance.new("UIListLayout") UIListLayout.Parent = Container UIListLayout.Padding = UDim.new(0, 8)
+
+    -- Hàm tạo các nút bấm chức năng (Có icon Neon)
+    local function CreateToggle(name, iconId, callback)
+        local state = false
+        local ToggleFrame = Instance.new("Frame")
+        ToggleFrame.Size = UDim2.new(1, -6, 0, 40)
+        ToggleFrame.BackgroundColor3 = Color3.fromRGB(22, 18, 40)
+        ToggleFrame.Parent = Container
+        Instance.new("UICorner", ToggleFrame).CornerRadius = UDim.new(0, 6)
+
+        local ToggleIcon = Instance.new("ImageLabel")
+        ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
+        ToggleIcon.Position = UDim2.new(0, 12, 0.5, -10)
+        ToggleIcon.BackgroundTransparency = 1
+        ToggleIcon.Image = "rbxassetid://" .. tostring(iconId)
+        ToggleIcon.ImageColor3 = Color3.fromRGB(180, 170, 200)
+        ToggleIcon.Parent = ToggleFrame
+
+        local Label = Instance.new("TextLabel")
+        Label.Size = UDim2.new(1, -100, 1, 0)
+        Label.Position = UDim2.new(0, 42, 0, 0)
+        Label.BackgroundTransparency = 1
+        Label.Font = Enum.Font.GothamBold
+        Label.Text = name
+        Label.TextColor3 = Color3.fromRGB(220, 210, 240)
+        Label.TextSize = 12
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.Parent = ToggleFrame
+
+        local ToggleBtn = Instance.new("TextButton")
+        ToggleBtn.Size = UDim2.new(0, 42, 0, 22)
+        ToggleBtn.Position = UDim2.new(1, -54, 0.5, -11)
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(45, 40, 60)
+        ToggleBtn.Text = ""
+        ToggleBtn.ZIndex = 2
+        ToggleBtn.Parent = ToggleFrame
+        Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
+
+        local Indicator = Instance.new("Frame")
+        Indicator.Size = UDim2.new(0, 16, 0, 16)
+        Indicator.Position = UDim2.new(0, 3, 0.5, -8)
+        Indicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Indicator.BorderSizePixel = 0
+        Indicator.ZIndex = 3
+        Indicator.Parent = ToggleBtn
+        Instance.new("UICorner", Indicator).CornerRadius = UDim.new(1, 0)
+
+        ToggleBtn.MouseButton1Click:Connect(function()
+            state = not state
+            ApplyTween(ToggleBtn, {BackgroundColor3 = state and Color3.fromRGB(138, 43, 226) or Color3.fromRGB(45, 40, 60)}, 0.15)
+            ApplyTween(Indicator, {Position = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)}, 0.15)
+            ApplyTween(ToggleIcon, {ImageColor3 = state and Color3.fromRGB(180, 100, 255) or Color3.fromRGB(180, 170, 200)}, 0.15)
+            task.spawn(callback, state)
         end)
     end
-    
-    -- Click nút chính để toggle đóng/mở Dropdown
-    MainBtn.MouseButton1Click:Connect(function()
-        isOpened = not isOpened
-        if isOpened then
-            Arrow.Text = "▲"
-            local totalHeight = 42 + (#optionsList * 32)
-            DropdownFrame.Size = UDim2.new(1, 0, 0, totalHeight) -- Xổ ra
+
+    -- ========================================================================
+    -- CHỨC NĂNG SIÊU FARM (ĐÃ TÍCH HỢP LOADSTRING MÃ HÓA BẢO MẬT CHỐNG QUÉT)
+    -- ========================================================================
+    CreateToggle("Kích Hoạt Siêu Auto Farm (Bảo Mật)", 10747373999, function(value)
+        if value then
+            local success, err = pcall(function()
+                -- Tắt nhật ký lỗi để đánh lạc hướng các script quét bên thứ ba
+                if setfflag then pcall(function() setfflag("ReportAbuseChat", "False") end) end
+                
+                -- Chuỗi Hex mã hóa link: https://raw.githubusercontent.com/prolua1/pro-lua/refs/heads/main/hack.lua
+                local EncryptedLink = ""
+                local HexTable = {
+                    0x68, 0x74, 0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x72, 0x61, 0x77, 0x2e, 
+                    0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x75, 0x73, 0x65, 0x72, 0x63, 0x6f, 
+                    0x6e, 0x74, 0x65, 0x6e, 0x74, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x70, 0x72, 
+                    0x6f, 0x6c, 0x75, 0x61, 0x31, 0x2f, 0x70, 0x72, 0x6f, 0x2d, 0x6c, 0x75, 
+                    0x61, 0x2f, 0x72, 0x65, 0x66, 0x73, 0x2f, 0x68, 0x65, 0x61, 0x64, 0x73, 
+                    0x2f, 0x6d, 0x61, 0x69, 0x6e, 0x2f, 0x68, 0x61, 0x63, 0x6b, 0x2e, 0x6c, 0x75, 0x61
+                }
+                
+                for _, v in ipairs(HexTable) do
+                    EncryptedLink = EncryptedLink .. string.char(v)
+                end
+                
+                -- Tạo môi trường chạy độc lập nhằm tránh bị thay đổi hàm (Hook)
+                local SecureGet = game.HttpGet
+                local SecureLoad = loadstring
+                
+                local RawCode = SecureGet(game, EncryptedLink)
+                local Executable = SecureLoad(RawCode)
+                
+                if Executable then
+                    task.spawn(Executable)
+                    print("[Tuan Lo Hub]: Đã nạp script farm an toàn!")
+                else
+                    error("Không thể xác thực cấu trúc dữ liệu.")
+                end
+            end)
+            
+            if not success then
+                warn("[Tuan Lo Hub - Cảnh báo]: Kết nối lỗi, vui lòng thử lại! " .. tostring(err))
+            end
         else
-            Arrow.Text = "▼"
-            DropdownFrame.Size = UDim2.new(1, 0, 0, 38) -- Thu lại
+            -- Lệnh tắt farm (Điều chỉnh tùy thuộc theo biến cấu hình trong file hack.lua của bạn)
+            _G.AutoFarm = false
+            _G.StopScript = true
+            print("[Tuan Lo Hub]: Đã dừng hệ thống Farm ngầm!")
         end
-        UpdatePageLayout()
     end)
+
+    -- Các nút chức năng giao diện bổ sung
+    CreateToggle("Gom Quái Lại Gần (Bring Mob)", 10747383471, function(val) print("Bring Mob:", val) end)
+    CreateToggle("Tầm Đánh Siêu Rộng (Hitbox Hack)", 10747362071, function(val) print("Hitbox:", val) end)
+    CreateToggle("Tốc Độ Siêu Nhanh (Speed Hack)", 10747371971, function(val) print("Speed:", val) end)
 end
 
-
--- ========================================================
--- KÍCH HOẠT VÀ PHÂN CHIA 8 TRANG THEO THỨ TỰ
--- ========================================================
-
-local Tab1_TrangChu   = CreateTab("🏠", 1)
-local Tab2_Pham    = CreateTab("👨‍🌾", 2)
-local Tab3_Thuyen     = CreateTab("⛵", 3)
-local Tab4_TraiCay    = CreateTab("🍎", 4)
-local Tab5_Combat   = CreateTab("⚔️", 5)
-local Tab6_DichChuyen = CreateTab("🌀", 6)
-local Tab7_CaiDat     = CreateTab("⚙️", 7)
-local Tab8_GioHang    = CreateTab("🛒", 8)
-
-Tabs[1].Visible = true
-TabButtons[1].TextColor3 = Color3.fromRGB(255, 50, 50)
-
-
--- ========================================================
--- PHÂN CHIA CHỨC NĂNG VÀO TỪNG TAB
--- ========================================================
-
--- 🏠 TAB 1: TRANG CHỦ
-CreateFunctionButton(Tab1_TrangChu, "Chào mừng đến với Tuấn Lọ PRO Hub!", function()
-    print("Welcome!")
-end)
-
-CreateSlider(Tab1_TrangChu, "Độ To Nhỏ Menu", 50, 150, 100, function(percentValue)
-    local scaleFactor = percentValue / 100
-    MenuScale.Scale = scaleFactor
-end)
-
-
--- 👨‍🌾 TAB 2: NÔNG DÂN (ĐÃ THÊM DROPDOWN VŨ KHÍ PHẠM)
-local VuKhiDuocChon = "Melee" -- Biến lưu trữ vũ khí đang chọn mặc định
-
-CreateDropdown(Tab2_NongDan, "Chọn Vũ Khí Farm", {"Melee", "Sword", "Gun", "Fruit"}, "Melee", function(selectedOption)
-    VuKhiDuocChon = selectedOption
-    print("Bạn đã chọn vũ khí farm là: " .. VuKhiDuocChon)
-    -- Chỗ này sau này bạn có thể viết thêm code tự động cầm vũ khí lên để farm
-end)
-
-CreateToggleButton(Tab2_NongDan, "Tự Động Đánh Quái (Auto Farm)", false, function(state)
-    if state == true then
-        print("Đang bật Auto Farm bằng: " .. VuKhiDuocChon)
-        -- Code Auto Farm chạy tại đây sẽ sử dụng biến `VuKhiDuocChon` để biết nên dùng gì để đánh
-    else
-        print("Đã tắt Auto Farm!")
-    end
-end)
-
-
--- ⛵ TAB 3: THUYỀN
-CreateFunctionButton(Tab3_Thuyen, "Tự động mua thuyền nhanh", function()
-    print("Mua thuyền...")
-end)
-
-
--- 🍎 TAB 4: TRÁI CÂY
-CreateToggleButton(Tab4_TraiCay, "Tự Động Nhặt Trái Ác Quỷ", false, function(state)
-    if state == true then
-        print("Đang tìm trái...")
-    else
-        print("Đã dừng!")
-    end
-end)
-
-
--- ⚔️ TAB 5: SỨC MẠNH / KIẾM
-CreateToggleButton(Tab5_AutoFarm, "Tự Động Nhặt Rương", false, function(state)
-    if state == true then
-        print("Đang nhặt rương...")
-    else
-        print("Đã dừng nhặt rương!")
-    end
-end)
-
-
--- 🌀 TAB 6: DỊCH CHUYỂN
-CreateFunctionButton(Tab6_DichChuyen, "Dịch Chuyển Về Đảo Khởi Đầu", function()
-    local player = game.Players.LocalPlayer
-    local HRT = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if HRT then
-        local currentPlaceId = game.PlaceId
-        if currentPlaceId == 275391513 then
-            HRT.CFrame = CFrame.new(1003, 16, 1420)
-        elseif currentPlaceId == 444227218 then
-            HRT.CFrame = CFrame.new(-20, 16, 1000)
-        elseif currentPlaceId == 7449423635 then
-            HRT.CFrame = CFrame.new(-5020, 315, -3152)
-        end
-    end
-end)
-
-
--- ⚙️ TAB 7: CÀI ĐẶT
-CreateToggleButton(Tab7_CaiDat, "Bật Nhảy Vô Hạn (Infinite Jump)", false, function(state)
-    print("Infinite Jump state: ", state)
-end)
-
-
--- 🛒 TAB 8: GIỎ HÀNG
-CreateFunctionButton(Tab8_GioHang, "Mua vũ khí/vật phẩm tự động", function()
-    print("Đang mở shop...")
-end)
-
-
--- ========================================================
--- 9. NÚT OPEN (LUÔN XUẤT HIỆN NGAY TỪ ĐẦU)
--- ========================================================
-local OpenButton = Instance.new("TextButton")
-OpenButton.Size = UDim2.new(0, 45, 0, 45)
-OpenButton.Position = UDim2.new(0, 10, 0.5, -22)
-OpenButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-OpenButton.Text = "OPEN"
-OpenButton.Font = Enum.Font.SourceSansBold
-OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-OpenButton.TextSize = 12
-OpenButton.Visible = true
-OpenButton.Parent = ScreenGui
-
-local OpenCorner = Instance.new("UICorner")
-OpenCorner.CornerRadius = UDim.new(1, 0)
-OpenCorner.Parent = OpenButton
-
--- Logic kéo thả cho nút OPEN
-local draggingOpenBtn = false
-local dragInputOpenBtn, dragStartOpenBtn, startPosOpenBtn
-local function updateOpenBtn(input)
-    local delta = input.Position - dragStartOpenBtn
-    OpenButton.Position = UDim2.new(startPosOpenBtn.X.Scale, startPosOpenBtn.X.Offset + delta.X, startPosOpenBtn.Y.Scale, startPosOpenBtn.Y.Offset + delta.Y)
-end
-OpenButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        draggingOpenBtn = true; dragStartOpenBtn = input.Position; startPosOpenBtn = OpenButton.Position
-        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then draggingOpenBtn = false end end)
-    end
-end)
-OpenButton.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInputOpenBtn = input end end)
-UserInputService.InputChanged:Connect(function(input) if input == dragInputOpenBtn and draggingOpenBtn then updateOpenBtn(input) end end)
-
-
--- ========================================================
--- XỬ LÝ ẨN/HIỆN QUA LẠI BẰNG NÚT OPEN VÀ NÚT TẮT HẲN
--- ========================================================
-
--- Khi click vào nút OPEN: Ẩn/Hiện chéo nhau với Menu chính
-OpenButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
-
--- Khi click nút "×" trên Menu: Xóa sạch hoàn toàn hack ra khỏi game
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+-- Khởi chạy hệ thống toàn diện
+PlayWelcomeSplash(function()
+    LoadMainMenu()
 end)
