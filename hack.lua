@@ -421,10 +421,10 @@ end
 -- ========================================================
 
 local Tab1_TrangChu   = CreateTab("🏠", 1)
-local Tab2_NongDan    = CreateTab("👨‍🌾", 2)
+local Tab2_Pham    = CreateTab("👨‍🌾", 2)
 local Tab3_Thuyen     = CreateTab("⛵", 3)
 local Tab4_TraiCay    = CreateTab("🍎", 4)
-local Tab5_AutoFarm   = CreateTab("⚔️", 5)
+local Tab5_Combat   = CreateTab("⚔️", 5)
 local Tab6_DichChuyen = CreateTab("🌀", 6)
 local Tab7_CaiDat     = CreateTab("⚙️", 7)
 local Tab8_GioHang    = CreateTab("🛒", 8)
