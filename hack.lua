@@ -344,14 +344,14 @@ local function LoadMainMenu()
     end
 
     -- Khởi tạo 8 Tabs
-    local Tab1 = CreateTab("Chính (Main)", 10747373999)
-    local Tab2 = CreateTab("Phụ (Main 2)", 10747383471)
-    local Tab3 = CreateTab("Chỉ Số (Stats)", 10747362071)
-    local Tab4 = CreateTab("Dịch Chuyển", 10747371971)
-    local Tab5 = CreateTab("Phó Bản (Raid)", 10747373999)
-    local Tab6 = CreateTab("khong biết (Sea)", 10747383471)
-    local Tab7 = CreateTab("Trái Ác Quỷ", 10747362071)
-    local Tab8 = CreateTab("Hiển Thị (Visual)", 10747371971)
+    local Tab1 = CreateTab("🏠 Trang chủ (Main)", 10747373999)
+    local Tab2 = CreateTab("👨‍🌾 Pham (Main 2)", 10747383471)
+    local Tab3 = CreateTab("⛵ Event biển (Stats)", 10747362071)
+    local Tab4 = CreateTab("🍎 Trái cây", 10747371971)
+    local Tab5 = CreateTab("⚔️ Combat (Raid)", 10747373999)
+    local Tab6 = CreateTab("🌀 Dịch  (Sea)", 10747383471)
+    local Tab7 = CreateTab("⚙️ Cài đặt", 10747362071)
+    local Tab8 = CreateTab("🛒 Cửa hàng (Visual)", 10747371971)
 
     Tab1.Select()
 
