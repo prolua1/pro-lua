@@ -1,12 +1,12 @@
 --[[
     ========================================================================
-       TUAN LO PRO HUB - BẢN ĐỎ PREMIUM (V4.6 - CHỈNH SIZE + TIME SERVER)
+       TUAN LO PRO HUB - BẢN ĐỎ PREMIUM (V4.7 - FIXED CRASH UPTIME)
     ========================================================================
 ]]
 
 local LPH_Name = "Tuan Lo Pro Hub"
 local LPH_Developer = "Tuan Lo Developer"
-local LPH_Version = "v4.6 Premium"
+local LPH_Version = "v4.7 Premium"
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -135,7 +135,7 @@ local function LoadMainMenu()
     Instance.new("UICorner", MinimizeBtn).CornerRadius = UDim.new(1, 0)
     local MiniStroke = Instance.new("UIStroke", MinimizeBtn) MiniStroke.Color = Color3.fromRGB(255, 30, 30) MiniStroke.Thickness = 2
 
-    -- TITLE BAR (THANH TIÊU ĐỀ)
+    -- 1. KHỞI TẠO TITLE BAR TRƯỚC
     local TitleBar = Instance.new("Frame")
     TitleBar.Size = UDim2.new(1, 0, 0, 45)
     TitleBar.BackgroundColor3 = Color3.fromRGB(25, 12, 12)
@@ -151,7 +151,7 @@ local function LoadMainMenu()
     HubIcon.Parent = TitleBar
 
     local TitleText = Instance.new("TextLabel")
-    TitleText.Size = UDim2.new(1, -260, 1, 0) -- Thu hẹp độ rộng text tiêu đề để nhường chỗ cho đồng hồ
+    TitleText.Size = UDim2.new(1, -260, 1, 0) 
     TitleText.Position = UDim2.new(0, 48, 0, 0)
     TitleText.BackgroundTransparency = 1
     TitleText.Font = Enum.Font.FredokaOne
@@ -172,14 +172,14 @@ local function LoadMainMenu()
     CloseBtn.Parent = TitleBar
     Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(1, 0)
 
-    -- ĐÃ CHÈN ĐOẠN HIỂN THỊ THỜI GIAN SERVER VÀO ĐÂY THEO Ý BẠN:
+    -- 2. KHỞI TẠO THỜI GIAN SERVER SAU KHI TITLE BAR ĐÃ CÓ SẴN (FIXED)
     local UptimeText = Instance.new("TextLabel")
     UptimeText.Size = UDim2.new(0, 160, 1, 0)
     UptimeText.Position = UDim2.new(1, -210, 0, 0)
     UptimeText.BackgroundTransparency = 1
     UptimeText.Font = Enum.Font.GothamBold
     UptimeText.Text = "Server Uptime: 00:00:00"
-    UptimeText.TextColor3 = Color3.fromRGB(255, 80, 80) -- Màu đỏ neon nhẹ cho đồng bộ
+    UptimeText.TextColor3 = Color3.fromRGB(255, 80, 80) 
     UptimeText.TextSize = 11
     UptimeText.TextXAlignment = Enum.TextXAlignment.Right
     UptimeText.Parent = TitleBar
@@ -431,7 +431,7 @@ local function LoadMainMenu()
     
     Tab1.AddToggle("Tự Động Farm Cấp Độ", 10747373999, function(v) print("Auto Farm:", v) end)
 
-    -- [Tab 7: Cài đặt] -> Nơi điều chỉnh size Hub
+    -- [Tab 7: Cài đặt] -> Điều chỉnh kích thước Hub
     Tab7.AddSlider("Kích Thước Giao Diện Hub (%)", 10747362071, 50, 150, 100, function(value)
         HubScale.Scale = value / 100
     end)
