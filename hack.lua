@@ -1,12 +1,12 @@
 --[[
     ========================================================================
-       TUAN LO PRO HUB - BẢN ĐỎ PREMIUM (8 TABS - ĐÃ SỬA LỖI CHỐNG SPAM CODE)
+       TUAN LO PRO HUB - BẢN ĐỎ PREMIUM (8 TABS - ĐÃ THÊM THANH KÉO SLIDER)
     ========================================================================
 ]]
 
 local LPH_Name = "Tuan Lo Pro Hub"
 local LPH_Developer = "Tuan Lo Developer"
-local LPH_Version = "v4.1 Premium"
+local LPH_Version = "v4.2 Premium"
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -286,6 +286,7 @@ local function LoadMainMenu()
 
         TabBtn.MouseButton1Click:Connect(Select)
         
+        -- HÀM TẠO NÚT BẬT/TẮT (TOGGLE)
         local function AddToggle(name, toggleIconId, callback)
             local state = false
             local ToggleFrame = Instance.new("Frame")
@@ -340,27 +341,133 @@ local function LoadMainMenu()
             end)
         end
 
-        return {Select = Select, AddToggle = AddToggle}
+        -- HÀM TẠO THANH KÉO GIÁ TRỊ (SLIDER MỚI THÊM VÀO)
+        local function AddSlider(name, sliderIconId, min, max, default, callback)
+            local SliderFrame = Instance.new("Frame")
+            SliderFrame.Size = UDim2.new(1, -6, 0, 50) -- Cao hơn Toggle một chút để có khoảng cách làm thanh trượt
+            SliderFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
+            SliderFrame.Parent = TabPage
+            Instance.new("UICorner", SliderFrame).CornerRadius = UDim.new(0, 6)
+
+            local SliderIcon = Instance.new("ImageLabel")
+            SliderIcon.Size = UDim2.new(0, 20, 0, 20)
+            SliderIcon.Position = UDim2.new(0, 12, 0, 8)
+            SliderIcon.BackgroundTransparency = 1
+            SliderIcon.Image = "rbxassetid://" .. tostring(sliderIconId)
+            SliderIcon.ImageColor3 = Color3.fromRGB(200, 150, 150)
+            SliderIcon.Parent = SliderFrame
+
+            local Label = Instance.new("TextLabel")
+            Label.Size = UDim2.new(1, -120, 0, 20)
+            Label.Position = UDim2.new(0, 42, 0, 8)
+            Label.BackgroundTransparency = 1
+            Label.Font = Enum.Font.GothamBold
+            Label.Text = name
+            Label.TextColor3 = Color3.fromRGB(240, 210, 210)
+            Label.TextSize = 12
+            Label.TextXAlignment = Enum.TextXAlignment.Left
+            Label.Parent = SliderFrame
+
+            local ValueLabel = Instance.new("TextLabel")
+            ValueLabel.Size = UDim2.new(0, 60, 0, 20)
+            ValueLabel.Position = UDim2.new(1, -72, 0, 8)
+            ValueLabel.BackgroundTransparency = 1
+            ValueLabel.Font = Enum.Font.GothamBold
+            ValueLabel.Text = tostring(default)
+            ValueLabel.TextColor3 = Color3.fromRGB(255, 30, 30) -- Đỏ rực Neon hiển thị con số
+            ValueLabel.TextSize = 12
+            ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+            ValueLabel.Parent = SliderFrame
+
+            -- Khung nền thanh trượt
+            local SliderBar = Instance.new("TextButton")
+            SliderBar.Size = UDim2.new(1, -24, 0, 6)
+            SliderBar.Position = UDim2.new(0, 12, 0, 34)
+            SliderBar.BackgroundColor3 = Color3.fromRGB(60, 40, 40)
+            SliderBar.Text = ""
+            SliderBar.AutoButtonColor = false
+            SliderBar.Parent = SliderFrame
+            Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(1, 0)
+
+            -- Vùng màu đỏ đại diện cho giá trị đang kéo
+            local SliderFill = Instance.new("Frame")
+            SliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+            SliderFill.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
+            SliderFill.BorderSizePixel = 0
+            SliderFill.Parent = SliderBar
+            Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+
+            -- Xử lý logic Kéo/Thả (Hỗ trợ nhạy cả PC và Cảm ứng Mobile)
+            local dragging = false
+            local function UpdateSlider(input)
+                local percentage = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
+                local value = math.floor(min + (max - min) * percentage)
+                
+                ValueLabel.Text = tostring(value)
+                TweenService:Create(SliderFill, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(percentage, 0, 1, 0)}):Play()
+                task.spawn(callback, value)
+            end
+
+            SliderBar.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    UpdateSlider(input)
+                end
+            end)
+
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                    UpdateSlider(input)
+                end
+            end)
+
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = false
+                end
+            end)
+        end
+
+        -- Xuất cả 3 hàm ra ngoài cấu trúc Tab
+        return {Select = Select, AddToggle = AddToggle, AddSlider = AddSlider}
     end
 
     -- Khởi tạo 8 Tabs
-    local Tab1 = CreateTab("🏠 Trang chủ (Main)", 10747373999)
-    local Tab2 = CreateTab("👨‍🌾 Pham (Main 2)", 10747383471)
-    local Tab3 = CreateTab("⛵ Event biển (Stats)", 10747362071)
-    local Tab4 = CreateTab("🍎 Trái cây", 10747371971)
-    local Tab5 = CreateTab("⚔️ Combat (Raid)", 10747373999)
-    local Tab6 = CreateTab("🌀 Dịch  (Sea)", 10747383471)
-    local Tab7 = CreateTab("⚙️ Cài đặt", 10747362071)
-    local Tab8 = CreateTab("🛒 Cửa hàng (Visual)", 10747371971)
+    local Tab1 = CreateTab("🏠 Trang chủ ", 10747373999)
+    local Tab2 = CreateTab("👨‍🌾 Pham      ", 10747383471)
+    local Tab3 = CreateTab("⛵ Event biển", 10747362071)
+    local Tab4 = CreateTab("🍎 Trái cây  ", 10747371971)
+    local Tab5 = CreateTab("⚔️ Combat    ", 10747373999)
+    local Tab6 = CreateTab("🌀 Dịch      ", 10747383471)
+    local Tab7 = CreateTab("⚙️ Cài đặt   ", 10747362071)
+    local Tab8 = CreateTab("🛒 Cửa hàng  ", 10747371971)
 
     Tab1.Select()
 
-    -- Danh sách nút bấm mẫu cho các Tab
+    -- ========================================================================
+    -- DANH SÁCH CÁC CHỨC NĂNG TRONG TAB
+    -- ========================================================================
+    
+    -- [Tab 1: Trang chủ]
     Tab1.AddToggle("Tự Động Farm Cấp Độ", 10747373999, function(v) print("Auto Farm:", v) end)
     Tab1.AddToggle("Gom Quái (Bring Mob)", 10747383471, function(v) print("Bring Mob:", v) end)
 
-    Tab2.AddToggle("Tầm Đánh Rộng (Hitbox)", 10747362071, function(v) print("Hitbox:", v) end)
-    Tab2.AddToggle("Đánh Siêu Nhanh", 10747371971, function(v) print("Fast Attack:", v) end)
+    -- [Tab 2: Pham]
+    Tab2.AddToggle("Bật Tầm Đánh Rộng", 10747362071, function(v) print("Bật Hitbox:", v) end)
+    
+    -- Thêm thanh trượt chỉnh kích thước Tầm Đánh (Từ 0 đến 100, mặc định để là 15)
+    Tab2.AddSlider("Kích Thước Tầm Đánh (Hitbox Size)", 10747362071, 0, 100, 15, function(value)
+        print("Đang chỉnh kích thước Hitbox thành:", value)
+    end)
+    
+    -- Thêm thanh trượt chỉnh Tốc Độ Đánh/Chạy (Từ 16 đến 300, mặc định gốc game là 16)
+    Tab2.AddSlider("Tốc Độ Nhân Vật (Speed Walk)", 10747371971, 16, 300, 16, function(value)
+        pcall(function()
+            if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+            end
+         pcall)
+    end)
 end
 
 -- VÒNG ĐỜI KHỞI CHẠY KHÔNG SPAM
