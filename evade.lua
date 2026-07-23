@@ -255,3 +255,4 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 -- mới tự làm code thôi --
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/prolua1/pro-lua/refs/heads/main/evade.lua"))() --
