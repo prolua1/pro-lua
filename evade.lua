@@ -1,108 +1,161 @@
--- // HUB TUẤN LỌ - COMBAT & AN TOÀN //
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+-- // HUB TUẤN LỌ - PRO EDITION (KÈM KÉO THẢ GIAO DIỆN) //
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Players = game.Players
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
 local player = Players.LocalPlayer
 
--- Xóa menu cũ nếu chạy lại nhiều lần
-if CoreGui:FindFirstChild("TuanLoHub") then
-    CoreGui.TuanLoHub:Destroy()
+-- Xóa GUI cũ nếu đã tồn tại để tránh bị trùng lặp
+if game.CoreGui:FindFirstChild("TuanLoHub") then
+    game.CoreGui.TuanLoHub:Destroy()
 end
 
--- 1. Tạo ScreenGui chính
-local HubGui = Instance.new("ScreenGui")
-HubGui.Name = "TuanLoHub"
-HubGui.Parent = CoreGui
-HubGui.ResetOnSpawn = false
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "TuanLoHub"
+ScreenGui.Parent = game.CoreGui
 
--- 2. Nút tròn mở/tắt Hub ngoài màn hình
-local CircleBtn = Instance.new("TextButton")
-CircleBtn.Name = "CircleButton"
-CircleBtn.Size = UDim2.new(0, 50, 0, 50)
-CircleBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
-CircleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-CircleBtn.Text = "TL"
-CircleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CircleBtn.TextSize = 16
-CircleBtn.Font = Enum.Font.SourceSansBold
-CircleBtn.Draggable = true
-CircleBtn.Parent = HubGui
+-- Nút tròn mở/đóng Hub ("TL")
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+ToggleBtn.Position = UDim2.new(0, 50, 0, 100)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleBtn.Text = "TL"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextSize = 20
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.Parent = ScreenGui
 
-local CircleCorner = Instance.new("UICorner")
-CircleCorner.CornerRadius = UDim.new(1, 0)
-CircleCorner.Parent = CircleBtn
+local UICornerBtn = Instance.new("UICorner")
+UICornerBtn.CornerRadius = UDim.new(1, 0)
+UICornerBtn.Parent = ToggleBtn
 
-local CircleStroke = Instance.new("UIStroke")
-CircleStroke.Color = Color3.fromRGB(0, 170, 255)
-CircleStroke.Thickness = 2
-CircleStroke.Parent = CircleBtn
-
--- 3. Khung Menu Chính (Main Frame) - Thu gọn kích thước vừa đủ chứa các nút tính năng
+-- Khung chính của Hub
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 220, 0, 280)
-MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = HubGui
+MainFrame.Size = UDim2.new(0, 260, 0, 320)
+MainFrame.Position = UDim2.new(0, 120, 0, 100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.Visible = true
+MainFrame.Parent = ScreenGui
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 8)
-MainCorner.Parent = MainFrame
+local UICornerMain = Instance.new("UICorner")
+UICornerMain.CornerRadius = UDim.new(0, 8)
+UICornerMain.Parent = MainFrame
 
--- Tiêu đề Hub
+-- Tiêu đề Hub (Đồng thời là thanh để cầm kéo Hub)
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -30, 0, 35)
-Title.Position = UDim2.new(0, 12, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Text = "MENU AN TOÀN & COMBAT"
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Title.Text = "Hub Tuấn Lọ - Pro Edition"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 12
+Title.TextSize = 14
 Title.Font = Enum.Font.SourceSansBold
-Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = MainFrame
 
--- Nút Thu Gọn (-)
-local MinimizeBtn = Instance.new("TextButton")
-MinimizeBtn.Size = UDim2.new(0, 26, 0, 26)
-MinimizeBtn.Position = UDim2.new(1, -32, 0, 4)
-MinimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-MinimizeBtn.Text = "-"
-MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinimizeBtn.TextSize = 14
-MinimizeBtn.Font = Enum.Font.SourceSansBold
-MinimizeBtn.Parent = MainFrame
+local UICornerTitle = Instance.new("UICorner")
+UICornerTitle.CornerRadius = UDim.new(0, 8)
+UICornerTitle.Parent = Title
 
-local MinCorner = Instance.new("UICorner")
-MinCorner.CornerRadius = UDim.new(0, 4)
-MinCorner.Parent = MinimizeBtn
+-- ==================== HÀM HỖ TRỢ KÉO THẢ (DRAG) ====================
+local function MakeDraggable(guiObject, dragTarget)
+    dragTarget = dragTarget or guiObject
+    local dragging, dragInput, dragStart, startPos
 
--- Logic Nút Tròn Bật/Tắt Toàn Bộ Hub
-local isOpen = true
-CircleBtn.MouseButton1Click:Connect(function()
-    isOpen = not isOpen
-    MainFrame.Visible = isOpen
-    CircleStroke.Color = isOpen and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(255, 0, 0)
+    dragTarget.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = guiObject.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            guiObject.Position = UDim2.new(
+                startPos.X.Scale, 
+                startPos.X.Offset + delta.X, 
+                startPos.Y.Scale, 
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+-- Áp dụng tính năng kéo thả cho nút tròn "TL" và khung chính Hub (cầm vào thanh tiêu đề để kéo)
+MakeDraggable(ToggleBtn)
+MakeDraggable(MainFrame, Title)
+
+-- Thanh chuyển Tab (Tab Buttons)
+local TabBar = Instance.new("Frame")
+TabBar.Size = UDim2.new(1, -10, 0, 30)
+TabBar.Position = UDim2.new(0, 5, 0, 40)
+TabBar.BackgroundTransparency = 1
+TabBar.Parent = MainFrame
+
+local Tab1Btn = Instance.new("TextButton")
+Tab1Btn.Size = UDim2.new(0.48, 0, 1, 0)
+Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+Tab1Btn.Text = "Combat & Move"
+Tab1Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Tab1Btn.TextSize = 12
+Tab1Btn.Font = Enum.Font.SourceSansBold
+Tab1Btn.Parent = TabBar
+Instance.new("UICorner", Tab1Btn).CornerRadius = UDim.new(0, 6)
+
+local Tab2Btn = Instance.new("TextButton")
+Tab2Btn.Size = UDim2.new(0.48, 0, 1, 0)
+Tab2Btn.Position = UDim2.new(0.52, 0, 0, 0)
+Tab2Btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+Tab2Btn.Text = "Evade & Utility"
+Tab2Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Tab2Btn.TextSize = 12
+Tab2Btn.Font = Enum.Font.SourceSansBold
+Tab2Btn.Parent = TabBar
+Instance.new("UICorner", Tab2Btn).CornerRadius = UDim.new(0, 6)
+
+-- Khung chứa nội dung Tab 1
+local Tab1Container = Instance.new("ScrollingFrame")
+Tab1Container.Size = UDim2.new(1, -10, 1, -80)
+Tab1Container.Position = UDim2.new(0, 5, 0, 75)
+Tab1Container.BackgroundTransparency = 1
+Tab1Container.CanvasSize = UDim2.new(0, 0, 0, 230)
+Tab1Container.ScrollBarThickness = 4
+Tab1Container.Parent = MainFrame
+
+-- Khung chứa nội dung Tab 2
+local Tab2Container = Instance.new("ScrollingFrame")
+Tab2Container.Size = UDim2.new(1, -10, 1, -80)
+Tab2Container.Position = UDim2.new(0, 5, 0, 75)
+Tab2Container.BackgroundTransparency = 1
+Tab2Container.CanvasSize = UDim2.new(0, 0, 0, 100)
+Tab2Container.ScrollBarThickness = 4
+Tab2Container.Visible = false
+Tab2Container.Parent = MainFrame
+
+-- Chuyển Tab qua lại
+Tab1Btn.MouseButton1Click:Connect(function()
+    Tab1Container.Visible = true
+    Tab2Container.Visible = false
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 end)
 
-MinimizeBtn.MouseButton1Click:Connect(function()
-    isOpen = false
-    MainFrame.Visible = false
-    CircleStroke.Color = Color3.fromRGB(255, 0, 0)
+Tab2Btn.MouseButton1Click:Connect(function()
+    Tab1Container.Visible = false
+    Tab2Container.Visible = true
+    Tab2Btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    Tab1Btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 end)
 
--- // KHUNG CHỨA CÁC NÚT TÍNH NĂNG COMBAT //
-local CombatHolder = Instance.new("Frame")
-CombatHolder.Size = UDim2.new(1, -20, 0, 225)
-CombatHolder.Position = UDim2.new(0, 10, 0, 45)
-CombatHolder.BackgroundTransparency = 1
-CombatHolder.Parent = MainFrame
-
-local function CreateToggleButton(name, posY)
+-- Hàm tạo nút bấm chung
+local function CreateButton(name, posY, parentFrame)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 36)
     btn.Position = UDim2.new(0, 0, 0, posY)
@@ -111,28 +164,34 @@ local function CreateToggleButton(name, posY)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
     btn.Font = Enum.Font.SourceSansBold
-    btn.Parent = CombatHolder
-
+    btn.Parent = parentFrame
+    
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
     corner.Parent = btn
     return btn
 end
 
-local ToggleEvadeBtn = CreateToggleButton("Lướt Phím Z", 0)
-local ToggleFlyBtn = CreateToggleButton("Tính Năng Bay", 44)
-local ToggleNoclipBtn = CreateToggleButton("Xuyên Tường", 88)
-local ToggleInvisBtn = CreateToggleButton("Tàng Hình", 132)
-local ToggleSpeedBtn = CreateToggleButton("Tốc Độ Chạy", 176)
+-- Tạo nút Tab 1
+local ToggleEvadeBtn = CreateButton("Lướt Phím Z", 0, Tab1Container)
+local ToggleFlyBtn = CreateButton("Tính Năng Bay", 44, Tab1Container)
+local ToggleNoclipBtn = CreateButton("Xuyên Tường", 88, Tab1Container)
+local ToggleInvisBtn = CreateButton("Tàng Hình", 132, Tab1Container)
+local ToggleSpeedBtn = CreateButton("Tốc Độ Chạy", 176, Tab1Container)
 
--- // LOGIC TÍNH NĂNG COMBAT & AN TOÀN //
+-- Tạo nút Tab 2
+local ToggleVoidBtn = CreateButton("Void Mode", 0, Tab2Container)
+local ToggleTPDownedBtn = CreateButton("TP Người Bị Hạ", 44, Tab2Container)
+ToggleTPDownedBtn.Text = "TP Người Bị Hạ"
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- ==================== PHẦN LOGIC TÍNH NĂNG ====================
+
+-- 1. Lướt Phím Z (Z-Dash)
 local evadeEnabled = false
-local flyEnabled = false
-local noclipEnabled = false
-local invisEnabled = false
-local speedEnabled = false
-
--- 1. Lướt phím Z
 ToggleEvadeBtn.MouseButton1Click:Connect(function()
     evadeEnabled = not evadeEnabled
     ToggleEvadeBtn.BackgroundColor3 = evadeEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
@@ -142,16 +201,19 @@ end)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if evadeEnabled and input.KeyCode == Enum.KeyCode.Z then
-        local currentRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-        if currentRoot then
-            local targetCFrame = currentRoot.CFrame * CFrame.new(0, 0, -25)
-            local tween = TweenService:Create(currentRoot, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = targetCFrame})
+        local char = player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local root = char.HumanoidRootPart
+            local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local tween = TweenService:Create(root, tweenInfo, {CFrame = root.CFrame + (root.CFrame.LookVector * 25)})
             tween:Play()
         end
     end
 end)
 
--- 2. Bay
+-- 2. Tính Năng Bay (Fly)
+local flyEnabled = false
+local flySpeed = 50
 local bg, bv
 ToggleFlyBtn.MouseButton1Click:Connect(function()
     flyEnabled = not flyEnabled
@@ -160,35 +222,33 @@ ToggleFlyBtn.MouseButton1Click:Connect(function()
     
     local char = player.Character
     if not char then return end
-    local currentRoot = char:FindFirstChild("HumanoidRootPart")
+    local root = char:FindFirstChild("HumanoidRootPart")
     local humanoid = char:FindFirstChildOfClass("Humanoid")
     
-    if flyEnabled then
-        if currentRoot and humanoid then
-            humanoid.PlatformStand = true
-            bg = Instance.new("BodyGyro", currentRoot)
-            bg.P = 9e4
-            bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-            bg.cframe = currentRoot.CFrame
-            
-            bv = Instance.new("BodyVelocity", currentRoot)
-            bv.velocity = Vector3.new(0, 0.1, 0)
-            bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
-            
-            task.spawn(function()
-                while flyEnabled and char and currentRoot and humanoid and currentRoot.Parent do
-                    local camera = workspace.CurrentCamera
-                    local moveDir = Vector3.new()
-                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camera.CFrame.LookVector end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camera.CFrame.LookVector end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - camera.CFrame.RightVector end
-                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + camera.CFrame.RightVector end
-                    bv.velocity = moveDir * 80
-                    bg.cframe = camera.CFrame
-                    task.wait()
-                end
-            end)
-        end
+    if flyEnabled and root and humanoid then
+        humanoid.PlatformStand = true
+        bg = Instance.new("BodyGyro", root)
+        bg.P = 9e4
+        bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+        bg.cframe = root.CFrame
+        
+        bv = Instance.new("BodyVelocity", root)
+        bv.velocity = Vector3.new(0, 0, 0)
+        bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+        
+        task.spawn(function()
+            while flyEnabled and char and root and humanoid do
+                local camera = workspace.CurrentCamera
+                local moveDir = Vector3.new()
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camera.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camera.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - camera.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + camera.CFrame.RightVector end
+                bv.velocity = moveDir * flySpeed
+                bg.cframe = camera.CFrame
+                task.wait()
+            end
+        end)
     else
         if humanoid then humanoid.PlatformStand = false end
         if bg then bg:Destroy() end
@@ -196,27 +256,40 @@ ToggleFlyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Xuyên tường
+-- 3. Xuyên Tường (Noclip)
+local noclipEnabled = false
+local noclipConn
 ToggleNoclipBtn.MouseButton1Click:Connect(function()
     noclipEnabled = not noclipEnabled
     ToggleNoclipBtn.BackgroundColor3 = noclipEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
     ToggleNoclipBtn.Text = "Xuyên Tường: " .. (noclipEnabled and "BẬT" or "TẮT")
-end)
-
-RunService.Stepped:Connect(function()
+    
     if noclipEnabled then
+        noclipConn = RunService.Stepped:Connect(function()
+            local char = player.Character
+            if char then
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    else
+        if noclipConn then noclipConn:Disconnect() end
         local char = player.Character
         if char then
-            for _, part in ipairs(char:GetDescendants()) do
+            for _, part in pairs(char:GetDescendants()) do
                 if part:IsA("BasePart") then
-                    part.CanCollide = false
+                    part.CanCollide = true
                 end
             end
         end
     end
 end)
 
--- 4. Tàng hình
+-- 4. Tàng Hình (Invisibility)
+local invisEnabled = false
 ToggleInvisBtn.MouseButton1Click:Connect(function()
     invisEnabled = not invisEnabled
     ToggleInvisBtn.BackgroundColor3 = invisEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
@@ -224,10 +297,8 @@ ToggleInvisBtn.MouseButton1Click:Connect(function()
     
     local char = player.Character
     if char then
-        for _, part in ipairs(char:GetDescendants()) do
+        for _, part in pairs(char:GetDescendants()) do
             if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                part.Transparency = invisEnabled and 1 or 0
-            elseif part:IsA("Decal") then
                 part.Transparency = invisEnabled and 1 or 0
             end
             if part:IsA("Accessory") then
@@ -238,20 +309,96 @@ ToggleInvisBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 5. Tốc độ chạy
+-- 5. Tốc Độ Chạy (Speed)
+local speedEnabled = false
+local speedConn
 ToggleSpeedBtn.MouseButton1Click:Connect(function()
     speedEnabled = not speedEnabled
     ToggleSpeedBtn.BackgroundColor3 = speedEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
     ToggleSpeedBtn.Text = "Tốc Độ Chạy: " .. (speedEnabled and "BẬT" or "TẮT")
+    
+    if speedEnabled then
+        speedConn = RunService.RenderStepped:Connect(function()
+            local char = player.Character
+            if char and char:FindFirstChildOfClass("Humanoid") then
+                char.Humanoid.WalkSpeed = 50
+            end
+        end)
+    else
+        if speedConn then speedConn:Disconnect() end
+        local char = player.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char.Humanoid.WalkSpeed = 16
+        end
+    end
 end)
 
-RunService.RenderStepped:Connect(function()
-    if speedEnabled then
-        local char = player.Character
-        if char then
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if humanoid then humanoid.WalkSpeed = 120 end
+-- 6. Void Mode (Lơ lửng chống chết rơi)
+local voidEnabled = false
+local hoverBodyPos, hoverBodyGyro, originalPos
+ToggleVoidBtn.MouseButton1Click:Connect(function()
+    voidEnabled = not voidEnabled
+    ToggleVoidBtn.BackgroundColor3 = voidEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
+    ToggleVoidBtn.Text = "Void Mode: " .. (voidEnabled and "BẬT" or "TẮT")
+    
+    local char = player.Character
+    if not char then return end
+    local currentRoot = char:FindFirstChild("HumanoidRootPart")
+    
+    if voidEnabled then
+        if currentRoot then
+            originalPos = currentRoot.CFrame
+            local targetPos = currentRoot.Position - Vector3.new(0, 15, 0)
+            currentRoot.CFrame = CFrame.new(targetPos)
+            
+            hoverBodyPos = Instance.new("BodyPosition", currentRoot)
+            hoverBodyPos.Position = targetPos
+            hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            hoverBodyPos.P = 10000
+            
+            hoverBodyGyro = Instance.new("BodyGyro", currentRoot)
+            hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            hoverBodyGyro.CFrame = currentRoot.CFrame
         end
+    else
+        if hoverBodyPos then hoverBodyPos:Destroy() end
+        if hoverBodyGyro then hoverBodyGyro:Destroy() end
+        
+        if currentRoot and originalPos then
+            currentRoot.CFrame = originalPos + Vector3.new(0, 3, 0)
+        end
+    end
+end)
+
+-- 7. TP Người Bị Hạ (Evade Downed Teleport)
+ToggleTPDownedBtn.MouseButton1Click:Connect(function()
+    local char = player.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local rootPart = char.HumanoidRootPart
+    
+    local targetFound = false
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player and p.Character then
+            local targetChar = p.Character
+            local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
+            local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+            
+            local isDowned = targetChar:FindFirstChild("Downed") or (humanoid and humanoid.Health <= 0)
+            
+            if isDowned and targetRoot then
+                if humanoid then
+                    pcall(function() humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
+                end
+                task.wait(0.05)
+                rootPart.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
+                targetFound = true
+                break
+            end
+        end
+    end
+    
+    if not targetFound then
+        print("Không tìm thấy người chơi nào đang bị hạ trên bản đồ!")
     end
 end)
 -- mới tự làm code thôi --
