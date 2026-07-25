@@ -381,7 +381,7 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 7. Auto TP Dưới Chân (Cứu mượt mà, đủ thời gian và tàng hình tuyệt đối trước mắt người khác)
+-- 7. Auto TP Dưới Chân (Cứu xong tele xuống vùng ngầm an toàn, không sợ Nextbot tóm)
 ToggleTPDownedBtn.MouseButton1Click:Connect(function()
     autoStealthReviveEnabled = not autoStealthReviveEnabled
     ToggleTPDownedBtn.BackgroundColor3 = autoStealthReviveEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
@@ -393,7 +393,7 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                 local char = player.Character
                 if char and char:FindFirstChild("HumanoidRootPart") then
                     local rootPart = char.HumanoidRootPart
-                    local safePos = rootPart.CFrame -- Lưu vị trí gốc hiện tại của bạn
+                    local safePos = rootPart.CFrame -- Lưu vị trí hiện tại
                     
                     local foundTarget = false
                     for _, p in pairs(Players:GetPlayers()) do
@@ -407,24 +407,24 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                             if isDowned and targetRoot then
                                 foundTarget = true
                                 
-                                -- Tạm ngắt Void Mode nếu đang bật để tránh xung đột
+                                -- Tạm ngắt Void Mode nếu đang bật
                                 local wasVoidActive = voidEnabled
                                 if wasVoidActive then
                                     if hoverBodyPos then hoverBodyPos:Destroy() end
                                     if hoverBodyGyro then hoverBodyGyro:Destroy() end
                                 end
                                 
-                                -- 1. Tàng hình tạm thời (Ẩn model nhân vật để người khác không nhìn thấy bạn tele)
+                                -- 1. Tàng hình nhân vật để không ai nhìn thấy
                                 for _, part in pairs(char:GetDescendants()) do
                                     if part:IsA("BasePart") or part:IsA("Decal") then
                                         part.Transparency = 1
                                     end
                                 end
                                 
-                                -- 2. Teleport ĐÚNG VỊ TRÍ DƯỚI CHÂN người bị hạ gục
+                                -- 2. Teleport độn thổ xuống dưới chân người bị gục để cứu
                                 rootPart.CFrame = targetRoot.CFrame - Vector3.new(0, 4, 0)
                                 
-                                -- 3. Kích hoạt và giữ tương tác cứu (ProximityPrompt)
+                                -- 3. Kích hoạt ProximityPrompt để cứu
                                 for _, obj in pairs(targetChar:GetDescendants()) do
                                     if obj:IsA("ProximityPrompt") then
                                         pcall(function()
@@ -433,13 +433,13 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                                     end
                                 end
                                 
-                                -- 4. ĐỢI ĐỦ THỜI GIAN ĐỂ HỆ THỐNG CỨU XONG (1.5 giây)
+                                -- 4. Đợi đủ thời gian cứu (1.5 giây)
                                 task.wait(1.5)
                                 
-                                -- 5. Trở về vị trí an toàn ban đầu
-                                rootPart.CFrame = safePos
+                                -- 5. THAY VÌ VỀ CHỖ CŨ TRÊN MẶT ĐẤT, HÃY TELE THẲNG XUỐNG DƯỚI LÒNG ĐẤT (Trừ thêm trục Y xuống sâu để Né Nextbot tuyệt đối)
+                                rootPart.CFrame = safePos - Vector3.new(0, 25, 0)
                                 
-                                -- 6. Hiện lại nhân vật bình thường sau khi đã về chỗ cũ
+                                -- 6. Hiện lại hình dáng nhân vật
                                 for _, part in pairs(char:GetDescendants()) do
                                     if part:IsA("BasePart") then
                                         part.Transparency = (part.Name == "HumanoidRootPart") and 1 or 0
@@ -448,10 +448,9 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                                     end
                                 end
                                 
-                                -- Khôi phục lại Void Mode nếu lúc đầu đang bật
+                                -- Khôi phục lại trạng thái Void Mode ở dưới lòng đất an toàn
                                 if wasVoidActive then
-                                    local targetPos = rootPart.Position - Vector3.new(0, 15, 0)
-                                    rootPart.CFrame = CFrame.new(targetPos)
+                                    local targetPos = rootPart.Position
                                     originalPos = safePos
                                     
                                     hoverBodyPos = Instance.new("BodyPosition", rootPart)
