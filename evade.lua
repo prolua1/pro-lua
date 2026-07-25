@@ -377,35 +377,44 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 7. TP Người Bị Hạ (Evade Downed Teleport)
+-- 7. Tự Động Cứu Người Bị Hạ (Auto Revive / Auto Rescue)
+local autoReviveEnabled = false
+local autoReviveConn
+
+ToggleTPDownedBtn.Text = "Auto Cứu: TẮT"
+
 ToggleTPDownedBtn.MouseButton1Click:Connect(function()
-    local char = player.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local rootPart = char.HumanoidRootPart
+    autoReviveEnabled = not autoReviveEnabled
+    ToggleTPDownedBtn.BackgroundColor3 = autoReviveEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
+    ToggleTPDownedBtn.Text = "Auto Cứu: " .. (autoReviveEnabled and "BẬT" or "TẮT")
     
-    local targetFound = false
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player and p.Character then
-            local targetChar = p.Character
-            local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
-            local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+    if autoReviveEnabled then
+        autoReviveConn = RunService.Heartbeat:Connect(function()
+            local char = player.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+            local rootPart = char.HumanoidRootPart
             
-            local isDowned = targetChar:FindFirstChild("Downed") or (humanoid and humanoid.Health <= 0)
-            
-            if isDowned and targetRoot then
-                if humanoid then
-                    pcall(function() humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= player and p.Character then
+                    local targetChar = p.Character
+                    local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
+                    local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+                    
+                    -- Kiểm tra xem người chơi đó có đang bị hạ (Downed) hay không
+                    local isDowned = targetChar:FindFirstChild("Downed") or (humanoid and humanoid.Health <= 0)
+                    
+                    if isDowned and targetRoot then
+                        -- Dịch chuyển lại gần người đang bị hạ để cứu
+                        rootPart.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
+                        break -- Cứu xong một người sẽ chuyển sang người tiếp theo nếu có
+                    end
                 end
-                task.wait(0.05)
-                rootPart.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
-                targetFound = true
-                break
             end
+        end)
+    else
+        if autoReviveConn then
+            autoReviveConn:Disconnect()
         end
-    end
-    
-    if not targetFound then
-        print("Không tìm thấy người chơi nào đang bị hạ trên bản đồ!")
     end
 end)
 -- mới tự làm code thôi --
