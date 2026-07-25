@@ -340,9 +340,13 @@ ToggleSpeedBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 6. Void Mode (Lơ lửng chống chết rơi)
+-- Biến trạng thái chung để chia sẻ giữa 2 tính năng
 local voidEnabled = false
 local hoverBodyPos, hoverBodyGyro, originalPos
+local autoStealthReviveEnabled = false
+local autoStealthConn
+
+-- 6. Void Mode (Đã tích hợp cơ chế tạm nghỉ khi Auto Cứu làm việc)
 ToggleVoidBtn.MouseButton1Click:Connect(function()
     voidEnabled = not voidEnabled
     ToggleVoidBtn.BackgroundColor3 = voidEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
@@ -377,10 +381,7 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 7. Auto TP Dưới Chân Người Bị Gục (Hoạt động mượt mà, không xung đột)
-local autoStealthReviveEnabled = false
-local autoStealthConn
-
+-- 7. Auto TP Dưới Chân (Tự động vô hiệu hóa Void Mode khi đi cứu, cứu xong bật lại Void Mode như cũ)
 ToggleTPDownedBtn.MouseButton1Click:Connect(function()
     autoStealthReviveEnabled = not autoStealthReviveEnabled
     ToggleTPDownedBtn.BackgroundColor3 = autoStealthReviveEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
@@ -392,7 +393,7 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                 local char = player.Character
                 if char and char:FindFirstChild("HumanoidRootPart") then
                     local rootPart = char.HumanoidRootPart
-                    local safePos = rootPart.CFrame -- Lưu vị trí gốc của bạn
+                    local safePos = rootPart.CFrame -- Lưu vị trí gốc hiện tại của bạn
                     
                     local foundTarget = false
                     for _, p in pairs(Players:GetPlayers()) do
@@ -401,19 +402,19 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                             local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
                             local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
                             
-                            -- Kiểm tra xem người chơi đó có đang bị hạ gục không
                             local isDowned = targetChar:FindFirstChild("Downed") or (humanoid and humanoid.Health <= 0)
                             
                             if isDowned and targetRoot then
                                 foundTarget = true
                                 
-                                -- Tạm thời vô hiệu hóa BodyPosition của Void Mode nếu nó đang giữ chân bạn
-                                local activeBodyPos = rootPart:FindFirstChildOfClass("BodyPosition")
-                                if activeBodyPos then
-                                    activeBodyPos.MaxForce = Vector3.new(0, 0, 0)
+                                -- BƯỚC 1: Nếu Void Mode đang bật, tạm thời ngắt bỏ BodyPosition/BodyGyro để nó thả lỏng nhân vật ra
+                                local wasVoidActive = voidEnabled
+                                if wasVoidActive then
+                                    if hoverBodyPos then hoverBodyPos:Destroy() end
+                                    if hoverBodyGyro then hoverBodyGyro:Destroy() end
                                 end
                                 
-                                -- Teleport ĐÚNG VỊ TRÍ DƯỚI CHÂN người bị hạ gục (thấp hơn 4 đơn vị theo trục Y)
+                                -- BƯỚC 2: Teleport ĐÚNG VỊ TRÍ DƯỚI CHÂN người bị hạ gục
                                 rootPart.CFrame = targetRoot.CFrame - Vector3.new(0, 4, 0)
                                 
                                 -- Kích hoạt tương tác cứu (ProximityPrompt)
@@ -425,14 +426,25 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                                     end
                                 end
                                 
-                                task.wait(0.3) -- Chờ lệnh cứu thực thi
+                                task.wait(0.3) -- Chờ thực hiện lệnh cứu xong
                                 
-                                -- Trở về vị trí an toàn ban đầu
+                                -- BƯỚC 3: Trở về vị trí an toàn ban đầu
                                 rootPart.CFrame = safePos
                                 
-                                -- Bật lại lực giữ của Void Mode nếu bạn đang bật Void Mode
-                                if activeBodyPos then
-                                    activeBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                                -- BƯỚC 4: Nếu lúc đầu bạn đang bật Void Mode, tự động thiết lập lại trạng thái Void Mode ngay tại vị trí an toàn đó
+                                if wasVoidActive then
+                                    local targetPos = rootPart.Position - Vector3.new(0, 15, 0)
+                                    rootPart.CFrame = CFrame.new(targetPos)
+                                    originalPos = safePos -- Cập nhật lại vị trí gốc mới
+                                    
+                                    hoverBodyPos = Instance.new("BodyPosition", rootPart)
+                                    hoverBodyPos.Position = targetPos
+                                    hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                                    hoverBodyPos.P = 20000
+                                    
+                                    hoverBodyGyro = Instance.new("BodyGyro", rootPart)
+                                    hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+                                    hoverBodyGyro.CFrame = rootPart.CFrame
                                 end
                                 
                                 break
@@ -441,7 +453,7 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                     end
                     
                     if not foundTarget then
-                        task.wait(1) -- Nếu không có ai gục thì nghỉ 1 giây quét lại cho nhẹ máy
+                        task.wait(1) -- Nếu không có ai gục thì nghỉ 1 giây quét lại
                     end
                 end
                 task.wait(0.5)
