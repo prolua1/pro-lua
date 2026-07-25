@@ -328,7 +328,7 @@ ToggleSpeedBtn.MouseButton1Click:Connect(function()
         speedConn = RunService.RenderStepped:Connect(function()
             local char = player.Character
             if char and char:FindFirstChildOfClass("Humanoid") then
-                char.Humanoid.WalkSpeed = 50
+                char.Humanoid.WalkSpeed = 70
             end
         end)
     else
@@ -361,7 +361,7 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
             hoverBodyPos = Instance.new("BodyPosition", currentRoot)
             hoverBodyPos.Position = targetPos
             hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            hoverBodyPos.P = 10000
+            hoverBodyPos.P = 20000
             
             hoverBodyGyro = Instance.new("BodyGyro", currentRoot)
             hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
