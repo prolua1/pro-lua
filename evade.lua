@@ -377,68 +377,80 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 7. TP Cứu Lén Lút & Tự Động Kích Hoạt Cứu (Auto Interact Prompt)
+-- 7. Auto Độn Thổ Cứu Lén Lút (Phiên bản siêu mượt, không giật lag)
+local autoStealthReviveEnabled = false
+local autoStealthConn
+
 ToggleTPDownedBtn.MouseButton1Click:Connect(function()
-    local char = player.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local rootPart = char.HumanoidRootPart
-    local safePos = rootPart.CFrame -- Lưu vị trí ẩn nấp hiện tại
+    autoStealthReviveEnabled = not autoStealthReviveEnabled
+    ToggleTPDownedBtn.BackgroundColor3 = autoStealthReviveEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
+    ToggleTPDownedBtn.Text = "Auto Độn Thổ Cứu: " .. (autoStealthReviveEnabled and "BẬT" or "TẮT")
     
-    local targetFound = false
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player and p.Character then
-            local targetChar = p.Character
-            local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
-            local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
-            
-            -- Kiểm tra trạng thái bị hạ gục
-            local isDowned = targetChar:FindFirstChild("Downed") or (humanoid and humanoid.Health <= 0)
-            
-            if isDowned and targetRoot then
-                targetFound = true
+    if autoStealthReviveEnabled then
+        autoStealthConn = RunService.Heartbeat:Connect(function()
+            -- Dùng cơ chế chống tràn nhịp để mỗi 1.5 giây mới quét 1 lần, tránh bị giật khung hình
+            if tick() % 1.5 < 0.1 then
+                local char = player.Character
+                if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                local rootPart = char.HumanoidRootPart
                 
-                -- Bay ra vị trí đồng đội ngay lập tức
-                rootPart.CFrame = targetRoot.CFrame + Vector3.new(0, 2, 0)
-                task.wait(0.1)
-                
-                -- Tự động tìm và kích hoạt ProximityPrompt hoặc Prompt cứu của game
-                local triggered = false
-                for _, obj in pairs(targetChar:GetDescendants()) do
-                    if obj:IsA("ProximityPrompt") then
-                        -- Kích hoạt trực tiếp prompt cứu của game từ xa/ngay lập tức
-                        pcall(function()
-                            fireproximityprompt(obj)
-                            triggered = true
-                        end)
-                    end
-                end
-                
-                -- Nếu game dùng cơ chế tương tác dạng bấm hoặc qua sự kiện khác
-                if not triggered then
-                    -- Thử kích hoạt các RemoteEvent liên quan đến Revive trong ReplicatedStorage nếu có
-                    pcall(function()
-                        local events = game:GetService("ReplicatedStorage"):FindFirstChild("Events", true)
-                        if events then
-                            for _, ev in pairs(events:GetChildren()) do
-                                if string.lower(ev.Name):find("revive") or string.lower(ev.Name):find("rescue") then
-                                    ev:FireServer(p)
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= player and p.Character then
+                        local targetChar = p.Character
+                        local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
+                        local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+                        
+                        local isDowned = targetChar:FindFirstChild("Downed") or (humanoid and humanoid.Health <= 0)
+                        
+                        if isDowned and targetRoot then
+                            -- Lưu tạm vị trí hiện tại
+                            local safePos = rootPart.CFrame
+                            
+                            -- Tắt va chạm tạm thời
+                            for _, part in pairs(char:GetDescendants()) do
+                                if part:IsA("BasePart") then part.CanCollide = false end
+                            end
+                            
+                            -- Độn thổ xuống dưới chân người bị gục
+                            rootPart.CFrame = targetRoot.CFrame - Vector3.new(0, 4, 0)
+                            
+                            -- Kích hoạt cứu nhanh
+                            local triggered = false
+                            for _, obj in pairs(targetChar:GetDescendants()) do
+                                if obj:IsA("ProximityPrompt") then
+                                    pcall(function()
+                                        fireproximityprompt(obj)
+                                        triggered = true
+                                    end)
                                 end
                             end
+                            
+                            if not triggered then
+                                pcall(function()
+                                    local events = game:GetService("ReplicatedStorage"):FindFirstChild("Events", true)
+                                    if events then
+                                        for _, ev in pairs(events:GetChildren()) do
+                                            if string.lower(ev.Name):find("revive") or string.lower(ev.Name):find("rescue") then
+                                                ev:FireServer(p)
+                                            end
+                                        end
+                                    end
+                                end)
+                            end
+                            
+                            task.wait(0.2)
+                            -- Trở về vị trí cũ an toàn mượt mà
+                            rootPart.CFrame = safePos
+                            break
                         end
-                    end)
+                    end
                 end
-                
-                task.wait(0.3) -- Chờ một tí để hệ thống nhận diện lệnh cứu
-                
-                -- Lập tức dịch chuyển trở lại vị trí ẩn nấp ban đầu an toàn
-                rootPart.CFrame = safePos
-                break
             end
+        end)
+    else
+        if autoStealthConn then
+            autoStealthConn:Disconnect()
         end
-    end
-    
-    if not targetFound then
-        print("Không tìm thấy ai đang gục trên bản đồ để cứu!")
     end
 end)
 -- mới tự làm code thôi --
