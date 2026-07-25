@@ -381,7 +381,7 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 7. Auto TP Dưới Chân (Tự động vô hiệu hóa Void Mode khi đi cứu, cứu xong bật lại Void Mode như cũ)
+-- 7. Auto TP Dưới Chân (Cứu mượt mà, đủ thời gian và tàng hình tuyệt đối trước mắt người khác)
 ToggleTPDownedBtn.MouseButton1Click:Connect(function()
     autoStealthReviveEnabled = not autoStealthReviveEnabled
     ToggleTPDownedBtn.BackgroundColor3 = autoStealthReviveEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
@@ -407,17 +407,24 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                             if isDowned and targetRoot then
                                 foundTarget = true
                                 
-                                -- BƯỚC 1: Nếu Void Mode đang bật, tạm thời ngắt bỏ BodyPosition/BodyGyro để nó thả lỏng nhân vật ra
+                                -- Tạm ngắt Void Mode nếu đang bật để tránh xung đột
                                 local wasVoidActive = voidEnabled
                                 if wasVoidActive then
                                     if hoverBodyPos then hoverBodyPos:Destroy() end
                                     if hoverBodyGyro then hoverBodyGyro:Destroy() end
                                 end
                                 
-                                -- BƯỚC 2: Teleport ĐÚNG VỊ TRÍ DƯỚI CHÂN người bị hạ gục
+                                -- 1. Tàng hình tạm thời (Ẩn model nhân vật để người khác không nhìn thấy bạn tele)
+                                for _, part in pairs(char:GetDescendants()) do
+                                    if part:IsA("BasePart") or part:IsA("Decal") then
+                                        part.Transparency = 1
+                                    end
+                                end
+                                
+                                -- 2. Teleport ĐÚNG VỊ TRÍ DƯỚI CHÂN người bị hạ gục
                                 rootPart.CFrame = targetRoot.CFrame - Vector3.new(0, 4, 0)
                                 
-                                -- Kích hoạt tương tác cứu (ProximityPrompt)
+                                -- 3. Kích hoạt và giữ tương tác cứu (ProximityPrompt)
                                 for _, obj in pairs(targetChar:GetDescendants()) do
                                     if obj:IsA("ProximityPrompt") then
                                         pcall(function()
@@ -426,16 +433,26 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                                     end
                                 end
                                 
-                                task.wait(0.3) -- Chờ thực hiện lệnh cứu xong
+                                -- 4. ĐỢI ĐỦ THỜI GIAN ĐỂ HỆ THỐNG CỨU XONG (1.5 giây)
+                                task.wait(1.5)
                                 
-                                -- BƯỚC 3: Trở về vị trí an toàn ban đầu
+                                -- 5. Trở về vị trí an toàn ban đầu
                                 rootPart.CFrame = safePos
                                 
-                                -- BƯỚC 4: Nếu lúc đầu bạn đang bật Void Mode, tự động thiết lập lại trạng thái Void Mode ngay tại vị trí an toàn đó
+                                -- 6. Hiện lại nhân vật bình thường sau khi đã về chỗ cũ
+                                for _, part in pairs(char:GetDescendants()) do
+                                    if part:IsA("BasePart") then
+                                        part.Transparency = (part.Name == "HumanoidRootPart") and 1 or 0
+                                    elseif part:IsA("Decal") then
+                                        part.Transparency = 0
+                                    end
+                                end
+                                
+                                -- Khôi phục lại Void Mode nếu lúc đầu đang bật
                                 if wasVoidActive then
                                     local targetPos = rootPart.Position - Vector3.new(0, 15, 0)
                                     rootPart.CFrame = CFrame.new(targetPos)
-                                    originalPos = safePos -- Cập nhật lại vị trí gốc mới
+                                    originalPos = safePos
                                     
                                     hoverBodyPos = Instance.new("BodyPosition", rootPart)
                                     hoverBodyPos.Position = targetPos
@@ -453,7 +470,7 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                     end
                     
                     if not foundTarget then
-                        task.wait(1) -- Nếu không có ai gục thì nghỉ 1 giây quét lại
+                        task.wait(1)
                     end
                 end
                 task.wait(0.5)
