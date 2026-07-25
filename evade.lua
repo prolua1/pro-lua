@@ -381,11 +381,14 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 7. Auto TP Cứu An Toàn (Đồng bộ chuẩn xác theo trục X, Y, Z của người bị gục)
+-- 7. Auto TP Cứu An Toàn (Đã sửa lỗi cú pháp, tele cực mượt và chuẩn xác)
+local autoStealthReviveEnabled = false
+local autoStealthConn
+
 ToggleTPDownedBtn.MouseButton1Click:Connect(function()
     autoStealthReviveEnabled = not autoStealthReviveEnabled
     ToggleTPDownedBtn.BackgroundColor3 = autoStealthReviveEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
-    ToggleTPDownedBtn.Text = "Auto TP Dưới Chân: " + (autoStealthReviveEnabled and "BẬT" or "TẮT") -- (Sửa dấu + thành dấu .. nếu cần, ở đây viết chuẩn Lua)
+    ToggleTPDownedBtn.Text = "Auto TP Dưới Chân: " .. (autoStealthReviveEnabled and "BẬT" or "TẮT")
     
     if autoStealthReviveEnabled then
         autoStealthConn = task.spawn(function()
@@ -413,7 +416,7 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                                     if hoverBodyGyro then hoverBodyGyro:Destroy() end
                                 end
                                 
-                                -- 1. Tàng hình hoàn toàn và tắt va chạm toàn bộ các phần trên cơ thể
+                                -- 1. Tàng hình hoàn toàn và tắt va chạm
                                 for _, part in pairs(char:GetDescendants()) do
                                     if part:IsA("BasePart") then
                                         part.Transparency = 1
@@ -423,13 +426,10 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                                     end
                                 end
                                 
-                                -- 2. Dịch chuyển chuẩn xác: Khớp hoàn toàn tọa độ X và Z của nạn nhân, 
-                                -- đồng thời dịch chuyển lệch một chút theo trục Z/X phía sau lưng họ (tránh đè lên hitbox chính) 
-                                -- và hạ thấp/nâng lên một khoảng nhỏ theo trục Y để chui ngầm/nằm ẩn.
-                                local offsetPos = targetRoot.CFrame * CFrame.new(0, -1, 2) -- Lùi về phía sau 2 đơn vị, thấp xuống 1 đơn vị so với tâm ngã
-                                rootPart.CFrame = offsetPos
+                                -- 2. Dịch chuyển ngay lập tức bám theo tọa độ của người bị gục (lùi về phía sau 2 đơn vị, thấp xuống 1 đơn vị)
+                                rootPart.CFrame = targetRoot.CFrame * CFrame.new(0, -1, 2)
                                 
-                                -- 3. Gửi tín hiệu giữ phím cứu (ProximityPrompt) liên tục trong 1.5 giây
+                                -- 3. Gửi tín hiệu giữ phím cứu liên tục trong 1.5 giây
                                 local startTime = tick()
                                 while tick() - startTime < 1.5 and autoStealthReviveEnabled do
                                     for _, obj in pairs(targetChar:GetDescendants()) do
@@ -440,7 +440,7 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                                     task.wait(0.2)
                                 end
                                 
-                                -- 4. Cứu xong: Bay vút lên trời cao (trên không trung 30 đơn vị) để tránh tuyệt đối Nextbot dưới đất
+                                -- 4. Cứu xong: Bay vút lên trời cao (30 đơn vị) tránh Nextbot
                                 rootPart.CFrame = targetRoot.CFrame + Vector3.new(0, 30, 0)
                                 
                                 -- 5. Hiện lại hình dáng nhân vật và bật lại va chạm
