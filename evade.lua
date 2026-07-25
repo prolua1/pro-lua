@@ -288,7 +288,7 @@ ToggleNoclipBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 4. Tàng Hình (Invisibility)
+-- 4. Tàng Hình (Invisibility - Phiên bản tối ưu chống ghi đè)
 local invisEnabled = false
 ToggleInvisBtn.MouseButton1Click:Connect(function()
     invisEnabled = not invisEnabled
@@ -299,11 +299,18 @@ ToggleInvisBtn.MouseButton1Click:Connect(function()
     if char then
         for _, part in pairs(char:GetDescendants()) do
             if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                -- Ẩn phần thân thể, tay chân, đầu
+                part.LocalTransparencyModifier = invisEnabled and 1 or 0
                 part.Transparency = invisEnabled and 1 or 0
-            end
-            if part:IsA("Accessory") then
+            elseif part:IsA("Decal") or part:IsA("Texture") then
+                -- Ẩn mặt và các hình dán
+                part.Transparency = invisEnabled and 1 or 0
+            elseif part:IsA("Accessory") then
                 local handle = part:FindFirstChild("Handle")
-                if handle then handle.Transparency = invisEnabled and 1 or 0 end
+                if handle then
+                    handle.LocalTransparencyModifier = invisEnabled and 1 or 0
+                    handle.Transparency = invisEnabled and 1 or 0
+                end
             end
         end
     end
