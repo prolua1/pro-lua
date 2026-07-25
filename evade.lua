@@ -381,7 +381,7 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 7. Auto TP Cứu An Toàn (Đã sửa lỗi cú pháp, tele cực mượt và chuẩn xác)
+-- 7. Auto TP Cứu Siêu Tốc (Quét trực tiếp ProximityPrompt cứu người trên toàn bản đồ)
 local autoStealthReviveEnabled = false
 local autoStealthConn
 
@@ -396,85 +396,89 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                 local char = player.Character
                 if char and char:FindFirstChild("HumanoidRootPart") then
                     local rootPart = char.HumanoidRootPart
+                    local targetPrompt = nil
+                    local targetRootPart = nil
                     
-                    local foundTarget = false
-                    for _, p in pairs(Players:GetPlayers()) do
-                        if p ~= player and p.Character then
-                            local targetChar = p.Character
-                            local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
-                            local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
-                            
-                            local isDowned = targetChar:FindFirstChild("Downed") or (humanoid and humanoid.Health <= 0)
-                            
-                            if isDowned and targetRoot then
-                                foundTarget = true
-                                
-                                -- Tạm ngắt Void Mode để tránh xung đột
-                                local wasVoidActive = voidEnabled
-                                if wasVoidActive then
-                                    if hoverBodyPos then hoverBodyPos:Destroy() end
-                                    if hoverBodyGyro then hoverBodyGyro:Destroy() end
+                    -- Quét toàn bộ Workspace để tìm ProximityPrompt của hành động cứu
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if obj:IsA("ProximityPrompt") then
+                            local text = string.lower(obj.ActionText .. " " .. obj.ObjectText)
+                            -- Tìm prompt có chứa từ khóa cứu người (Revive / Help / Rescue)
+                            if string.find(text, "revive") or string.find(text, "help") or string.find(text, "rescue") then
+                                local parentModel = obj.Parent
+                                while parentModel and not parentModel:IsA("Model") do
+                                    parentModel = parentModel.Parent
                                 end
                                 
-                                -- 1. Tàng hình hoàn toàn và tắt va chạm
-                                for _, part in pairs(char:GetDescendants()) do
-                                    if part:IsA("BasePart") then
-                                        part.Transparency = 1
-                                        part.CanCollide = false
-                                    elseif part:IsA("Decal") then
-                                        part.Transparency = 1
+                                if parentModel and parentModel ~= char then
+                                    local pRoot = parentModel:FindFirstChild("HumanoidRootPart") or parentModel:FindFirstChild("Torso")
+                                    if pRoot then
+                                        targetPrompt = obj
+                                        targetRootPart = pRoot
+                                        break
                                     end
                                 end
-                                
-                                -- 2. Dịch chuyển ngay lập tức bám theo tọa độ của người bị gục (lùi về phía sau 2 đơn vị, thấp xuống 1 đơn vị)
-                                rootPart.CFrame = targetRoot.CFrame * CFrame.new(0, -1, 2)
-                                
-                                -- 3. Gửi tín hiệu giữ phím cứu liên tục trong 1.5 giây
-                                local startTime = tick()
-                                while tick() - startTime < 1.5 and autoStealthReviveEnabled do
-                                    for _, obj in pairs(targetChar:GetDescendants()) do
-                                        if obj:IsA("ProximityPrompt") then
-                                            pcall(function() fireproximityprompt(obj) end)
-                                        end
-                                    end
-                                    task.wait(0.2)
-                                end
-                                
-                                -- 4. Cứu xong: Bay vút lên trời cao (30 đơn vị) tránh Nextbot
-                                rootPart.CFrame = targetRoot.CFrame + Vector3.new(0, 30, 0)
-                                
-                                -- 5. Hiện lại hình dáng nhân vật và bật lại va chạm
-                                for _, part in pairs(char:GetDescendants()) do
-                                    if part:IsA("BasePart") then
-                                        part.Transparency = (part.Name == "HumanoidRootPart") and 1 or 0
-                                        part.CanCollide = true
-                                    elseif part:IsA("Decal") then
-                                        part.Transparency = 0
-                                    end
-                                end
-                                
-                                -- Khôi phục Void Mode nếu lúc đầu bật
-                                if wasVoidActive then
-                                    local targetPos = rootPart.Position - Vector3.new(0, 15, 0)
-                                    originalPos = rootPart.CFrame
-                                    
-                                    hoverBodyPos = Instance.new("BodyPosition", rootPart)
-                                    hoverBodyPos.Position = targetPos
-                                    hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-                                    hoverBodyPos.P = 20000
-                                    
-                                    hoverBodyGyro = Instance.new("BodyGyro", rootPart)
-                                    hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-                                    hoverBodyGyro.CFrame = rootPart.CFrame
-                                end
-                                
-                                break
                             end
                         end
                     end
                     
-                    if not foundTarget then
-                        task.wait(1)
+                    if targetPrompt and targetRootPart then
+                        -- Tạm ngắt Void Mode để tránh xung đột
+                        local wasVoidActive = voidEnabled
+                        if wasVoidActive then
+                            if hoverBodyPos then hoverBodyPos:Destroy() end
+                            if hoverBodyGyro then hoverBodyGyro:Destroy() end
+                        end
+                        
+                        -- 1. Tàng hình và tắt va chạm
+                        for _, part in pairs(char:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.Transparency = 1
+                                part.CanCollide = false
+                            elseif part:IsA("Decal") then
+                                part.Transparency = 1
+                            end
+                        end
+                        
+                        -- 2. Teleport ngay lập tức đến cạnh người cần cứu
+                        rootPart.CFrame = targetRootPart.CFrame * CFrame.new(0, -1, 2)
+                        
+                        -- 3. Kích hoạt và giữ phím ProximityPrompt liên tục trong 1.5 giây
+                        local startTime = tick()
+                        while tick() - startTime < 1.5 and autoStealthReviveEnabled do
+                            pcall(function()
+                                fireproximityprompt(targetPrompt)
+                            end)
+                            task.wait(0.2)
+                        end
+                        
+                        -- 4. Cứu xong: Bay vút lên trời cao (30 đơn vị) tránh Nextbot
+                        rootPart.CFrame = targetRootPart.CFrame + Vector3.new(0, 30, 0)
+                        
+                        -- 5. Hiện lại nhân vật
+                        for _, part in pairs(char:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.Transparency = (part.Name == "HumanoidRootPart") and 1 or 0
+                                part.CanCollide = true
+                            elseif part:IsA("Decal") then
+                                part.Transparency = 0
+                            end
+                        end
+                        
+                        -- Khôi phục Void Mode nếu lúc đầu bật
+                        if wasVoidActive then
+                            local targetPos = rootPart.Position - Vector3.new(0, 15, 0)
+                            originalPos = rootPart.CFrame
+                            
+                            hoverBodyPos = Instance.new("BodyPosition", rootPart)
+                            hoverBodyPos.Position = targetPos
+                            hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                            hoverBodyPos.P = 20000
+                            
+                            hoverBodyGyro = Instance.new("BodyGyro", rootPart)
+                            hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+                            hoverBodyGyro.CFrame = rootPart.CFrame
+                        end
                     end
                 end
                 task.wait(0.5)
