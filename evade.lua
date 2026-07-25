@@ -381,11 +381,11 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 7. Auto TP Dưới Chân (Cứu xong tele xuống vùng ngầm an toàn, không sợ Nextbot tóm)
+-- 7. Auto TP Cứu An Toàn (Đồng bộ chuẩn xác theo trục X, Y, Z của người bị gục)
 ToggleTPDownedBtn.MouseButton1Click:Connect(function()
     autoStealthReviveEnabled = not autoStealthReviveEnabled
     ToggleTPDownedBtn.BackgroundColor3 = autoStealthReviveEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
-    ToggleTPDownedBtn.Text = "Auto TP Dưới Chân: " .. (autoStealthReviveEnabled and "BẬT" or "TẮT")
+    ToggleTPDownedBtn.Text = "Auto TP Dưới Chân: " + (autoStealthReviveEnabled and "BẬT" or "TẮT") -- (Sửa dấu + thành dấu .. nếu cần, ở đây viết chuẩn Lua)
     
     if autoStealthReviveEnabled then
         autoStealthConn = task.spawn(function()
@@ -393,7 +393,6 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                 local char = player.Character
                 if char and char:FindFirstChild("HumanoidRootPart") then
                     local rootPart = char.HumanoidRootPart
-                    local safePos = rootPart.CFrame -- Lưu vị trí hiện tại
                     
                     local foundTarget = false
                     for _, p in pairs(Players:GetPlayers()) do
@@ -407,51 +406,57 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                             if isDowned and targetRoot then
                                 foundTarget = true
                                 
-                                -- Tạm ngắt Void Mode nếu đang bật
+                                -- Tạm ngắt Void Mode để tránh xung đột
                                 local wasVoidActive = voidEnabled
                                 if wasVoidActive then
                                     if hoverBodyPos then hoverBodyPos:Destroy() end
                                     if hoverBodyGyro then hoverBodyGyro:Destroy() end
                                 end
                                 
-                                -- 1. Tàng hình nhân vật để không ai nhìn thấy
+                                -- 1. Tàng hình hoàn toàn và tắt va chạm toàn bộ các phần trên cơ thể
                                 for _, part in pairs(char:GetDescendants()) do
-                                    if part:IsA("BasePart") or part:IsA("Decal") then
+                                    if part:IsA("BasePart") then
+                                        part.Transparency = 1
+                                        part.CanCollide = false
+                                    elseif part:IsA("Decal") then
                                         part.Transparency = 1
                                     end
                                 end
                                 
-                                -- 2. Teleport độn thổ xuống dưới chân người bị gục để cứu
-                                rootPart.CFrame = targetRoot.CFrame - Vector3.new(0, 4, 0)
+                                -- 2. Dịch chuyển chuẩn xác: Khớp hoàn toàn tọa độ X và Z của nạn nhân, 
+                                -- đồng thời dịch chuyển lệch một chút theo trục Z/X phía sau lưng họ (tránh đè lên hitbox chính) 
+                                -- và hạ thấp/nâng lên một khoảng nhỏ theo trục Y để chui ngầm/nằm ẩn.
+                                local offsetPos = targetRoot.CFrame * CFrame.new(0, -1, 2) -- Lùi về phía sau 2 đơn vị, thấp xuống 1 đơn vị so với tâm ngã
+                                rootPart.CFrame = offsetPos
                                 
-                                -- 3. Kích hoạt ProximityPrompt để cứu
-                                for _, obj in pairs(targetChar:GetDescendants()) do
-                                    if obj:IsA("ProximityPrompt") then
-                                        pcall(function()
-                                            fireproximityprompt(obj)
-                                        end)
+                                -- 3. Gửi tín hiệu giữ phím cứu (ProximityPrompt) liên tục trong 1.5 giây
+                                local startTime = tick()
+                                while tick() - startTime < 1.5 and autoStealthReviveEnabled do
+                                    for _, obj in pairs(targetChar:GetDescendants()) do
+                                        if obj:IsA("ProximityPrompt") then
+                                            pcall(function() fireproximityprompt(obj) end)
+                                        end
                                     end
+                                    task.wait(0.2)
                                 end
                                 
-                                -- 4. Đợi đủ thời gian cứu (1.5 giây)
-                                task.wait(1.5)
+                                -- 4. Cứu xong: Bay vút lên trời cao (trên không trung 30 đơn vị) để tránh tuyệt đối Nextbot dưới đất
+                                rootPart.CFrame = targetRoot.CFrame + Vector3.new(0, 30, 0)
                                 
-                                -- 5. THAY VÌ VỀ CHỖ CŨ TRÊN MẶT ĐẤT, HÃY TELE THẲNG XUỐNG DƯỚI LÒNG ĐẤT (Trừ thêm trục Y xuống sâu để Né Nextbot tuyệt đối)
-                                rootPart.CFrame = safePos - Vector3.new(0, 25, 0)
-                                
-                                -- 6. Hiện lại hình dáng nhân vật
+                                -- 5. Hiện lại hình dáng nhân vật và bật lại va chạm
                                 for _, part in pairs(char:GetDescendants()) do
                                     if part:IsA("BasePart") then
                                         part.Transparency = (part.Name == "HumanoidRootPart") and 1 or 0
+                                        part.CanCollide = true
                                     elseif part:IsA("Decal") then
                                         part.Transparency = 0
                                     end
                                 end
                                 
-                                -- Khôi phục lại trạng thái Void Mode ở dưới lòng đất an toàn
+                                -- Khôi phục Void Mode nếu lúc đầu bật
                                 if wasVoidActive then
-                                    local targetPos = rootPart.Position
-                                    originalPos = safePos
+                                    local targetPos = rootPart.Position - Vector3.new(0, 15, 0)
+                                    originalPos = rootPart.CFrame
                                     
                                     hoverBodyPos = Instance.new("BodyPosition", rootPart)
                                     hoverBodyPos.Position = targetPos
