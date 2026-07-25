@@ -377,7 +377,7 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 7. Auto TP Dưới Chân Người Bị Gục (Chính xác, ổn định và không giật)
+-- 7. Auto TP Dưới Chân Người Bị Gục (Hoạt động mượt mà, không xung đột)
 local autoStealthReviveEnabled = false
 local autoStealthConn
 
@@ -407,6 +407,12 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                             if isDowned and targetRoot then
                                 foundTarget = true
                                 
+                                -- Tạm thời vô hiệu hóa BodyPosition của Void Mode nếu nó đang giữ chân bạn
+                                local activeBodyPos = rootPart:FindFirstChildOfClass("BodyPosition")
+                                if activeBodyPos then
+                                    activeBodyPos.MaxForce = Vector3.new(0, 0, 0)
+                                end
+                                
                                 -- Teleport ĐÚNG VỊ TRÍ DƯỚI CHÂN người bị hạ gục (thấp hơn 4 đơn vị theo trục Y)
                                 rootPart.CFrame = targetRoot.CFrame - Vector3.new(0, 4, 0)
                                 
@@ -423,6 +429,12 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                                 
                                 -- Trở về vị trí an toàn ban đầu
                                 rootPart.CFrame = safePos
+                                
+                                -- Bật lại lực giữ của Void Mode nếu bạn đang bật Void Mode
+                                if activeBodyPos then
+                                    activeBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                                end
+                                
                                 break
                             end
                         end
