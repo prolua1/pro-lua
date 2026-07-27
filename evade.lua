@@ -1,8 +1,9 @@
--- // HUB TUẤN LỌ - PRO EDITION (KÈM KÉO THẢ GIAO DIỆN) //
+-- // HUB TUẤN LỌ - PRO EDITION (FULL TÍNH NĂNG + VOID AFK THÔNG MINH) //
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
 
 local player = Players.LocalPlayer
 
@@ -32,7 +33,7 @@ UICornerBtn.Parent = ToggleBtn
 
 -- Khung chính của Hub
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 260, 0, 320)
+MainFrame.Size = UDim2.new(0, 260, 0, 370)
 MainFrame.Position = UDim2.new(0, 120, 0, 100)
 MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MainFrame.Visible = true
@@ -42,7 +43,7 @@ local UICornerMain = Instance.new("UICorner")
 UICornerMain.CornerRadius = UDim.new(0, 8)
 UICornerMain.Parent = MainFrame
 
--- Tiêu đề Hub (Đồng thời là thanh để cầm kéo Hub)
+-- Tiêu đề Hub
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -59,7 +60,7 @@ UICornerTitle.Parent = Title
 -- ==================== HÀM HỖ TRỢ KÉO THẢ (DRAG) ====================
 local function MakeDraggable(guiObject, dragTarget)
     dragTarget = dragTarget or guiObject
-    local dragging, dragInput, dragStart, startPos
+    local dragging, dragStart, startPos
 
     dragTarget.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -88,11 +89,10 @@ local function MakeDraggable(guiObject, dragTarget)
     end)
 end
 
--- Áp dụng tính năng kéo thả cho nút tròn "TL" và khung chính Hub (cầm vào thanh tiêu đề để kéo)
 MakeDraggable(ToggleBtn)
 MakeDraggable(MainFrame, Title)
 
--- Thanh chuyển Tab (Tab Buttons)
+-- Thanh chuyển Tab
 local TabBar = Instance.new("Frame")
 TabBar.Size = UDim2.new(1, -10, 0, 30)
 TabBar.Position = UDim2.new(0, 5, 0, 40)
@@ -125,7 +125,7 @@ local Tab1Container = Instance.new("ScrollingFrame")
 Tab1Container.Size = UDim2.new(1, -10, 1, -80)
 Tab1Container.Position = UDim2.new(0, 5, 0, 75)
 Tab1Container.BackgroundTransparency = 1
-Tab1Container.CanvasSize = UDim2.new(0, 0, 0, 230)
+Tab1Container.CanvasSize = UDim2.new(0, 0, 0, 280)
 Tab1Container.ScrollBarThickness = 4
 Tab1Container.Parent = MainFrame
 
@@ -134,7 +134,7 @@ local Tab2Container = Instance.new("ScrollingFrame")
 Tab2Container.Size = UDim2.new(1, -10, 1, -80)
 Tab2Container.Position = UDim2.new(0, 5, 0, 75)
 Tab2Container.BackgroundTransparency = 1
-Tab2Container.CanvasSize = UDim2.new(0, 0, 0, 100)
+Tab2Container.CanvasSize = UDim2.new(0, 0, 0, 150)
 Tab2Container.ScrollBarThickness = 4
 Tab2Container.Visible = false
 Tab2Container.Parent = MainFrame
@@ -154,7 +154,6 @@ Tab2Btn.MouseButton1Click:Connect(function()
     Tab1Btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 end)
 
--- Hàm tạo nút bấm chung
 local function CreateButton(name, posY, parentFrame)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, 36)
@@ -178,11 +177,12 @@ local ToggleFlyBtn = CreateButton("Tính Năng Bay", 44, Tab1Container)
 local ToggleNoclipBtn = CreateButton("Xuyên Tường", 88, Tab1Container)
 local ToggleInvisBtn = CreateButton("Tàng Hình", 132, Tab1Container)
 local ToggleSpeedBtn = CreateButton("Tốc Độ Chạy", 176, Tab1Container)
+local ToggleSummerBtn = CreateButton("Lụm Điểm Mùa Hè", 220, Tab1Container)
 
 -- Tạo nút Tab 2
 local ToggleVoidBtn = CreateButton("Void Mode", 0, Tab2Container)
 local ToggleTPDownedBtn = CreateButton("TP Người Bị Hạ", 44, Tab2Container)
-ToggleTPDownedBtn.Text = "TP Người Bị Hạ"
+local ToggleDodgeNetbotBtn = CreateButton("Auto Né Netbot", 88, Tab2Container)
 
 ToggleBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
@@ -190,7 +190,7 @@ end)
 
 -- ==================== PHẦN LOGIC TÍNH NĂNG ====================
 
--- 1. Lướt Phím Z (Z-Dash)
+-- 1. Lướt Phím Z
 local evadeEnabled = false
 ToggleEvadeBtn.MouseButton1Click:Connect(function()
     evadeEnabled = not evadeEnabled
@@ -211,7 +211,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- 2. Tính Năng Bay (Fly)
+-- 2. Tính Năng Bay
 local flyEnabled = false
 local flySpeed = 50
 local bg, bv
@@ -256,7 +256,7 @@ ToggleFlyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Xuyên Tường (Noclip)
+-- 3. Xuyên Tường
 local noclipEnabled = false
 local noclipConn
 ToggleNoclipBtn.MouseButton1Click:Connect(function()
@@ -288,7 +288,7 @@ ToggleNoclipBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 4. Tàng Hình (Invisibility - Phiên bản tối ưu chống ghi đè)
+-- 4. Tàng Hình
 local invisEnabled = false
 ToggleInvisBtn.MouseButton1Click:Connect(function()
     invisEnabled = not invisEnabled
@@ -299,11 +299,9 @@ ToggleInvisBtn.MouseButton1Click:Connect(function()
     if char then
         for _, part in pairs(char:GetDescendants()) do
             if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                -- Ẩn phần thân thể, tay chân, đầu
                 part.LocalTransparencyModifier = invisEnabled and 1 or 0
                 part.Transparency = invisEnabled and 1 or 0
             elseif part:IsA("Decal") or part:IsA("Texture") then
-                -- Ẩn mặt và các hình dán
                 part.Transparency = invisEnabled and 1 or 0
             elseif part:IsA("Accessory") then
                 local handle = part:FindFirstChild("Handle")
@@ -316,7 +314,7 @@ ToggleInvisBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 5. Tốc Độ Chạy (Speed)
+-- 5. Tốc Độ Chạy
 local speedEnabled = false
 local speedConn
 ToggleSpeedBtn.MouseButton1Click:Connect(function()
@@ -340,55 +338,129 @@ ToggleSpeedBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Biến trạng thái chung để chia sẻ giữa 2 tính năng
+-- 6. Lụm Điểm Mùa Hè
+local summerEnabled = false
+local summerConn
+ToggleSummerBtn.MouseButton1Click:Connect(function()
+    summerEnabled = not summerEnabled
+    ToggleSummerBtn.BackgroundColor3 = summerEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
+    ToggleSummerBtn.Text = "Lụm Điểm Mùa Hè: " .. (summerEnabled and "BẬT" or "TẮT")
+    
+    if summerEnabled then
+        summerConn = task.spawn(function()
+            while summerEnabled do
+                local char = player.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local rootPart = char.HumanoidRootPart
+                    local foundAny = false
+                    
+                    for _, obj in pairs(Workspace:GetDescendants()) do
+                        if not summerEnabled then break end
+                        
+                        local targetPart = nil
+                        if obj:IsA("BasePart") then
+                            targetPart = obj
+                        elseif obj:IsA("Model") then
+                            targetPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                        end
+                        
+                        if targetPart then
+                            local nameLower = string.lower(obj.Name)
+                            if string.find(nameLower, "summer") or string.find(nameLower, "point") or string.find(nameLower, "token") or string.find(nameLower, "coin") or string.find(nameLower, "item") then
+                                foundAny = true
+                                rootPart.CFrame = targetPart.CFrame + Vector3.new(0, 1, 0)
+                                
+                                for _, prompt in pairs(obj:GetDescendants()) do
+                                    if prompt:IsA("ProximityPrompt") then
+                                        pcall(function() fireproximityprompt(prompt) end)
+                                    end
+                                end
+                                task.wait(0.25)
+                            end
+                        end
+                    end
+                    
+                    if not foundAny then
+                        task.wait(1)
+                    end
+                end
+                task.wait(0.2)
+            end
+        end)
+    else
+        summerEnabled = false
+    end
+end)
+
+-- Biến trạng thái chung Void Mode & Auto Re-apply khi đổi map/respawn
 local voidEnabled = false
 local hoverBodyPos, hoverBodyGyro, originalPos
-local autoStealthReviveEnabled = false
-local autoStealthConn
+local respawnVoidConn
 
--- 6. Void Mode (Đã tích hợp cơ chế tạm nghỉ khi Auto Cứu làm việc)
+local function ApplyVoidMode()
+    local char = player.Character
+    if not char then return end
+    local currentRoot = char:WaitForChild("HumanoidRootPart", 5)
+    
+    if voidEnabled and currentRoot then
+        task.wait(0.5) -- Chờ map load ổn định
+        originalPos = currentRoot.CFrame
+        -- Tăng độ sâu xuống -35 studs (lòng đất cực kỳ sâu và an toàn)
+        local targetPos = currentRoot.Position - Vector3.new(0, 45, 0)
+        currentRoot.CFrame = CFrame.new(targetPos)
+        
+        if hoverBodyPos then hoverBodyPos:Destroy() end
+        if hoverBodyGyro then hoverBodyGyro:Destroy() end
+        
+        hoverBodyPos = Instance.new("BodyPosition", currentRoot)
+        hoverBodyPos.Position = targetPos
+        hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        hoverBodyPos.P = 20000
+        
+        hoverBodyGyro = Instance.new("BodyGyro", currentRoot)
+        hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+        hoverBodyGyro.CFrame = currentRoot.CFrame
+    end
+end
+
+-- 7. Void Mode (Tăng độ sâu -35 và tự động bật lại khi qua map mới)
 ToggleVoidBtn.MouseButton1Click:Connect(function()
     voidEnabled = not voidEnabled
     ToggleVoidBtn.BackgroundColor3 = voidEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
     ToggleVoidBtn.Text = "Void Mode: " .. (voidEnabled and "BẬT" or "TẮT")
     
-    local char = player.Character
-    if not char then return end
-    local currentRoot = char:FindFirstChild("HumanoidRootPart")
-    
     if voidEnabled then
-        if currentRoot then
-            originalPos = currentRoot.CFrame
-            local targetPos = currentRoot.Position - Vector3.new(0, 15, 0)
-            currentRoot.CFrame = CFrame.new(targetPos)
-            
-            hoverBodyPos = Instance.new("BodyPosition", currentRoot)
-            hoverBodyPos.Position = targetPos
-            hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            hoverBodyPos.P = 20000
-            
-            hoverBodyGyro = Instance.new("BodyGyro", currentRoot)
-            hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-            hoverBodyGyro.CFrame = currentRoot.CFrame
+        ApplyVoidMode()
+        -- Lắng nghe sự kiện đổi map / hồi sinh để tự động kéo xuống Void lại cho AFK
+        if not respawnVoidConn then
+            respawnVoidConn = player.CharacterAdded:Connect(function()
+                if voidEnabled then
+                    task.defer(ApplyVoidMode)
+                end
+            end)
         end
     else
         if hoverBodyPos then hoverBodyPos:Destroy() end
         if hoverBodyGyro then hoverBodyGyro:Destroy() end
         
-        if currentRoot and originalPos then
-            currentRoot.CFrame = originalPos + Vector3.new(0, 3, 0)
+        local char = player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") and originalPos then
+            char.HumanoidRootPart.CFrame = originalPos + Vector3.new(0, 3, 0)
+        end
+        if respawnVoidConn then
+            respawnVoidConn:Disconnect()
+            respawnVoidConn = nil
         end
     end
 end)
 
--- 7. Auto TP Cứu Siêu Tốc (Quét trực tiếp ProximityPrompt cứu người trên toàn bản đồ)
+-- 8. Auto TP Cứu
 local autoStealthReviveEnabled = false
 local autoStealthConn
-
 ToggleTPDownedBtn.MouseButton1Click:Connect(function()
     autoStealthReviveEnabled = not autoStealthReviveEnabled
     ToggleTPDownedBtn.BackgroundColor3 = autoStealthReviveEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
-    ToggleTPDownedBtn.Text = "Auto TP Dưới Chân: " .. (autoStealthReviveEnabled and "BẬT" or "TẮT")
+    ToggleTPDownedBtn.Text = "TP Người Bị Hạ: " .. (autoStealthReviveEnabled and "BẬT" or "TẮT")
     
     if autoStealthReviveEnabled then
         autoStealthConn = task.spawn(function()
@@ -396,96 +468,135 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
                 local char = player.Character
                 if char and char:FindFirstChild("HumanoidRootPart") then
                     local rootPart = char.HumanoidRootPart
-                    local targetPrompt = nil
-                    local targetRootPart = nil
+                    local foundTarget = false
                     
-                    -- Quét toàn bộ Workspace để tìm ProximityPrompt của hành động cứu
-                    for _, obj in pairs(workspace:GetDescendants()) do
-                        if obj:IsA("ProximityPrompt") then
-                            local text = string.lower(obj.ActionText .. " " .. obj.ObjectText)
-                            -- Tìm prompt có chứa từ khóa cứu người (Revive / Help / Rescue)
-                            if string.find(text, "revive") or string.find(text, "help") or string.find(text, "rescue") then
-                                local parentModel = obj.Parent
-                                while parentModel and not parentModel:IsA("Model") do
-                                    parentModel = parentModel.Parent
+                    for _, p in pairs(Players:GetPlayers()) do
+                        if p ~= player and p.Character then
+                            local targetChar = p.Character
+                            local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
+                            local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+                            local isDowned = targetChar:FindFirstChild("Downed") or (humanoid and humanoid.Health <= 0)
+                            
+                            if isDowned and targetRoot then
+                                foundTarget = true
+                                local wasVoidActive = voidEnabled
+                                if wasVoidActive then
+                                    if hoverBodyPos then hoverBodyPos:Destroy() end
+                                    if hoverBodyGyro then hoverBodyGyro:Destroy() end
                                 end
                                 
-                                if parentModel and parentModel ~= char then
-                                    local pRoot = parentModel:FindFirstChild("HumanoidRootPart") or parentModel:FindFirstChild("Torso")
-                                    if pRoot then
-                                        targetPrompt = obj
-                                        targetRootPart = pRoot
-                                        break
+                                for _, part in pairs(char:GetDescendants()) do
+                                    if part:IsA("BasePart") then
+                                        part.Transparency = 1
+                                        part.CanCollide = false
+                                    elseif part:IsA("Decal") then
+                                        part.Transparency = 1
                                     end
                                 end
+                                
+                                rootPart.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -2)
+                                
+                                local startTime = tick()
+                                while tick() - startTime < 2 and autoStealthReviveEnabled do
+                                    for _, obj in pairs(targetChar:GetDescendants()) do
+                                        if obj:IsA("ProximityPrompt") then
+                                            pcall(function() fireproximityprompt(obj) end)
+                                        end
+                                    end
+                                    task.wait(0.2)
+                                end
+                                
+                                rootPart.CFrame = targetRoot.CFrame - Vector3.new(0, 3, 0)
+                                
+                                for _, part in pairs(char:GetDescendants()) do
+                                    if part:IsA("BasePart") then
+                                        part.Transparency = (part.Name == "HumanoidRootPart") and 1 or 0
+                                        part.CanCollide = true
+                                    elseif part:IsA("Decal") then
+                                        part.Transparency = 0
+                                    end
+                                end
+                                
+                                if wasVoidActive then
+                                    local targetPos = rootPart.Position - Vector3.new(0, 35, 0)
+                                    originalPos = rootPart.CFrame
+                                    
+                                    hoverBodyPos = Instance.new("BodyPosition", rootPart)
+                                    hoverBodyPos.Position = targetPos
+                                    hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                                    hoverBodyPos.P = 20000
+                                    
+                                    hoverBodyGyro = Instance.new("BodyGyro", rootPart)
+                                    hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+                                    hoverBodyGyro.CFrame = rootPart.CFrame
+                                end
+                                break
                             end
                         end
                     end
-                    
-                    if targetPrompt and targetRootPart then
-                        -- Tạm ngắt Void Mode để tránh xung đột
-                        local wasVoidActive = voidEnabled
-                        if wasVoidActive then
-                            if hoverBodyPos then hoverBodyPos:Destroy() end
-                            if hoverBodyGyro then hoverBodyGyro:Destroy() end
-                        end
-                        
-                        -- 1. Tàng hình và tắt va chạm
-                        for _, part in pairs(char:GetDescendants()) do
-                            if part:IsA("BasePart") then
-                                part.Transparency = 1
-                                part.CanCollide = false
-                            elseif part:IsA("Decal") then
-                                part.Transparency = 1
-                            end
-                        end
-                        
-                        -- 2. Teleport ngay lập tức đến cạnh người cần cứu
-                        rootPart.CFrame = targetRootPart.CFrame * CFrame.new(0, -1, 2)
-                        
-                        -- 3. Kích hoạt và giữ phím ProximityPrompt liên tục trong 1.5 giây
-                        local startTime = tick()
-                        while tick() - startTime < 1.5 and autoStealthReviveEnabled do
-                            pcall(function()
-                                fireproximityprompt(targetPrompt)
-                            end)
-                            task.wait(0.2)
-                        end
-                        
-                        -- 4. Cứu xong: Bay vút lên trời cao (30 đơn vị) tránh Nextbot
-                        rootPart.CFrame = targetRootPart.CFrame + Vector3.new(0, 30, 0)
-                        
-                        -- 5. Hiện lại nhân vật
-                        for _, part in pairs(char:GetDescendants()) do
-                            if part:IsA("BasePart") then
-                                part.Transparency = (part.Name == "HumanoidRootPart") and 1 or 0
-                                part.CanCollide = true
-                            elseif part:IsA("Decal") then
-                                part.Transparency = 0
-                            end
-                        end
-                        
-                        -- Khôi phục Void Mode nếu lúc đầu bật
-                        if wasVoidActive then
-                            local targetPos = rootPart.Position - Vector3.new(0, 15, 0)
-                            originalPos = rootPart.CFrame
-                            
-                            hoverBodyPos = Instance.new("BodyPosition", rootPart)
-                            hoverBodyPos.Position = targetPos
-                            hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-                            hoverBodyPos.P = 20000
-                            
-                            hoverBodyGyro = Instance.new("BodyGyro", rootPart)
-                            hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-                            hoverBodyGyro.CFrame = rootPart.CFrame
-                        end
-                    end
+                    if not foundTarget then task.wait(1) end
                 end
                 task.wait(0.5)
             end
         end)
     else
         autoStealthReviveEnabled = false
+    end
+end)
+
+-- 9. Auto Né Netbot
+local dodgeNetbotEnabled = false
+local dodgeConn
+ToggleDodgeNetbotBtn.MouseButton1Click:Connect(function()
+    dodgeNetbotEnabled = not dodgeNetbotEnabled
+    ToggleDodgeNetbotBtn.BackgroundColor3 = dodgeNetbotEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
+    ToggleDodgeNetbotBtn.Text = "Auto Né Netbot: " .. (dodgeNetbotEnabled and "BẬT" or "TẮT")
+    
+    if dodgeNetbotEnabled then
+        dodgeConn = RunService.RenderStepped:Connect(function()
+            local char = player.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+            local rootPart = char.HumanoidRootPart
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            
+            for _, obj in pairs(Workspace:GetDescendants()) do
+                if not dodgeNetbotEnabled then break end
+                if obj:IsA("Model") and obj ~= char then
+                    local isPlayer = Players:GetPlayerFromCharacter(obj)
+                    if not isPlayer then
+                        local enemyRoot = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")
+                        local enemyHumanoid = obj:FindFirstChildOfClass("Humanoid")
+                        
+                        if enemyRoot and enemyHumanoid then
+                            local success, distance = pcall(function()
+                                return (rootPart.Position - enemyRoot.Position).Magnitude
+                            end)
+                            
+                            if success and distance and distance < 50 then
+                                if distance < 25 then
+                                    local diff = rootPart.Position - enemyRoot.Position
+                                    if diff.Magnitude > 0 then
+                                        local dodgeDir = diff.Unit
+                                        rootPart.CFrame = rootPart.CFrame + (dodgeDir * 8)
+                                        
+                                        if humanoid then
+                                            humanoid.WalkSpeed = 35
+                                            task.delay(0.3, function()
+                                                if humanoid and not speedEnabled then
+                                                    humanoid.WalkSpeed = 16
+                                                end
+                                            end)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        if dodgeConn then dodgeConn:Disconnect() end
     end
 end)
 -- mới tự làm code thôi --
