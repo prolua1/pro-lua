@@ -283,7 +283,7 @@ ToggleNoclipBtn.MouseButton1Click:Connect(function()
                 if part:IsA("BasePart") then
                     part.CanCollide = true
                 end
-            end
+            end 
         end
     end
 end)
