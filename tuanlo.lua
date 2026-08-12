@@ -1,7 +1,6 @@
 --[[
     ========================================================================
-        TUAN LO PRO HUB - BẢN ĐỎ PREMIUM (V5.1 - OPTIMIZED DROPDOWN UI)
-        [ĐÃ NÂNG CẤP HIỆU ỨNG THU GỌN BREATHING GLOW CHUYÊN NGHIỆP]
+        TUAN LO PRO HUB
     ========================================================================
 ]]
 
@@ -100,9 +99,7 @@ local function LoadMainMenu()
     HubScale.Scale = 1.0
     HubScale.Parent = MainFrame
 
-    -- ==========================================================
-    -- NÚT THU GỌN CAO CẤP (MINIMIZE BUTTON PREMIUM)
-    -- ==========================================================
+
     local MinimizeBtn = Instance.new("ImageButton")
     MinimizeBtn.Size = UDim2.new(0, 0, 0, 0)
     MinimizeBtn.Position = UDim2.new(0, 20, 0, 20)
@@ -557,7 +554,7 @@ local function LoadMainMenu()
             end)
         end
 
-        -- HÀM THÊM BOX THÔNG TIN SERVER VÀO TABPAGE
+        
         local function AddServerMonitorBox()
             local MonitorFrame = Instance.new("Frame")
             MonitorFrame.Size = UDim2.new(1, -6, 0, 160)
@@ -672,7 +669,7 @@ local function LoadMainMenu()
   Tab4.AddToggle("Auto nhặt trái ác quỷ ", 10747371971, function(TrangThai)
     if TrangThai then
         print(" Đang nhặt trái ác quỷ...")
-        -- Đoạn code xử lý auto raid của bạn nhét ở đây
+       
     else
         print("Đã nhặt trái ác quỷ .")
     end
@@ -680,7 +677,7 @@ end)
       Tab4.AddToggle("Auto lưu trái ác quỷ ", 10747371971, function(TrangThai)
     if TrangThai then
         print(" Đang lưu trái ác quỷ...")
-        -- Đoạn code xử lý auto raid của bạn nhét ở đây
+       
     else
         print("Đã lưu trái ác quỷ .")
     end
@@ -703,10 +700,10 @@ end)
     Tab2.AddToggle("Bật Auto Farm Xương", 10747373999, function(v) end)
     Tab2.AddToggle("Bật Auto Farm Nguyên Liệu", 10747373999, function(v) end)
 
-    -- CHUYỂN NÚT NHẬN CODE SANG TAB 8 (CỬA HÀNG)
+    
     Tab8.AddToggle("Tự Động Nhận Code", 10747373999, function(v) end)
     
-    -- GIỮ LẠI KHU VỰC THEO DÕI SERVER TẠI TAB 1
+    
     Tab1.AddServerMonitorBox()
 
     Tab7.AddSlider("Kích Thước Giao Diện Hub (%)", 10747362071, 50, 150, 100, function(value)
