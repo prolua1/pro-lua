@@ -1,4 +1,4 @@
--- // HUB TUẤN LỌ - PRO EDITION (FULL TÍNH NĂNG + VOID AFK THÔNG MINH) //
+--- HUB TUẤN LỌ ---
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -7,7 +7,7 @@ local Workspace = game:GetService("Workspace")
 
 local player = Players.LocalPlayer
 
--- Xóa GUI cũ nếu đã tồn tại để tránh bị trùng lặp
+
 if game.CoreGui:FindFirstChild("TuanLoHub") then
     game.CoreGui.TuanLoHub:Destroy()
 end
@@ -16,7 +16,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TuanLoHub"
 ScreenGui.Parent = game.CoreGui
 
--- Nút tròn mở/đóng Hub ("TL")
+
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
 ToggleBtn.Position = UDim2.new(0, 50, 0, 100)
@@ -31,7 +31,7 @@ local UICornerBtn = Instance.new("UICorner")
 UICornerBtn.CornerRadius = UDim.new(1, 0)
 UICornerBtn.Parent = ToggleBtn
 
--- Khung chính của Hub
+
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 260, 0, 370)
 MainFrame.Position = UDim2.new(0, 120, 0, 100)
@@ -43,7 +43,7 @@ local UICornerMain = Instance.new("UICorner")
 UICornerMain.CornerRadius = UDim.new(0, 8)
 UICornerMain.Parent = MainFrame
 
--- Tiêu đề Hub
+
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -57,7 +57,7 @@ local UICornerTitle = Instance.new("UICorner")
 UICornerTitle.CornerRadius = UDim.new(0, 8)
 UICornerTitle.Parent = Title
 
--- ==================== HÀM HỖ TRỢ KÉO THẢ (DRAG) ====================
+
 local function MakeDraggable(guiObject, dragTarget)
     dragTarget = dragTarget or guiObject
     local dragging, dragStart, startPos
@@ -92,7 +92,7 @@ end
 MakeDraggable(ToggleBtn)
 MakeDraggable(MainFrame, Title)
 
--- Thanh chuyển Tab
+
 local TabBar = Instance.new("Frame")
 TabBar.Size = UDim2.new(1, -10, 0, 30)
 TabBar.Position = UDim2.new(0, 5, 0, 40)
@@ -120,7 +120,7 @@ Tab2Btn.Font = Enum.Font.SourceSansBold
 Tab2Btn.Parent = TabBar
 Instance.new("UICorner", Tab2Btn).CornerRadius = UDim.new(0, 6)
 
--- Khung chứa nội dung Tab 1
+
 local Tab1Container = Instance.new("ScrollingFrame")
 Tab1Container.Size = UDim2.new(1, -10, 1, -80)
 Tab1Container.Position = UDim2.new(0, 5, 0, 75)
@@ -129,7 +129,7 @@ Tab1Container.CanvasSize = UDim2.new(0, 0, 0, 280)
 Tab1Container.ScrollBarThickness = 4
 Tab1Container.Parent = MainFrame
 
--- Khung chứa nội dung Tab 2
+
 local Tab2Container = Instance.new("ScrollingFrame")
 Tab2Container.Size = UDim2.new(1, -10, 1, -80)
 Tab2Container.Position = UDim2.new(0, 5, 0, 75)
@@ -139,7 +139,7 @@ Tab2Container.ScrollBarThickness = 4
 Tab2Container.Visible = false
 Tab2Container.Parent = MainFrame
 
--- Chuyển Tab qua lại
+
 Tab1Btn.MouseButton1Click:Connect(function()
     Tab1Container.Visible = true
     Tab2Container.Visible = false
@@ -171,7 +171,7 @@ local function CreateButton(name, posY, parentFrame)
     return btn
 end
 
--- Tạo nút Tab 1
+
 local ToggleEvadeBtn = CreateButton("Lướt Phím Z", 0, Tab1Container)
 local ToggleFlyBtn = CreateButton("Tính Năng Bay", 44, Tab1Container)
 local ToggleNoclipBtn = CreateButton("Xuyên Tường", 88, Tab1Container)
@@ -179,7 +179,7 @@ local ToggleInvisBtn = CreateButton("Tàng Hình", 132, Tab1Container)
 local ToggleSpeedBtn = CreateButton("Tốc Độ Chạy", 176, Tab1Container)
 local ToggleSummerBtn = CreateButton("Lụm Điểm Mùa Hè", 220, Tab1Container)
 
--- Tạo nút Tab 2
+
 local ToggleVoidBtn = CreateButton("Void Mode", 0, Tab2Container)
 local ToggleTPDownedBtn = CreateButton("TP Người Bị Hạ", 44, Tab2Container)
 local ToggleDodgeNetbotBtn = CreateButton("Auto Né Netbot", 88, Tab2Container)
@@ -188,9 +188,9 @@ ToggleBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- ==================== PHẦN LOGIC TÍNH NĂNG ====================
 
--- 1. Lướt Phím Z
+
+
 local evadeEnabled = false
 ToggleEvadeBtn.MouseButton1Click:Connect(function()
     evadeEnabled = not evadeEnabled
@@ -211,7 +211,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- 2. Tính Năng Bay
+
 local flyEnabled = false
 local flySpeed = 50
 local bg, bv
@@ -256,7 +256,7 @@ ToggleFlyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Xuyên Tường
+
 local noclipEnabled = false
 local noclipConn
 ToggleNoclipBtn.MouseButton1Click:Connect(function()
@@ -288,7 +288,7 @@ ToggleNoclipBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 4. Tàng Hình
+
 local invisEnabled = false
 ToggleInvisBtn.MouseButton1Click:Connect(function()
     invisEnabled = not invisEnabled
@@ -314,7 +314,7 @@ ToggleInvisBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 5. Tốc Độ Chạy
+
 local speedEnabled = false
 local speedConn
 ToggleSpeedBtn.MouseButton1Click:Connect(function()
@@ -338,7 +338,7 @@ ToggleSpeedBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 6. Lụm Điểm Mùa Hè
+
 local summerEnabled = false
 local summerConn
 ToggleSummerBtn.MouseButton1Click:Connect(function()
@@ -392,7 +392,7 @@ ToggleSummerBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Biến trạng thái chung Void Mode & Auto Re-apply khi đổi map/respawn
+
 local voidEnabled = false
 local hoverBodyPos, hoverBodyGyro, originalPos
 local respawnVoidConn
@@ -403,9 +403,9 @@ local function ApplyVoidMode()
     local currentRoot = char:WaitForChild("HumanoidRootPart", 5)
     
     if voidEnabled and currentRoot then
-        task.wait(0.5) -- Chờ map load ổn định
+        task.wait(0.5) 
         originalPos = currentRoot.CFrame
-        -- Tăng độ sâu xuống -35 studs (lòng đất cực kỳ sâu và an toàn)
+       
         local targetPos = currentRoot.Position - Vector3.new(0, 45, 0)
         currentRoot.CFrame = CFrame.new(targetPos)
         
@@ -423,7 +423,7 @@ local function ApplyVoidMode()
     end
 end
 
--- 7. Void Mode (Tăng độ sâu -35 và tự động bật lại khi qua map mới)
+
 ToggleVoidBtn.MouseButton1Click:Connect(function()
     voidEnabled = not voidEnabled
     ToggleVoidBtn.BackgroundColor3 = voidEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(150, 0, 0)
@@ -431,7 +431,7 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     
     if voidEnabled then
         ApplyVoidMode()
-        -- Lắng nghe sự kiện đổi map / hồi sinh để tự động kéo xuống Void lại cho AFK
+        
         if not respawnVoidConn then
             respawnVoidConn = player.CharacterAdded:Connect(function()
                 if voidEnabled then
@@ -454,7 +454,7 @@ ToggleVoidBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 8. Auto TP Cứu
+
 local autoStealthReviveEnabled = false
 local autoStealthConn
 ToggleTPDownedBtn.MouseButton1Click:Connect(function()
@@ -544,7 +544,7 @@ ToggleTPDownedBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 9. Auto Né Netbot
+
 local dodgeNetbotEnabled = false
 local dodgeConn
 ToggleDodgeNetbotBtn.MouseButton1Click:Connect(function()
@@ -599,5 +599,5 @@ ToggleDodgeNetbotBtn.MouseButton1Click:Connect(function()
         if dodgeConn then dodgeConn:Disconnect() end
     end
 end)
--- mới tự làm code thôi --
+-- mới tự làm code lỏ thôi --
 -- loadstring(game:HttpGet("https://raw.githubusercontent.com/prolua1/pro-lua/refs/heads/main/evade.lua"))() --
