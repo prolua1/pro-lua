@@ -7,7 +7,7 @@ int main() {
     double so1, so2;
 
     do {
-        cout << "\n--- MAY TINH DON GIAN (C++) ---\n";
+        cout << "\n--- Máy tính đơn giản (C++) ---\n";
         cout << "1. Cong (+)\n";
         cout << "2. Tru (-)\n";
         cout << "3. Nhan (*)\n";
