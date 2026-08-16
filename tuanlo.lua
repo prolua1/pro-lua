@@ -1,26 +1,41 @@
---[[
-    ========================================================================
-        TUAN LO PRO HUB
-    ========================================================================
-]]
-
 local LPH_Name = "Tuan Lo Pro Hub"
 local LPH_Developer = "Tuan Lo Developer"
-local LPH_Version = "v5.1 Premium"
+local LPH_Version = "v7.8 Stable"
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
+pcall(function()
+    if game.CoreGui:FindFirstChild("TuanLoHub_Custom") then
+        game.CoreGui.TuanLoHub_Custom:Destroy()
+    end
+end)
+
 local MainGui = Instance.new("ScreenGui")
-MainGui.Name = "LPH_" .. tostring(math.random(100000, 999999))
+MainGui.Name = "TuanLoHub_Custom"
 MainGui.ResetOnSpawn = false
 MainGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling 
+MainGui.IgnoreGuiInset = true
 
-if gethui then MainGui.Parent = gethui()
-elseif syn and syn.protect_gui then syn.protect_gui(MainGui) MainGui.Parent = game:GetService("CoreGui")
-else pcall(function() MainGui.Parent = game:GetService("CoreGui") end) end
+pcall(function()
+    if gethui then MainGui.Parent = gethui()
+    elseif syn and syn.protect_gui then syn.protect_gui(MainGui) MainGui.Parent = game:GetService("CoreGui")
+    else MainGui.Parent = game:GetService("CoreGui") end
+end)
+
+local blackScreenFrame = Instance.new("Frame")
+blackScreenFrame.Size = UDim2.new(1, 0, 1, 0)
+blackScreenFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+blackScreenFrame.BorderSizePixel = 0
+blackScreenFrame.Visible = false
+blackScreenFrame.ZIndex = 0
+blackScreenFrame.Parent = MainGui
 
 local function ApplyTween(object, properties, duration)
     return TweenService:Create(object, TweenInfo.new(duration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), properties)
@@ -89,6 +104,8 @@ local function LoadMainMenu()
     MainFrame.Position = UDim2.new(0.5, -BaseWidth/2, 0.5, -BaseHeight/2)
     MainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 10)
     MainFrame.BorderSizePixel = 0
+    MainFrame.ClipsDescendants = true
+    MainFrame.ZIndex = 10
     MainFrame.Parent = MainGui
     MakeDraggable(MainFrame)
 
@@ -99,7 +116,6 @@ local function LoadMainMenu()
     HubScale.Scale = 1.0
     HubScale.Parent = MainFrame
 
-
     local MinimizeBtn = Instance.new("ImageButton")
     MinimizeBtn.Size = UDim2.new(0, 0, 0, 0)
     MinimizeBtn.Position = UDim2.new(0, 20, 0, 20)
@@ -108,6 +124,7 @@ local function LoadMainMenu()
     MinimizeBtn.ImageColor3 = Color3.fromRGB(255, 50, 50)
     MinimizeBtn.ImageTransparency = 0.3
     MinimizeBtn.Visible = false
+    MinimizeBtn.ZIndex = 15
     MinimizeBtn.Parent = MainGui
     MakeDraggable(MinimizeBtn)
 
@@ -123,28 +140,12 @@ local function LoadMainMenu()
     MiniText.Text = "TLP"
     MiniText.TextColor3 = Color3.fromRGB(255, 230, 230)
     MiniText.TextSize = 13
+    MiniText.ZIndex = 16
     MiniText.Parent = MinimizeBtn
     
     local MiniTextStroke = Instance.new("UIStroke", MiniText)
     MiniTextStroke.Color = Color3.fromRGB(150, 0, 0)
     MiniTextStroke.Thickness = 1.5
-
-    task.spawn(function()
-        while true do
-            if MinimizeBtn.Visible then
-                ApplyTween(MiniStroke, {Thickness = 3.5, Color = Color3.fromRGB(255, 0, 0)}, 0.8):Play()
-                ApplyTween(MinimizeBtn, {BackgroundColor3 = Color3.fromRGB(35, 10, 10)}, 0.8):Play()
-                ApplyTween(MiniText, {TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.8):Play()
-                task.wait(0.8)
-                ApplyTween(MiniStroke, {Thickness = 1.5, Color = Color3.fromRGB(160, 20, 20)}, 0.8):Play()
-                ApplyTween(MinimizeBtn, {BackgroundColor3 = Color3.fromRGB(15, 6, 6)}, 0.8):Play()
-                ApplyTween(MiniText, {TextColor3 = Color3.fromRGB(200, 150, 150)}, 0.8):Play()
-                task.wait(0.8)
-            else
-                task.wait(0.5)
-            end
-        end
-    end)
 
     MinimizeBtn.MouseEnter:Connect(function()
         ApplyTween(MinimizeBtn, {Size = UDim2.new(0, 56, 0, 56)}, 0.15):Play()
@@ -154,12 +155,11 @@ local function LoadMainMenu()
         ApplyTween(MinimizeBtn, {Size = UDim2.new(0, 50, 0, 50)}, 0.15):Play()
     end)
 
-    -- TITLE BAR
     local TitleBar = Instance.new("Frame")
     TitleBar.Size = UDim2.new(1, 0, 0, 45)
     TitleBar.BackgroundColor3 = Color3.fromRGB(25, 12, 12)
     TitleBar.BorderSizePixel = 0
-    TitleBar.ZIndex = 2
+    TitleBar.ZIndex = 11
     TitleBar.Parent = MainFrame
 
     local HubIcon = Instance.new("ImageLabel")
@@ -168,6 +168,7 @@ local function LoadMainMenu()
     HubIcon.BackgroundTransparency = 1
     HubIcon.Image = "rbxassetid://10747373999"
     HubIcon.ImageColor3 = Color3.fromRGB(255, 30, 30)
+    HubIcon.ZIndex = 12
     HubIcon.Parent = TitleBar
 
     local TitleText = Instance.new("TextLabel")
@@ -179,6 +180,7 @@ local function LoadMainMenu()
     TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
     TitleText.TextSize = 14
     TitleText.TextXAlignment = Enum.TextXAlignment.Left
+    TitleText.ZIndex = 12
     TitleText.Parent = TitleBar
 
     local CloseBtn = Instance.new("TextButton")
@@ -189,6 +191,7 @@ local function LoadMainMenu()
     CloseBtn.Text = "-"
     CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseBtn.TextSize = 14
+    CloseBtn.ZIndex = 12
     CloseBtn.Parent = TitleBar
     Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(1, 0)
 
@@ -201,6 +204,7 @@ local function LoadMainMenu()
     UptimeText.TextColor3 = Color3.fromRGB(255, 80, 80) 
     UptimeText.TextSize = 11
     UptimeText.TextXAlignment = Enum.TextXAlignment.Right
+    UptimeText.ZIndex = 12
     UptimeText.Parent = TitleBar
 
     task.spawn(function()
@@ -235,10 +239,10 @@ local function LoadMainMenu()
     TabScroll.Position = UDim2.new(0, 0, 0, 45)
     TabScroll.BackgroundColor3 = Color3.fromRGB(20, 12, 12)
     TabScroll.BorderSizePixel = 0
-    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 350)
+    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 400)
     TabScroll.ScrollBarThickness = 2
     TabScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 30, 30)
-    TabScroll.ZIndex = 2
+    TabScroll.ZIndex = 11
     TabScroll.Parent = MainFrame
 
     local TabListLayout = Instance.new("UIListLayout") TabListLayout.Parent = TabScroll TabListLayout.Padding = UDim.new(0, 4) TabListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -247,7 +251,8 @@ local function LoadMainMenu()
     ContentContainer.Size = UDim2.new(1, -150, 1, -55)
     ContentContainer.Position = UDim2.new(0, 145, 0, 50)
     ContentContainer.BackgroundTransparency = 1
-    ContentContainer.ZIndex = 1
+    ContentContainer.ClipsDescendants = true
+    ContentContainer.ZIndex = 11
     ContentContainer.Parent = MainFrame
 
     local activeTab = nil
@@ -261,8 +266,8 @@ local function LoadMainMenu()
         TabPage.CanvasSize = UDim2.new(0, 0, 0, 0)
         TabPage.ScrollBarThickness = 3
         TabPage.ScrollBarImageColor3 = Color3.fromRGB(255, 30, 30)
-        TabPage.ClipsDescendants = false 
-        TabPage.ZIndex = 2
+        TabPage.ClipsDescendants = true
+        TabPage.ZIndex = 11
         TabPage.Parent = ContentContainer
         
         local PageLayout = Instance.new("UIListLayout", TabPage)
@@ -270,14 +275,14 @@ local function LoadMainMenu()
         PageLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
         
         PageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            TabPage.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 20)
+            TabPage.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 15)
         end)
 
         local TabBtn = Instance.new("TextButton")
         TabBtn.Size = UDim2.new(0, 130, 0, 36)
         TabBtn.BackgroundColor3 = Color3.fromRGB(28, 16, 16)
         TabBtn.Text = ""
-        TabBtn.ZIndex = 3
+        TabBtn.ZIndex = 12
         TabBtn.Parent = TabScroll
         Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 6)
 
@@ -287,7 +292,7 @@ local function LoadMainMenu()
         TabIcon.BackgroundTransparency = 1
         TabIcon.Image = "rbxassetid://" .. tostring(iconId)
         TabIcon.ImageColor3 = Color3.fromRGB(150, 150, 150)
-        TabIcon.ZIndex = 4
+        TabIcon.ZIndex = 13
         TabIcon.Parent = TabBtn
 
         local TabLabel = Instance.new("TextLabel")
@@ -299,7 +304,7 @@ local function LoadMainMenu()
         TabLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
         TabLabel.TextSize = 11
         TabLabel.TextXAlignment = Enum.TextXAlignment.Left
-        TabLabel.ZIndex = 4
+        TabLabel.ZIndex = 13
         TabLabel.Parent = TabBtn
 
         local function Select()
@@ -318,399 +323,497 @@ local function LoadMainMenu()
 
         TabBtn.MouseButton1Click:Connect(Select)
         
-        -- TOGGLE
         local function AddToggle(name, toggleIconId, callback)
             local state = false
             local ToggleFrame = Instance.new("Frame")
-            ToggleFrame.Size = UDim2.new(1, -6, 0, 40)
+            ToggleFrame.Size = UDim2.new(1, -8, 0, 38)
             ToggleFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
-            ToggleFrame.ZIndex = 3 
+            ToggleFrame.ZIndex = 12
             ToggleFrame.Parent = TabPage
             Instance.new("UICorner", ToggleFrame).CornerRadius = UDim.new(0, 6)
 
             local ToggleIcon = Instance.new("ImageLabel")
-            ToggleIcon.Size = UDim2.new(0, 20, 0, 20)
-            ToggleIcon.Position = UDim2.new(0, 12, 0.5, -10)
+            ToggleIcon.Size = UDim2.new(0, 18, 0, 18)
+            ToggleIcon.Position = UDim2.new(0, 10, 0.5, -9)
             ToggleIcon.BackgroundTransparency = 1
             ToggleIcon.Image = "rbxassetid://" .. tostring(toggleIconId)
             ToggleIcon.ImageColor3 = Color3.fromRGB(200, 150, 150)
-            ToggleIcon.ZIndex = 4
+            ToggleIcon.ZIndex = 13
             ToggleIcon.Parent = ToggleFrame
 
             local Label = Instance.new("TextLabel")
-            Label.Size = UDim2.new(1, -100, 1, 0)
-            Label.Position = UDim2.new(0, 42, 0, 0)
+            Label.Size = UDim2.new(1, -95, 1, 0)
+            Label.Position = UDim2.new(0, 38, 0, 0)
             Label.BackgroundTransparency = 1
             Label.Font = Enum.Font.GothamBold
             Label.Text = name
             Label.TextColor3 = Color3.fromRGB(240, 210, 210)
-            Label.TextSize = 12
+            Label.TextSize = 11
             Label.TextXAlignment = Enum.TextXAlignment.Left
-            Label.ZIndex = 4
+            Label.ZIndex = 13
             Label.Parent = ToggleFrame
 
             local ToggleBtn = Instance.new("TextButton")
-            ToggleBtn.Size = UDim2.new(0, 42, 0, 22)
-            ToggleBtn.Position = UDim2.new(1, -54, 0.5, -11)
+            ToggleBtn.Size = UDim2.new(0, 40, 0, 20)
+            ToggleBtn.Position = UDim2.new(1, -48, 0.5, -10)
             ToggleBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 40)
             ToggleBtn.Text = ""
-            ToggleBtn.ZIndex = 4
+            ToggleBtn.ZIndex = 13
             ToggleBtn.Parent = ToggleFrame
             Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
 
             local Indicator = Instance.new("Frame")
-            Indicator.Size = UDim2.new(0, 16, 0, 16)
-            Indicator.Position = UDim2.new(0, 3, 0.5, -8)
+            Indicator.Size = UDim2.new(0, 14, 0, 14)
+            Indicator.Position = UDim2.new(0, 3, 0.5, -7)
             Indicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Indicator.BorderSizePixel = 0
-            Indicator.ZIndex = 5
+            Indicator.ZIndex = 14
             Indicator.Parent = ToggleBtn
             Instance.new("UICorner", Indicator).CornerRadius = UDim.new(1, 0)
 
             ToggleBtn.MouseButton1Click:Connect(function()
                 state = not state
                 ApplyTween(ToggleBtn, {BackgroundColor3 = state and Color3.fromRGB(255, 30, 30) or Color3.fromRGB(60, 40, 40)}, 0.15):Play()
-                ApplyTween(Indicator, {Position = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)}, 0.15):Play()
+                ApplyTween(Indicator, {Position = state and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)}, 0.15):Play()
                 ApplyTween(ToggleIcon, {ImageColor3 = state and Color3.fromRGB(255, 80, 80) or Color3.fromRGB(200, 150, 150)}, 0.15):Play()
                 task.spawn(callback, state)
             end)
         end
 
-        -- SLIDER
-        local function AddSlider(name, sliderIconId, min, max, default, callback)
-            local SliderFrame = Instance.new("Frame")
-            SliderFrame.Size = UDim2.new(1, -6, 0, 50)
-            SliderFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
-            SliderFrame.ZIndex = 3
-            SliderFrame.Parent = TabPage
-            Instance.new("UICorner", SliderFrame).CornerRadius = UDim.new(0, 6)
-
-            local SliderIcon = Instance.new("ImageLabel")
-            SliderIcon.Size = UDim2.new(0, 20, 0, 20)
-            SliderIcon.Position = UDim2.new(0, 12, 0, 8)
-            SliderIcon.BackgroundTransparency = 1
-            SliderIcon.Image = "rbxassetid://" .. tostring(sliderIconId)
-            SliderIcon.ImageColor3 = Color3.fromRGB(200, 150, 150)
-            SliderIcon.ZIndex = 4
-            SliderIcon.Parent = SliderFrame
-
-            local Label = Instance.new("TextLabel")
-            Label.Size = UDim2.new(1, -120, 0, 20)
-            Label.Position = UDim2.new(0, 42, 0, 8)
-            Label.BackgroundTransparency = 1
-            Label.Font = Enum.Font.GothamBold
-            Label.Text = name
-            Label.TextColor3 = Color3.fromRGB(240, 210, 210)
-            Label.TextSize = 12
-            Label.TextXAlignment = Enum.TextXAlignment.Left
-            Label.ZIndex = 4
-            Label.Parent = SliderFrame
-
-            local ValueLabel = Instance.new("TextLabel")
-            ValueLabel.Size = UDim2.new(0, 60, 0, 20)
-            ValueLabel.Position = UDim2.new(1, -72, 0, 8)
-            ValueLabel.BackgroundTransparency = 1
-            ValueLabel.Font = Enum.Font.GothamBold
-            ValueLabel.Text = tostring(default)
-            ValueLabel.TextColor3 = Color3.fromRGB(255, 30, 30)
-            ValueLabel.TextSize = 12
-            ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
-            ValueLabel.ZIndex = 4
-            ValueLabel.Parent = SliderFrame
-
-            local SliderBar = Instance.new("TextButton")
-            SliderBar.Size = UDim2.new(1, -24, 0, 6)
-            SliderBar.Position = UDim2.new(0, 12, 0, 34)
-            SliderBar.BackgroundColor3 = Color3.fromRGB(60, 40, 40)
-            SliderBar.Text = ""
-            SliderBar.AutoButtonColor = false
-            SliderBar.ZIndex = 4
-            SliderBar.Parent = SliderFrame
-            Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(1, 0)
-
-            local SliderFill = Instance.new("Frame")
-            SliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-            SliderFill.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
-            SliderFill.BorderSizePixel = 0
-            SliderFill.ZIndex = 5
-            SliderFill.Parent = SliderBar
-            Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
-
-            local dragging = false
-            local function UpdateSlider(input)
-                local percentage = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
-                local value = math.floor(min + (max - min) * percentage)
-                ValueLabel.Text = tostring(value)
-                ApplyTween(SliderFill, {Size = UDim2.new(percentage, 0, 1, 0)}, 0.05):Play()
-                task.spawn(callback, value)
-            end
-
-            SliderBar.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    dragging = true UpdateSlider(input)
-                end
-            end)
-            UserInputService.InputChanged:Connect(function(input)
-                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                    UpdateSlider(input)
-                end
-            end)
-            UserInputService.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    dragging = false
-                end
-            end)
-        end
-
-        -- DROPDOWN
-        local function AddDropdown(name, list, default, callback)
-            local isOpened = false
-            
-            local DropdownFrame = Instance.new("Frame")
-            DropdownFrame.Size = UDim2.new(1, -6, 0, 40) 
-            DropdownFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
-            DropdownFrame.ClipsDescendants = false 
-            DropdownFrame.ZIndex = 10 
-            DropdownFrame.Parent = TabPage
-            Instance.new("UICorner", DropdownFrame).CornerRadius = UDim.new(0, 6)
-
-            local DropLabel = Instance.new("TextLabel")
-            DropLabel.Size = UDim2.new(0, 150, 0, 40)
-            DropLabel.Position = UDim2.new(0, 12, 0, 0)
-            DropLabel.BackgroundTransparency = 1
-            DropLabel.Font = Enum.Font.GothamBold
-            DropLabel.Text = name
-            DropLabel.TextColor3 = Color3.fromRGB(240, 210, 210)
-            DropLabel.TextSize = 12
-            DropLabel.TextXAlignment = Enum.TextXAlignment.Left
-            DropLabel.ZIndex = 11
-            DropLabel.Parent = DropdownFrame
-
-            local MainBtn = Instance.new("TextButton")
-            MainBtn.Size = UDim2.new(1, -180, 0, 28)
-            MainBtn.Position = UDim2.new(1, -12, 0, 6)
-            MainBtn.AnchorPoint = Vector2.new(1, 0) 
-            MainBtn.BackgroundColor3 = Color3.fromRGB(40, 22, 22)
-            MainBtn.Font = Enum.Font.GothamBold
-            MainBtn.Text = default .. "  ▼"
-            MainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            MainBtn.TextSize = 11
-            MainBtn.ZIndex = 11
-            MainBtn.Parent = DropdownFrame
-            Instance.new("UICorner", MainBtn).CornerRadius = UDim.new(0, 4)
-
-            local Container = Instance.new("Frame")
-            Container.Size = UDim2.new(1, -180, 0, 0) 
-            Container.Position = UDim2.new(1, -12, 0, 36) 
-            Container.AnchorPoint = Vector2.new(1, 0)
-            Container.BackgroundColor3 = Color3.fromRGB(30, 15, 15)
-            Container.BorderSizePixel = 0
-            Container.ClipsDescendants = true 
-            Container.ZIndex = 50 
-            Container.Parent = DropdownFrame
-            
-            local ContainerStroke = Instance.new("UIStroke", Container) ContainerStroke.Color = Color3.fromRGB(255, 30, 30) ContainerStroke.Thickness = 1 ContainerStroke.Transparency = 1
-            Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 4)
-            
-            local UIList = Instance.new("UIListLayout", Container)
-            UIList.Padding = UDim.new(0, 2)
-
-            for _, option in ipairs(list) do
-                local OptBtn = Instance.new("TextButton")
-                OptBtn.Size = UDim2.new(1, 0, 0, 26)
-                OptBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 20)
-                OptBtn.BackgroundTransparency = 0.1
-                OptBtn.Font = Enum.Font.GothamMedium
-                OptBtn.Text = option
-                OptBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
-                OptBtn.TextSize = 11
-                OptBtn.ZIndex = 51
-                OptBtn.Parent = Container
-
-                OptBtn.MouseButton1Click:Connect(function()
-                    MainBtn.Text = option .. "  ▼"
-                    isOpened = false
-                    DropdownFrame.ZIndex = 10
-                    ApplyTween(Container, {Size = UDim2.new(1, -180, 0, 0)}, 0.15):Play()
-                    ContainerStroke.Transparency = 1
-                    task.spawn(callback, option)
-                end)
-            end
-
-            MainBtn.MouseButton1Click:Connect(function()
-                isOpened = not isOpened
-                if isOpened then
-                    DropdownFrame.ZIndex = 100 
-                    local targetHeight = (#list * 26) + ((#list - 1) * 2)
-                    ApplyTween(Container, {Size = UDim2.new(1, -180, 0, targetHeight)}, 0.18):Play()
-                    ContainerStroke.Transparency = 0.2
-                    MainBtn.Text = default .. "  ▲"
-                else
-                    DropdownFrame.ZIndex = 10
-                    ApplyTween(Container, {Size = UDim2.new(1, -180, 0, 0)}, 0.15):Play()
-                    ContainerStroke.Transparency = 1
-                    MainBtn.Text = default .. "  ▼"
-                end
-            end)
-        end
-
-        
-        local function AddServerMonitorBox()
-            local MonitorFrame = Instance.new("Frame")
-            MonitorFrame.Size = UDim2.new(1, -6, 0, 160)
-            MonitorFrame.BackgroundColor3 = Color3.fromRGB(20, 10, 10)
-            MonitorFrame.ZIndex = 3
-            MonitorFrame.Parent = TabPage
-            Instance.new("UICorner", MonitorFrame).CornerRadius = UDim.new(0, 6)
-            local BoxStroke = Instance.new("UIStroke", MonitorFrame) BoxStroke.Color = Color3.fromRGB(150, 20, 20) BoxStroke.Thickness = 1
-
-            local ServerTimeText = Instance.new("TextLabel")
-            ServerTimeText.Size = UDim2.new(1, -20, 0, 25)
-            ServerTimeText.Position = UDim2.new(0, 12, 0, 8)
-            ServerTimeText.BackgroundTransparency = 1
-            ServerTimeText.Font = Enum.Font.GothamBold
-            ServerTimeText.Text = "⏳ Đang quét dữ liệu server..."
-            ServerTimeText.TextColor3 = Color3.fromRGB(255, 215, 0)
-            ServerTimeText.TextSize = 12
-            ServerTimeText.TextXAlignment = Enum.TextXAlignment.Left
-            ServerTimeText.ZIndex = 4
-            ServerTimeText.Parent = MonitorFrame
-
-            local MoonStateText = Instance.new("TextLabel")
-            MoonStateText.Size = UDim2.new(1, -20, 0, 25)
-            MoonStateText.Position = UDim2.new(0, 12, 0, 33)
-            MoonStateText.BackgroundTransparency = 1
-            MoonStateText.Font = Enum.Font.GothamBold
-            MoonStateText.Text = "🌙 Tình hình trăng: Đang kiểm tra..."
-            MoonStateText.TextColor3 = Color3.fromRGB(200, 200, 255)
-            MoonStateText.TextSize = 12
-            MoonStateText.TextXAlignment = Enum.TextXAlignment.Left
-            MoonStateText.ZIndex = 4
-            MoonStateText.Parent = MonitorFrame
-
-            local IslandStatusText = Instance.new("TextLabel")
-            IslandStatusText.Size = UDim2.new(1, -20, 0, 90)
-            IslandStatusText.Position = UDim2.new(0, 12, 0, 62)
-            IslandStatusText.BackgroundTransparency = 1
-            IslandStatusText.Font = Enum.Font.GothamMedium
-            IslandStatusText.Text = ""
-            IslandStatusText.TextColor3 = Color3.fromRGB(240, 240, 240)
-            IslandStatusText.TextSize = 11
-            IslandStatusText.TextXAlignment = Enum.TextXAlignment.Left
-            IslandStatusText.TextYAlignment = Enum.TextYAlignment.Top
-            IslandStatusText.LineHeight = 1.3
-            IslandStatusText.ZIndex = 4
-            IslandStatusText.Parent = MonitorFrame
-
-            local Lighting = game:GetService("Lighting")
-            task.spawn(function()
-                while true do
-                    local t = workspace.DistributedGameTime
-                    local hours = math.floor(t / 3600)
-                    local mins = math.floor((t % 3600) / 60)
-                    local secs = math.floor(t % 60)
-                    ServerTimeText.Text = string.format("⏳ Thời gian Server: %02d giờ %02d phút %02d giây", hours, mins, secs)
-
-                    local clockTime = Lighting.ClockTime
-                    if clockTime >= 5 and clockTime <= 18 then
-                        MoonStateText.Text = "☀️ Tình hình trăng: Ban ngày (Không có trăng)"
-                        MoonStateText.TextColor3 = Color3.fromRGB(255, 180, 50)
-                    else
-                        if Lighting:AttributeValueWithDefault("FullMoonActive", false) == true then
-                            MoonStateText.Text = "🌕 TRĂNG TRÒN (FULL MOON ĐANG HOẠT ĐỘNG!)"
-                            MoonStateText.TextColor3 = Color3.fromRGB(255, 50, 50)
-                        else
-                            MoonStateText.Text = "🌙 Tình hình trăng: Ban đêm (Trăng thường)"
-                            MoonStateText.TextColor3 = Color3.fromRGB(200, 200, 255)
-                        end
-                    end
-
-                    local islands = { Mirage = "❌ Chưa xuất hiện", Kitsune = "❌ Chưa xuất hiện", Dragon = "❌ Chưa xuất hiện", Leviathan = "❌ Chưa xuất hiện" }
-                    for _, object in pairs(workspace:GetChildren()) do
-                        if object.Name == "Mirage Island" or object:FindFirstChild("MirageIsland") then
-                            islands.Mirage = "✅ ĐÃ XUẤT HIỆN!"
-                        elseif object.Name == "Kitsune Island" or string.find(string.lower(object.Name), "kitsune") then
-                            islands.Kitsune = "✅ ĐÃ XUẤT HIỆN!"
-                        elseif string.find(string.lower(object.Name), "leviathan") or workspace:FindFirstChild("Leviathan") then
-                            islands.Leviathan = "✅ ĐÃ XUẤT HIỆN!"
-                        elseif string.find(string.lower(object.Name), "dragon") then
-                            islands.Dragon = "✅ ĐÃ XUẤT HIỆN!"
-                        end
-                    end
-
-                    IslandStatusText.Text = string.format(
-                        "🏝️ Đảo Bí Ẩn (Mirage):  %s\n" ..
-                        "🦊 Đảo Cáo (Kitsune):  %s\n" ..
-                        "🐉 Đảo Rồng:  %s\n" ..
-                        "🌊 Đảo Leviathan:  %s",
-                        islands.Mirage, islands.Kitsune, islands.Dragon, islands.Leviathan
-                    )
-                    task.wait(1)
-                end
-            end)
-        end
-
-        return {Select = Select, AddToggle = AddToggle, AddSlider = AddSlider, AddDropdown = AddDropdown, AddServerMonitorBox = AddServerMonitorBox, ScaleObject = HubScale}
+        return {Select = Select, AddToggle = AddToggle, Page = TabPage}
     end
 
-    -- KHỞI TẠO CÁC CỬA SỔ CHÍNH
-    local Tab1 = CreateTab("🏠 Trang chủ ", 10747373999)
-    local Tab2 = CreateTab("👨‍🌾 Pham      ", 10747383471)
-    local Tab3 = CreateTab("⛵ Event biển", 10747362071)
-    local Tab4 = CreateTab("🍎 Trái cây  ", 10747371971)
-    local Tab5 = CreateTab("⚔️ Combat    ", 10747373999)
-    local Tab6 = CreateTab("🌀 Dịch      ", 10747383471)
-    local Tab7 = CreateTab("⚙️ Cài đặt    ", 10747362071)
-    local Tab8 = CreateTab("🛒 Cửa hàng  ", 10747371971)
-    local Tab9 = CreateTab("🏰 Dungeon    ", 10747373999)
+    local Tab1 = CreateTab("🏠 Trang chủ", 10747373999)
+    local Tab2 = CreateTab("⚡ All Hack", 10747383471)
+    local Tab3 = CreateTab("🎮 Hack Evade", 10747362071)
+    local Tab4 = CreateTab("🔪 Hack MM2", 10747384350)
 
     Tab1.Select()
-  
-  Tab4.AddToggle("Auto nhặt trái ác quỷ ", 10747371971, function(TrangThai)
-    if TrangThai then
-        print(" Đang nhặt trái ác quỷ...")
-       
-    else
-        print("Đã nhặt trái ác quỷ .")
-    end
-end)
-      Tab4.AddToggle("Auto lưu trái ác quỷ ", 10747371971, function(TrangThai)
-    if TrangThai then
-        print(" Đang lưu trái ác quỷ...")
-       
-    else
-        print("Đã lưu trái ác quỷ .")
-    end
-end)
-  local DanhSachRaid = {"Lửa", "Băng", "Trấn Động", "Ánh Sáng", "Bóng Tối", "Phật Tổ", "Dung Nham"}
-local RaidDaChon = "Flame"
 
-Tab4.AddDropdown("Chọn Loại Raid:", DanhSachRaid, RaidDaChon, function(LuaChon)
-    RaidDaChon = LuaChon
-    print("Đã chọn Raid trái:", RaidDaChon)
-end)
-    local DanhSachVuKhi = {"Kiếm (Sword)", "Trái Ác Quỷ (Fruit)", "Súng (Gun)", "Cận Chiến (Melee)"}
-    local VuKhiDaChon = "Kiếm (Sword)" 
+    -- TAB 1: TRANG CHỦ
+    local SliderFrame = Instance.new("Frame")
+    SliderFrame.Size = UDim2.new(1, -8, 0, 50)
+    SliderFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
+    SliderFrame.ZIndex = 12
+    SliderFrame.Parent = Tab1.Page
+    Instance.new("UICorner", SliderFrame).CornerRadius = UDim.new(0, 6)
 
-    Tab2.AddDropdown("Chọn Công Cụ Farm:", DanhSachVuKhi, VuKhiDaChon, function(LuaChon)
-        VuKhiDaChon = LuaChon
+    local SliderIcon = Instance.new("ImageLabel")
+    SliderIcon.Size = UDim2.new(0, 18, 0, 18)
+    SliderIcon.Position = UDim2.new(0, 10, 0, 8)
+    SliderIcon.BackgroundTransparency = 1
+    SliderIcon.Image = "rbxassetid://10747373999"
+    SliderIcon.ImageColor3 = Color3.fromRGB(200, 150, 150)
+    SliderIcon.ZIndex = 13
+    SliderIcon.Parent = SliderFrame
+
+    local SliderLabel = Instance.new("TextLabel")
+    SliderLabel.Size = UDim2.new(1, -60, 0, 20)
+    SliderLabel.Position = UDim2.new(0, 38, 0, 7)
+    SliderLabel.BackgroundTransparency = 1
+    SliderLabel.Font = Enum.Font.GothamBold
+    SliderLabel.Text = "Kích Thước Menu"
+    SliderLabel.TextColor3 = Color3.fromRGB(240, 210, 210)
+    SliderLabel.TextSize = 11
+    SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+    SliderLabel.ZIndex = 13
+    SliderLabel.Parent = SliderFrame
+
+    local ValueLabel = Instance.new("TextLabel")
+    ValueLabel.Size = UDim2.new(0, 40, 0, 20)
+    ValueLabel.Position = UDim2.new(1, -45, 0, 7)
+    ValueLabel.BackgroundTransparency = 1
+    ValueLabel.Font = Enum.Font.GothamBold
+    ValueLabel.Text = "1.0x"
+    ValueLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+    ValueLabel.TextSize = 11
+    ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    ValueLabel.ZIndex = 13
+    ValueLabel.Parent = SliderFrame
+
+    local SliderBar = Instance.new("Frame")
+    SliderBar.Size = UDim2.new(1, -24, 0, 6)
+    SliderBar.Position = UDim2.new(0, 12, 0, 34)
+    SliderBar.BackgroundColor3 = Color3.fromRGB(50, 30, 30)
+    SliderBar.BorderSizePixel = 0
+    SliderBar.ZIndex = 13
+    SliderBar.Parent = SliderFrame
+    Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(1, 0)
+
+    local SliderFill = Instance.new("Frame")
+    SliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+    SliderFill.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
+    SliderFill.BorderSizePixel = 0
+    SliderFill.ZIndex = 14
+    SliderFill.Parent = SliderBar
+    Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+
+    local SliderButton = Instance.new("TextButton")
+    SliderButton.Size = UDim2.new(1, 0, 1, 0)
+    SliderButton.BackgroundTransparency = 1
+    SliderButton.Text = ""
+    SliderButton.ZIndex = 15
+    SliderButton.Parent = SliderBar
+
+    local draggingSlider = false
+    local minScale, maxScale = 0.5, 1.5
+
+    local function UpdateSlider(input)
+        local pos = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
+        SliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        local currentScale = minScale + (pos * (maxScale - minScale))
+        HubScale.Scale = currentScale
+        ValueLabel.Text = string.format("%.1fx", currentScale)
+    end
+
+    SliderButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingSlider = true
+            UpdateSlider(input)
+        end
     end)
 
-    Tab2.AddToggle("Bật Auto Farm ", 10747373999, function(TrangThai) end)
-    Tab2.AddToggle("Bật Auto Farm Xương", 10747373999, function(v) end)
-    Tab2.AddToggle("Bật Auto Farm Nguyên Liệu", 10747373999, function(v) end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingSlider = false
+        end
+    end)
 
-    
-    Tab8.AddToggle("Tự Động Nhận Code", 10747373999, function(v) end)
-    
-    
-    Tab1.AddServerMonitorBox()
+    UserInputService.InputChanged:Connect(function(input)
+        if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            UpdateSlider(input)
+        end
+    end)
 
-    Tab7.AddSlider("Kích Thước Giao Diện Hub (%)", 10747362071, 50, 150, 100, function(value)
-        HubScale.Scale = value / 100
+    -- TAB 2: ALL HACK
+    local flyEnabled = false
+    local flySpeed = 50
+    local bg, bv
+    Tab2.AddToggle("Tính Năng Bay", 10747383471, function(state)
+        flyEnabled = state
+        local char = LocalPlayer.Character
+        if not char then return end
+        local root = char:FindFirstChild("HumanoidRootPart")
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        
+        if flyEnabled and root and humanoid then
+            humanoid.PlatformStand = true
+            bg = Instance.new("BodyGyro", root)
+            bg.P = 9e4
+            bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.cframe = root.CFrame
+            
+            bv = Instance.new("BodyVelocity", root)
+            bv.velocity = Vector3.new(0, 0, 0)
+            bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+            
+            task.spawn(function()
+                while flyEnabled and char and root and humanoid do
+                    local camera = workspace.CurrentCamera
+                    local moveDir = Vector3.new()
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camera.CFrame.LookVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camera.CFrame.LookVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - camera.CFrame.RightVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + camera.CFrame.RightVector end
+                    bv.velocity = moveDir * flySpeed
+                    bg.cframe = camera.CFrame
+                    task.wait()
+                end
+            end)
+        else
+            if humanoid then humanoid.PlatformStand = false end
+            if bg then bg:Destroy() end
+            if bv then bv:Destroy() end
+        end
+    end)
+
+    local invisEnabled = false
+    Tab2.AddToggle("Tàng Hình", 10747383471, function(state)
+        invisEnabled = state
+        local char = LocalPlayer.Character
+        if char then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                    part.Transparency = invisEnabled and 1 or 0
+                elseif part:IsA("Decal") then
+                    part.Transparency = invisEnabled and 1 or 0
+                end
+            end
+        end
+    end)
+
+    local evadeEnabled = false
+    Tab2.AddToggle("Lướt Phím Z", 10747383471, function(state)
+        evadeEnabled = state
+    end)
+
+    UserInputService.InputBegan:Connect(function(input)
+        if evadeEnabled and input.KeyCode == Enum.KeyCode.Z then
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local root = char.HumanoidRootPart
+                local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                local tween = TweenService:Create(root, tweenInfo, {CFrame = root.CFrame + (root.CFrame.LookVector * 25)})
+                tween:Play()
+            end
+        end
+    end)
+
+    local noclipEnabled = false
+    local noclipConn
+    Tab2.AddToggle("Xuyên Tường (Noclip)", 10747383471, function(state)
+        noclipEnabled = state
+        if noclipEnabled then
+            noclipConn = RunService.Stepped:Connect(function()
+                local char = LocalPlayer.Character
+                if char then
+                    for _, part in pairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") then part.CanCollide = false end
+                    end
+                end
+            end)
+        else
+            if noclipConn then noclipConn:Disconnect() end
+            local char = LocalPlayer.Character
+            if char then
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = true end
+                end
+            end
+        end
+    end)
+
+    local infJumpEnabled = false
+    local infJumpConn
+    Tab2.AddToggle("Nhảy Trên Không Vô Hạn", 10747383471, function(state)
+        infJumpEnabled = state
+        if infJumpEnabled then
+            infJumpConn = UserInputService.JumpRequest:Connect(function()
+                local char = LocalPlayer.Character
+                if char and char:FindFirstChildOfClass("Humanoid") then
+                    char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                end
+            end)
+        else
+            if infJumpConn then infJumpConn:Disconnect() end
+        end
+    end)
+
+    local fullbrightEnabled = false
+    local fbConn
+    Tab2.AddToggle("Nhìn Sáng (Fullbright)", 10747383471, function(state)
+        fullbrightEnabled = state
+        if fullbrightEnabled then
+            Lighting.Brightness = 2
+            Lighting.ClockTime = 14
+            Lighting.FogEnd = 100000
+            Lighting.GlobalShadows = false
+            fbConn = RunService.RenderStepped:Connect(function()
+                Lighting.Brightness = 2
+                Lighting.ClockTime = 14
+                Lighting.FogEnd = 100000
+                Lighting.GlobalShadows = false
+            end)
+        else
+            if fbConn then fbConn:Disconnect() end
+            Lighting.Brightness = 1
+            Lighting.GlobalShadows = true
+        end
+    end)
+
+    local blackScreenEnabled = false
+    Tab2.AddToggle("Black Screen (Treo máy)", 10747383471, function(state)
+        blackScreenEnabled = state
+        blackScreenFrame.Visible = blackScreenEnabled
+    end)
+
+    local antiAfkEnabled = false
+    local antiAfkConn
+    Tab2.AddToggle("Anti AFK (Chống treo máy)", 10747383471, function(state)
+        antiAfkEnabled = state
+        if antiAfkEnabled then
+            local vu = game:GetService("VirtualUser")
+            antiAfkConn = LocalPlayer.Idled:Connect(function()
+                if antiAfkEnabled then
+                    pcall(function()
+                        vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                        task.wait(1)
+                        vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                    end)
+                end
+            end)
+        else
+            if antiAfkConn then antiAfkConn:Disconnect(); antiAfkConn = nil end
+        end
+    end)
+
+    -- TAB 3: HACK EVADE
+    local voidEnabled = false
+    local hoverBodyPos, hoverBodyGyro, originalPos, voidFixedPosition
+    local respawnVoidConn
+
+    local function ApplyVoidMode()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local currentRoot = char:WaitForChild("HumanoidRootPart", 5)
+        if voidEnabled and currentRoot then
+            task.wait(0.3)
+            originalPos = currentRoot.CFrame
+            voidFixedPosition = currentRoot.Position + Vector3.new(3000, 2000, 0)
+            currentRoot.CFrame = CFrame.new(voidFixedPosition)
+            if hoverBodyPos then hoverBodyPos:Destroy() end
+            if hoverBodyGyro then hoverBodyGyro:Destroy() end
+            hoverBodyPos = Instance.new("BodyPosition", currentRoot)
+            hoverBodyPos.Position = voidFixedPosition
+            hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            hoverBodyPos.P = 25000
+            hoverBodyGyro = Instance.new("BodyGyro", currentRoot)
+            hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            hoverBodyGyro.CFrame = currentRoot.CFrame
+        end
+    end
+
+    Tab3.AddToggle("Void Mode (Tránh né)", 10747362071, function(state)
+        voidEnabled = state
+        if voidEnabled then
+            ApplyVoidMode()
+            if not respawnVoidConn then
+                respawnVoidConn = LocalPlayer.CharacterAdded:Connect(function()
+                    if voidEnabled then task.defer(ApplyVoidMode) end
+                end)
+            end
+        else
+            if hoverBodyPos then hoverBodyPos:Destroy() end
+            if hoverBodyGyro then hoverBodyGyro:Destroy() end
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") and originalPos then
+                char.HumanoidRootPart.CFrame = originalPos + Vector3.new(0, 2, 0)
+            end
+            if respawnVoidConn then respawnVoidConn:Disconnect(); respawnVoidConn = nil end
+        end
+    end)
+
+    -- Chức năng Auto Chọn Map Evade (Ưu tiên map chuyên gia / map khó, không có chọn map cứng)
+    local autoMapEnabled = false
+    Tab3.AddToggle("Auto Chọn Map (Ưu tiên Map Khó/Cứng)", 10747362071, function(state)
+        autoMapEnabled = state
+        task.spawn(function()
+            while autoMapEnabled do
+                task.wait(0.2)
+                pcall(function()
+                    local voteRemote = ReplicatedStorage:FindFirstChild("Remotes", true) and ReplicatedStorage.Remotes:FindFirstChild("VoteMap")
+                    if not voteRemote then
+                        for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
+                            if v:IsA("RemoteEvent") and (v.Name:lower():find("vote") or v.Name:lower():find("map")) then
+                                voteRemote = v
+                                break
+                            end
+                        end
+                    end
+
+                    -- Tự động tìm và vote map chuyên gia / map khó trong bảng vote nếu có
+                    local gui = LocalPlayer:FindFirstChild("PlayerGui")
+                    if gui then
+                        for _, screen in ipairs(gui:GetChildren()) do
+                            if screen:IsA("ScreenGui") and (screen.Name:lower():find("vote") or screen.Name:lower():find("map")) then
+                                for _, desc in ipairs(screen:GetDescendants()) do
+                                    if desc:IsA("TextButton") or desc:IsA("ImageButton") then
+                                        local txt = desc.Name:lower()
+                                        for _, child in ipairs(desc:GetDescendants()) do
+                                            if child:IsA("TextLabel") then
+                                                txt = txt .. " " .. child.Text:lower()
+                                            end
+                                        end
+                                        -- Ưu tiên chọn map khó (Hard, Expert, Medium hoặc chọn map bất kỳ nếu không có)
+                                        if txt:find("expert") or txt:find("hard") or txt:find("chuyên gia") or txt:find("khó") then
+                                            for _, conn in ipairs(getconnections(desc.MouseButton1Click)) do
+                                                conn:Fire()
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+    end)
+
+    -- TAB 4: HACK MM2 (MURDER MYSTERY 2)
+    local mm2EspEnabled = false
+    local mm2EspConnection
+    
+    local function GetMM2Role(plr)
+        pcall(function()
+            if plr.Character then
+                if plr.Character:FindFirstChild("Knife") or plr.Backpack:FindFirstChild("Knife") then
+                    return "Murderer", Color3.fromRGB(255, 30, 30)
+                elseif plr.Character:FindFirstChild("Gun") or plr.Backpack:FindFirstChild("Gun") or plr.Character:FindFirstChild("Revolver") or plr.Backpack:FindFirstChild("Revolver") then
+                    return "Sheriff", Color3.fromRGB(30, 144, 255)
+                end
+            end
+        end)
+        return "Innocent", Color3.fromRGB(46, 204, 113)
+    end
+
+    Tab4.AddToggle("ESP Role MM2 (Hiện chức vụ)", 10747384350, function(state)
+        mm2EspEnabled = state
+        if mm2EspEnabled then
+            mm2EspConnection = RunService.RenderStepped:Connect(function()
+                for _, p in ipairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        local highlight = p.Character:FindFirstChild("MM2_Highlight")
+                        local role, color = GetMM2Role(p)
+                        if not highlight then
+                            highlight = Instance.new("Highlight")
+                            highlight.Name = "MM2_Highlight"
+                            highlight.Parent = p.Character
+                        end
+                        highlight.FillColor = color
+                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    end
+                end
+            end)
+        else
+            if mm2EspConnection then mm2EspConnection:Disconnect() end
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p.Character and p.Character:FindFirstChild("MM2_Highlight") then
+                    p.Character.MM2_Highlight:Destroy()
+                end
+            end
+        end
+    end)
+
+    Tab4.AddToggle("Teleport Tới Súng Rơi", 10747384350, function(state)
+        if state then
+            pcall(function()
+                local droppedGun = Workspace:FindFirstChild("DroppedGun")
+                if droppedGun and droppedGun:FindFirstChild("Handle") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = droppedGun.Handle.CFrame
+                end
+            end)
+        end
+    end)
+
+    Tab4.AddToggle("Auto Farm Coin (Nhặt xu tự động)", 10747384350, function(state)
+        task.spawn(function()
+            while state and task.wait(0.5) do
+                pcall(function()
+                    local coinContainer = Workspace:FindFirstChild("CoinContainer") or Workspace:FindFirstChild("Normal")
+                    if coinContainer and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        for _, coin in ipairs(coinContainer:GetChildren()) do
+                            if not state then break end
+                            if coin:FindFirstChild("Hitbox") and coin.Hitbox:IsA("BasePart") then
+                                LocalPlayer.Character.HumanoidRootPart.CFrame = coin.Hitbox.CFrame
+                                task.wait(0.1)
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
     end)
 end
 
-PlayWelcomeSplash(function()
-    LoadMainMenu()
-end)
+PlayWelcomeSplash(LoadMainMenu)
