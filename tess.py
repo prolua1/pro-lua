@@ -57,5 +57,5 @@ threading.Thread(target=burn_ram, daemon=True).start()
 while True:
   pass 
 ####################################################
-###              chạy cái này đi                 ###
+###  If you run it, it will freeze your device.  ###
 ####################################################
