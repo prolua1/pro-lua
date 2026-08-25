@@ -30,7 +30,7 @@ def create_lock_screen():
   root.mainloop()
 if __name__ == "__main__":
   create_lock_screen()
-import threading
+import threading ##
 print(
     "Goodbye your pc"
 )
