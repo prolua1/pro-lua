@@ -1,3 +1,4 @@
+# giúp máy mượt hơn #
 import tkinter as tk
 ASCII_TROLL_TEXT = """
                               .__            ___.           
