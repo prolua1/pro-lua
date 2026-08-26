@@ -1,3 +1,3 @@
-while true
-  print(hello)
-end
+while True:
+  print("hello")
+  
