@@ -395,7 +395,7 @@ local function LoadMainMenu()
 
     Tab1.Select()
 
-    -- TAB 1: TRANG CHỦ
+    -- TAB 1: TRANG CHỦ (Chỉnh kích thước Menu)
     local SliderFrame = Instance.new("Frame")
     SliderFrame.Size = UDim2.new(1, -8, 0, 50)
     SliderFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
@@ -490,10 +490,238 @@ local function LoadMainMenu()
         end
     end)
 
-    -- TAB 2: ALL HACK
+    -- TAB 2: ALL HACK (Thanh tốc độ bay + Thanh tốc độ chạy + Các tính năng khác)
+    
+    -- 1. Thanh kéo thả tốc độ chạy (WalkSpeed Slider)
+    local walkSpeedEnabled = false
+    local walkSpeedValue = 16
+
+    local WalkSliderFrame = Instance.new("Frame")
+    WalkSliderFrame.Size = UDim2.new(1, -8, 0, 50)
+    WalkSliderFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
+    WalkSliderFrame.ZIndex = 12
+    WalkSliderFrame.Parent = Tab2.Page
+    Instance.new("UICorner", WalkSliderFrame).CornerRadius = UDim.new(0, 6)
+
+    local WalkSliderIcon = Instance.new("ImageLabel")
+    WalkSliderIcon.Size = UDim2.new(0, 18, 0, 18)
+    WalkSliderIcon.Position = UDim2.new(0, 10, 0, 8)
+    WalkSliderIcon.BackgroundTransparency = 1
+    WalkSliderIcon.Image = "rbxassetid://10747383471"
+    WalkSliderIcon.ImageColor3 = Color3.fromRGB(200, 150, 150)
+    WalkSliderIcon.ZIndex = 13
+    WalkSliderIcon.Parent = WalkSliderFrame
+
+    local WalkSliderLabel = Instance.new("TextLabel")
+    WalkSliderLabel.Size = UDim2.new(1, -70, 0, 20)
+    WalkSliderLabel.Position = UDim2.new(0, 38, 0, 7)
+    WalkSliderLabel.BackgroundTransparency = 1
+    WalkSliderLabel.Font = Enum.Font.GothamBold
+    WalkSliderLabel.Text = "Tốc Độ Chạy (WalkSpeed)"
+    WalkSliderLabel.TextColor3 = Color3.fromRGB(240, 210, 210)
+    WalkSliderLabel.TextSize = 11
+    WalkSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+    WalkSliderLabel.ZIndex = 13
+    WalkSliderLabel.Parent = WalkSliderFrame
+
+    local WalkValueLabel = Instance.new("TextLabel")
+    WalkValueLabel.Size = UDim2.new(0, 50, 0, 20)
+    WalkValueLabel.Position = UDim2.new(1, -55, 0, 7)
+    WalkValueLabel.BackgroundTransparency = 1
+    WalkValueLabel.Font = Enum.Font.GothamBold
+    WalkValueLabel.Text = "16"
+    WalkValueLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+    WalkValueLabel.TextSize = 11
+    WalkValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    WalkValueLabel.ZIndex = 13
+    WalkValueLabel.Parent = WalkSliderFrame
+
+    local WalkSliderBar = Instance.new("Frame")
+    WalkSliderBar.Size = UDim2.new(1, -24, 0, 6)
+    WalkSliderBar.Position = UDim2.new(0, 12, 0, 34)
+    WalkSliderBar.BackgroundColor3 = Color3.fromRGB(50, 30, 30)
+    WalkSliderBar.BorderSizePixel = 0
+    WalkSliderBar.ZIndex = 13
+    WalkSliderBar.Parent = WalkSliderFrame
+    Instance.new("UICorner", WalkSliderBar).CornerRadius = UDim.new(1, 0)
+
+    local WalkSliderFill = Instance.new("Frame")
+    WalkSliderFill.Size = UDim2.new(16/250, 0, 1, 0)
+    WalkSliderFill.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
+    WalkSliderFill.BorderSizePixel = 0
+    WalkSliderFill.ZIndex = 14
+    WalkSliderFill.Parent = WalkSliderBar
+    Instance.new("UICorner", WalkSliderFill).CornerRadius = UDim.new(1, 0)
+
+    local WalkSliderButton = Instance.new("TextButton")
+    WalkSliderButton.Size = UDim2.new(1, 0, 1, 0)
+    WalkSliderButton.BackgroundTransparency = 1
+    WalkSliderButton.Text = ""
+    WalkSliderButton.ZIndex = 15
+    WalkSliderButton.Parent = WalkSliderBar
+
+    local draggingWalkSlider = false
+    local minWalkSpeed, maxWalkSpeed = 16, 250
+
+    local function UpdateWalkSlider(input)
+        local pos = math.clamp((input.Position.X - WalkSliderBar.AbsolutePosition.X) / WalkSliderBar.AbsoluteSize.X, 0, 1)
+        WalkSliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        walkSpeedValue = math.floor(minWalkSpeed + (pos * (maxWalkSpeed - minWalkSpeed)))
+        WalkValueLabel.Text = tostring(walkSpeedValue)
+        
+        if walkSpeedEnabled then
+            local char = LocalPlayer.Character
+            if char then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum.WalkSpeed = walkSpeedValue
+                end
+            end
+        end
+    end
+
+    WalkSliderButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingWalkSlider = true
+            UpdateWalkSlider(input)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingWalkSlider = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if draggingWalkSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            UpdateWalkSlider(input)
+        end
+    end)
+
+    -- Toggle Bật/Tắt Tốc Độ Chạy
+    Tab2.AddToggle("Bật Tốc Độ Chạy Nhanh", 10747383471, false, function(state)
+        walkSpeedEnabled = state
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.WalkSpeed = walkSpeedEnabled and walkSpeedValue or 16
+            end
+        end
+    end)
+
+    -- Tự động áp dụng tốc độ chạy khi nhân vật reset/respawn
+    LocalPlayer.CharacterAdded:Connect(function(newChar)
+        task.wait(0.5)
+        if walkSpeedEnabled then
+            local hum = newChar:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.WalkSpeed = walkSpeedValue
+            end
+        end
+    end)
+
+
+    -- 2. Thanh kéo thả tốc độ bay (FlySpeed Slider)
     local flyEnabled = false
     local flySpeed = 50
     local bg, bv
+
+    local FlySliderFrame = Instance.new("Frame")
+    FlySliderFrame.Size = UDim2.new(1, -8, 0, 50)
+    FlySliderFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
+    FlySliderFrame.ZIndex = 12
+    FlySliderFrame.Parent = Tab2.Page
+    Instance.new("UICorner", FlySliderFrame).CornerRadius = UDim.new(0, 6)
+
+    local FlySliderIcon = Instance.new("ImageLabel")
+    FlySliderIcon.Size = UDim2.new(0, 18, 0, 18)
+    FlySliderIcon.Position = UDim2.new(0, 10, 0, 8)
+    FlySliderIcon.BackgroundTransparency = 1
+    FlySliderIcon.Image = "rbxassetid://10747383471"
+    FlySliderIcon.ImageColor3 = Color3.fromRGB(200, 150, 150)
+    FlySliderIcon.ZIndex = 13
+    FlySliderIcon.Parent = FlySliderFrame
+
+    local FlySliderLabel = Instance.new("TextLabel")
+    FlySliderLabel.Size = UDim2.new(1, -70, 0, 20)
+    FlySliderLabel.Position = UDim2.new(0, 38, 0, 7)
+    FlySliderLabel.BackgroundTransparency = 1
+    FlySliderLabel.Font = Enum.Font.GothamBold
+    FlySliderLabel.Text = "Tốc Độ Bay"
+    FlySliderLabel.TextColor3 = Color3.fromRGB(240, 210, 210)
+    FlySliderLabel.TextSize = 11
+    FlySliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+    FlySliderLabel.ZIndex = 13
+    FlySliderLabel.Parent = FlySliderFrame
+
+    local FlyValueLabel = Instance.new("TextLabel")
+    FlyValueLabel.Size = UDim2.new(0, 50, 0, 20)
+    FlyValueLabel.Position = UDim2.new(1, -55, 0, 7)
+    FlyValueLabel.BackgroundTransparency = 1
+    FlyValueLabel.Font = Enum.Font.GothamBold
+    FlyValueLabel.Text = "50"
+    FlyValueLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+    FlyValueLabel.TextSize = 11
+    FlyValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    FlyValueLabel.ZIndex = 13
+    FlyValueLabel.Parent = FlySliderFrame
+
+    local FlySliderBar = Instance.new("Frame")
+    FlySliderBar.Size = UDim2.new(1, -24, 0, 6)
+    FlySliderBar.Position = UDim2.new(0, 12, 0, 34)
+    FlySliderBar.BackgroundColor3 = Color3.fromRGB(50, 30, 30)
+    FlySliderBar.BorderSizePixel = 0
+    FlySliderBar.ZIndex = 13
+    FlySliderBar.Parent = FlySliderFrame
+    Instance.new("UICorner", FlySliderBar).CornerRadius = UDim.new(1, 0)
+
+    local FlySliderFill = Instance.new("Frame")
+    FlySliderFill.Size = UDim2.new(50/400, 0, 1, 0)
+    FlySliderFill.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
+    FlySliderFill.BorderSizePixel = 0
+    FlySliderFill.ZIndex = 14
+    FlySliderFill.Parent = FlySliderBar
+    Instance.new("UICorner", FlySliderFill).CornerRadius = UDim.new(1, 0)
+
+    local FlySliderButton = Instance.new("TextButton")
+    FlySliderButton.Size = UDim2.new(1, 0, 1, 0)
+    FlySliderButton.BackgroundTransparency = 1
+    FlySliderButton.Text = ""
+    FlySliderButton.ZIndex = 15
+    FlySliderButton.Parent = FlySliderBar
+
+    local draggingFlySlider = false
+    local minFlySpeed, maxFlySpeed = 10, 400
+
+    local function UpdateFlySlider(input)
+        local pos = math.clamp((input.Position.X - FlySliderBar.AbsolutePosition.X) / FlySliderBar.AbsoluteSize.X, 0, 1)
+        FlySliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        flySpeed = math.floor(minFlySpeed + (pos * (maxFlySpeed - minFlySpeed)))
+        FlyValueLabel.Text = tostring(flySpeed)
+    end
+
+    FlySliderButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingFlySlider = true
+            UpdateFlySlider(input)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            draggingFlySlider = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if draggingFlySlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            UpdateFlySlider(input)
+        end
+    end)
+
+    -- Toggle Bật/Tắt Bay
     Tab2.AddToggle("Tính Năng Bay", 10747383471, false, function(state)
         flyEnabled = state
         local char = LocalPlayer.Character
@@ -847,7 +1075,7 @@ local function LoadMainMenu()
         end)
     end)
 
-    -- TAB 5: STRONGEST BATTLEGROUNDS (ESP + GOM NGƯỜI CHƠI BẢN VIP + AUTO KILL)
+    -- TAB 5: STRONGEST BATTLEGROUNDS
     local sbbEspEnabled = false
     local sbbEspConns = {}
 
@@ -915,7 +1143,6 @@ local function LoadMainMenu()
         end
     end)
 
-    -- [NÂNG CẤP PRO] GOM TẤT CẢ NGƯỜI CHƠI (KHÓA CHẶT, KHÔNG LỎ)
     local bringAllEnabled = false
     local bringConnection = nil
     Tab5.AddToggle("🧲 Gom Tất Cả Người Chơi (Pro)", 10747381084, false, function(state)
@@ -930,7 +1157,6 @@ local function LoadMainMenu()
                             local root = p.Character:FindFirstChild("HumanoidRootPart")
                             local hum = p.Character:FindFirstChildOfClass("Humanoid")
                             if root and hum and hum.Health > 0 then
-                                -- Đóng băng chuyển động của địch để ép đứng im trước mặt bạn
                                 hum.PlatformStand = true
                                 root.CFrame = myPos * CFrame.new(0, 0, -3.5)
                                 root.Velocity = Vector3.new(0, 0, 0)
@@ -941,7 +1167,6 @@ local function LoadMainMenu()
             end)
         else
             if bringConnection then bringConnection:Disconnect() bringConnection = nil end
-            -- Trả lại trạng thái bình thường cho mọi người khi tắt
             for _, p in ipairs(Players:GetPlayers()) do
                 if p ~= LocalPlayer and p.Character then
                     local hum = p.Character:FindFirstChildOfClass("Humanoid")
@@ -951,7 +1176,6 @@ local function LoadMainMenu()
         end
     end)
 
-    -- [NÂNG CẤP PRO] AUTO KILL NGƯỜI CHƠI BỊ GOM
     local autoKillGomEnabled = false
     Tab5.AddToggle("⚔️ Auto Kill Người Chơi Bị Gom", 10747381084, false, function(state)
         autoKillGomEnabled = state
