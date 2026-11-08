@@ -490,9 +490,69 @@ local function LoadMainMenu()
         end
     end)
 
-    -- TAB 2: ALL HACK (Thanh tốc độ bay + Thanh tốc độ chạy + Các tính năng khác)
+    -- TAB 2: ALL HACK (Thêm Fix Lag, Hiện Vị Trí Tô Đỏ, Tốc Độ Chạy, Tốc Độ Bay...)
     
-    -- 1. Thanh kéo thả tốc độ chạy (WalkSpeed Slider)
+    -- 1. Tính năng Fix Lag (Tối ưu hóa đồ họa)
+    local fixLagEnabled = false
+    Tab2.AddToggle("⚡ Fix Lag (Tăng FPS)", 10747383471, false, function(state)
+        fixLagEnabled = state
+        if fixLagEnabled then
+            pcall(function()
+                Lighting.GlobalShadows = false
+                Lighting.FogEnd = 9e9
+                for _, v in ipairs(Workspace:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.Material = Enum.Material.SmoothPlastic
+                        v.Reflectance = 0
+                    elseif v:IsA("Decal") or v:IsA("Texture") then
+                        v.Transparency = 1
+                    end
+                end
+            end)
+        end
+    end)
+
+    -- 2. Tính năng Hiện Vị Trí Người Chơi (Tô Đỏ / ESP Red Highlight)
+    local espRedEnabled = false
+    local espRedConns = {}
+
+    local function updateEspRed()
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                local highlight = p.Character:FindFirstChild("TuanLo_RedHighlight")
+                if not highlight and espRedEnabled then
+                    highlight = Instance.new("Highlight")
+                    highlight.Name = "TuanLo_RedHighlight"
+                    highlight.Adornee = p.Character
+                    highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Tô đỏ bên trong
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- Viền trắng nổi bật
+                    highlight.FillTransparency = 0.3
+                    highlight.OutlineTransparency = 0
+                    highlight.Parent = p.Character
+                end
+                if highlight then
+                    highlight.Enabled = espRedEnabled
+                end
+            end
+        end
+    end
+
+    Tab2.AddToggle("🔴 Hiện Vị Trí (Tô Đỏ)", 10747383471, false, function(state)
+        espRedEnabled = state
+        if espRedEnabled then
+            table.insert(espRedConns, RunService.RenderStepped:Connect(updateEspRed))
+        else
+            for _, conn in ipairs(espRedConns) do conn:Disconnect() end
+            espRedConns = {}
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p.Character and p.Character:FindFirstChild("TuanLo_RedHighlight") then
+                    p.Character.TuanLo_RedHighlight:Destroy()
+                end
+            end
+        end
+    end)
+
+    -- 3. Thanh kéo thả tốc độ chạy (WalkSpeed Slider)
     local walkSpeedEnabled = false
     local walkSpeedValue = 16
 
@@ -599,7 +659,6 @@ local function LoadMainMenu()
         end
     end)
 
-    -- Toggle Bật/Tắt Tốc Độ Chạy
     Tab2.AddToggle("Bật Tốc Độ Chạy Nhanh", 10747383471, false, function(state)
         walkSpeedEnabled = state
         local char = LocalPlayer.Character
@@ -611,7 +670,6 @@ local function LoadMainMenu()
         end
     end)
 
-    -- Tự động áp dụng tốc độ chạy khi nhân vật reset/respawn
     LocalPlayer.CharacterAdded:Connect(function(newChar)
         task.wait(0.5)
         if walkSpeedEnabled then
@@ -622,8 +680,7 @@ local function LoadMainMenu()
         end
     end)
 
-
-    -- 2. Thanh kéo thả tốc độ bay (FlySpeed Slider)
+    -- 4. Thanh kéo thả tốc độ bay (FlySpeed Slider)
     local flyEnabled = false
     local flySpeed = 50
     local bg, bv
@@ -721,7 +778,6 @@ local function LoadMainMenu()
         end
     end)
 
-    -- Toggle Bật/Tắt Bay
     Tab2.AddToggle("Tính Năng Bay", 10747383471, false, function(state)
         flyEnabled = state
         local char = LocalPlayer.Character
