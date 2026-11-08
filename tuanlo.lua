@@ -1,6 +1,6 @@
 local LPH_Name = "Tuan Lo Pro Hub"
 local LPH_Developer = "Tuan Lo Developer"
-local LPH_Version = "v8.5.0 Ultimate Bring Pro"
+local LPH_Version = "v9.1 Ultimate Full Features"
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -8,6 +8,8 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
@@ -142,10 +144,6 @@ local function LoadMainMenu()
     MiniText.TextSize = 13
     MiniText.ZIndex = 16
     MiniText.Parent = MinimizeBtn
-    
-    local MiniTextStroke = Instance.new("UIStroke", MiniText)
-    MiniTextStroke.Color = Color3.fromRGB(150, 0, 0)
-    MiniTextStroke.Thickness = 1.5
 
     MinimizeBtn.MouseEnter:Connect(function()
         ApplyTween(MinimizeBtn, {Size = UDim2.new(0, 56, 0, 56)}, 0.15):Play()
@@ -178,7 +176,7 @@ local function LoadMainMenu()
     TitleText.Font = Enum.Font.FredokaOne
     TitleText.Text = LPH_Name .. " — " .. LPH_Version
     TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleText.TextSize = 14
+    TitleText.TextSize = 13
     TitleText.TextXAlignment = Enum.TextXAlignment.Left
     TitleText.ZIndex = 12
     TitleText.Parent = TitleBar
@@ -384,7 +382,44 @@ local function LoadMainMenu()
             end
         end
 
-        return {Select = Select, AddToggle = AddToggle, Page = TabPage}
+        local function AddButton(name, buttonIconId, callback)
+            local BtnFrame = Instance.new("Frame")
+            BtnFrame.Size = UDim2.new(1, -8, 0, 38)
+            BtnFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
+            BtnFrame.ZIndex = 12
+            BtnFrame.Parent = TabPage
+            Instance.new("UICorner", BtnFrame).CornerRadius = UDim.new(0, 6)
+
+            local BtnIcon = Instance.new("ImageLabel")
+            BtnIcon.Size = UDim2.new(0, 18, 0, 18)
+            BtnIcon.Position = UDim2.new(0, 10, 0.5, -9)
+            BtnIcon.BackgroundTransparency = 1
+            BtnIcon.Image = "rbxassetid://" .. tostring(buttonIconId)
+            BtnIcon.ImageColor3 = Color3.fromRGB(200, 150, 150)
+            BtnIcon.ZIndex = 13
+            BtnIcon.Parent = BtnFrame
+
+            local ActionBtn = Instance.new("TextButton")
+            ActionBtn.Size = UDim2.new(1, -38, 1, 0)
+            ActionBtn.Position = UDim2.new(0, 38, 0, 0)
+            ActionBtn.BackgroundTransparency = 1
+            ActionBtn.Font = Enum.Font.GothamBold
+            ActionBtn.Text = name
+            ActionBtn.TextColor3 = Color3.fromRGB(240, 210, 210)
+            ActionBtn.TextSize = 11
+            ActionBtn.TextXAlignment = Enum.TextXAlignment.Left
+            ActionBtn.ZIndex = 13
+            ActionBtn.Parent = BtnFrame
+
+            ActionBtn.MouseButton1Click:Connect(function()
+                ApplyTween(BtnFrame, {BackgroundColor3 = Color3.fromRGB(60, 25, 25)}, 0.1):Play()
+                task.wait(0.1)
+                ApplyTween(BtnFrame, {BackgroundColor3 = Color3.fromRGB(25, 15, 15)}, 0.15):Play()
+                task.spawn(callback)
+            end)
+        end
+
+        return {Select = Select, AddToggle = AddToggle, AddButton = AddButton, Page = TabPage}
     end
 
     local Tab1 = CreateTab("🏠 Trang chủ", 10747373999)
@@ -395,7 +430,7 @@ local function LoadMainMenu()
 
     Tab1.Select()
 
-    -- TAB 1: TRANG CHỦ (Chỉnh kích thước Menu)
+    -- TAB 1: TRANG CHỦ
     local SliderFrame = Instance.new("Frame")
     SliderFrame.Size = UDim2.new(1, -8, 0, 50)
     SliderFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
@@ -490,54 +525,93 @@ local function LoadMainMenu()
         end
     end)
 
-    -- TAB 2: ALL HACK (Thêm Fix Lag, Hiện Vị Trí Tô Đỏ, Tốc Độ Chạy, Tốc Độ Bay...)
-    
-    -- 1. Tính năng Fix Lag (Tối ưu hóa đồ họa)
-    local fixLagEnabled = false
+    Tab1.AddButton("🔄 Rejoin Server (Vào lại)", 10747373999, function()
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+    end)
+
+    Tab1.AddButton("🌐 Server Hop (Đổi Server Khác)", 10747373999, function()
+        local placeId = game.PlaceId
+        local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100")).data
+        for _, s in ipairs(servers) do
+            if s.playing < s.maxPlayers and s.id ~= game.JobId then
+                TeleportService:TeleportToPlaceInstance(placeId, s.id)
+                break
+            end
+        end
+    end)
+
+    -- TAB 2: ALL HACK
     Tab2.AddToggle("⚡ Fix Lag (Tăng FPS)", 10747383471, false, function(state)
-        fixLagEnabled = state
-        if fixLagEnabled then
+        if state then
             pcall(function()
                 Lighting.GlobalShadows = false
                 Lighting.FogEnd = 9e9
                 for _, v in ipairs(Workspace:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.Material = Enum.Material.SmoothPlastic
-                        v.Reflectance = 0
-                    elseif v:IsA("Decal") or v:IsA("Texture") then
-                        v.Transparency = 1
-                    end
+                    if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic v.Reflectance = 0
+                    elseif v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 1 end
                 end
             end)
         end
     end)
 
-    -- 2. Tính năng Hiện Vị Trí Người Chơi (Tô Đỏ / ESP Red Highlight)
+    -- Hiện Vị Trí (Tô Đỏ + Tên + Khoảng Cách mét)
     local espRedEnabled = false
     local espRedConns = {}
-
     local function updateEspRed()
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character then
-                local highlight = p.Character:FindFirstChild("TuanLo_RedHighlight")
+                local char = p.Character
+                local head = char:FindFirstChild("Head")
+                
+                local highlight = char:FindFirstChild("TuanLo_RedHighlight")
                 if not highlight and espRedEnabled then
                     highlight = Instance.new("Highlight")
                     highlight.Name = "TuanLo_RedHighlight"
-                    highlight.Adornee = p.Character
-                    highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Tô đỏ bên trong
-                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- Viền trắng nổi bật
+                    highlight.Adornee = char
+                    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
                     highlight.FillTransparency = 0.3
                     highlight.OutlineTransparency = 0
-                    highlight.Parent = p.Character
+                    highlight.Parent = char
                 end
-                if highlight then
-                    highlight.Enabled = espRedEnabled
+
+                local billboard = char:FindFirstChild("TuanLo_EspBillboard")
+                if not billboard and espRedEnabled and head then
+                    billboard = Instance.new("BillboardGui")
+                    billboard.Name = "TuanLo_EspBillboard"
+                    billboard.Size = UDim2.new(0, 140, 0, 50)
+                    billboard.StudsOffset = Vector3.new(0, 3, 0)
+                    billboard.AlwaysOnTop = true
+                    billboard.Parent = char
+
+                    local txtLabel = Instance.new("TextLabel")
+                    txtLabel.Name = "InfoText"
+                    txtLabel.Size = UDim2.new(1, 0, 1, 0)
+                    txtLabel.BackgroundTransparency = 1
+                    txtLabel.Font = Enum.Font.GothamBold
+                    txtLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    txtLabel.TextSize = 12
+                    txtLabel.TextStrokeTransparency = 0.5
+                    txtLabel.Parent = billboard
+                end
+
+                if highlight then highlight.Enabled = espRedEnabled end
+                if billboard then
+                    billboard.Enabled = espRedEnabled
+                    if espRedEnabled and head and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        local myRoot = LocalPlayer.Character.HumanoidRootPart
+                        local dist = math.floor((head.Position - myRoot.Position).Magnitude)
+                        local txtLabel = billboard:FindFirstChild("InfoText")
+                        if txtLabel then
+                            txtLabel.Text = p.Name .. "\n[" .. dist .. "m]"
+                        end
+                    end
                 end
             end
         end
     end
 
-    Tab2.AddToggle("🔴 Hiện Vị Trí (Tô Đỏ)", 10747383471, false, function(state)
+    Tab2.AddToggle("🔴 Hiện Vị Trí (Tô Đỏ + Tên + Khoảng Cách)", 10747383471, false, function(state)
         espRedEnabled = state
         if espRedEnabled then
             table.insert(espRedConns, RunService.RenderStepped:Connect(updateEspRed))
@@ -545,17 +619,17 @@ local function LoadMainMenu()
             for _, conn in ipairs(espRedConns) do conn:Disconnect() end
             espRedConns = {}
             for _, p in ipairs(Players:GetPlayers()) do
-                if p.Character and p.Character:FindFirstChild("TuanLo_RedHighlight") then
-                    p.Character.TuanLo_RedHighlight:Destroy()
+                if p.Character then
+                    if p.Character:FindFirstChild("TuanLo_RedHighlight") then p.Character.TuanLo_RedHighlight:Destroy() end
+                    if p.Character:FindFirstChild("TuanLo_EspBillboard") then p.Character.TuanLo_EspBillboard:Destroy() end
                 end
             end
         end
     end)
 
-    -- 3. Thanh kéo thả tốc độ chạy (WalkSpeed Slider)
+    -- WalkSpeed Slider
     local walkSpeedEnabled = false
     local walkSpeedValue = 16
-
     local WalkSliderFrame = Instance.new("Frame")
     WalkSliderFrame.Size = UDim2.new(1, -8, 0, 50)
     WalkSliderFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
@@ -628,59 +702,130 @@ local function LoadMainMenu()
         WalkSliderFill.Size = UDim2.new(pos, 0, 1, 0)
         walkSpeedValue = math.floor(minWalkSpeed + (pos * (maxWalkSpeed - minWalkSpeed)))
         WalkValueLabel.Text = tostring(walkSpeedValue)
-        
-        if walkSpeedEnabled then
-            local char = LocalPlayer.Character
-            if char then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum.WalkSpeed = walkSpeedValue
-                end
-            end
+        if walkSpeedEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeedValue
         end
     end
 
     WalkSliderButton.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            draggingWalkSlider = true
-            UpdateWalkSlider(input)
-        end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then draggingWalkSlider = true UpdateWalkSlider(input) end
     end)
-
     UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            draggingWalkSlider = false
-        end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then draggingWalkSlider = false end
     end)
-
     UserInputService.InputChanged:Connect(function(input)
-        if draggingWalkSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            UpdateWalkSlider(input)
-        end
+        if draggingWalkSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateWalkSlider(input) end
     end)
 
     Tab2.AddToggle("Bật Tốc Độ Chạy Nhanh", 10747383471, false, function(state)
         walkSpeedEnabled = state
-        local char = LocalPlayer.Character
-        if char then
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.WalkSpeed = walkSpeedEnabled and walkSpeedValue or 16
-            end
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeedEnabled and walkSpeedValue or 16
         end
     end)
 
-    LocalPlayer.CharacterAdded:Connect(function(newChar)
-        task.wait(0.5)
-        if walkSpeedEnabled then
-            local hum = newChar:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.WalkSpeed = walkSpeedValue
-            end
+    -- JumpPower Slider
+    local jumpPowerEnabled = false
+    local jumpPowerValue = 50
+    local JumpSliderFrame = Instance.new("Frame")
+    JumpSliderFrame.Size = UDim2.new(1, -8, 0, 50)
+    JumpSliderFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
+    JumpSliderFrame.ZIndex = 12
+    JumpSliderFrame.Parent = Tab2.Page
+    Instance.new("UICorner", JumpSliderFrame).CornerRadius = UDim.new(0, 6)
+
+    local JumpSliderIcon = Instance.new("ImageLabel")
+    JumpSliderIcon.Size = UDim2.new(0, 18, 0, 18)
+    JumpSliderIcon.Position = UDim2.new(0, 10, 0, 8)
+    JumpSliderIcon.BackgroundTransparency = 1
+    JumpSliderIcon.Image = "rbxassetid://10747383471"
+    JumpSliderIcon.ImageColor3 = Color3.fromRGB(200, 150, 150)
+    JumpSliderIcon.ZIndex = 13
+    JumpSliderIcon.Parent = JumpSliderFrame
+
+    local JumpSliderLabel = Instance.new("TextLabel")
+    JumpSliderLabel.Size = UDim2.new(1, -70, 0, 20)
+    JumpSliderLabel.Position = UDim2.new(0, 38, 0, 7)
+    JumpSliderLabel.BackgroundTransparency = 1
+    JumpSliderLabel.Font = Enum.Font.GothamBold
+    JumpSliderLabel.Text = "Độ Cao Nhảy (JumpPower)"
+    JumpSliderLabel.TextColor3 = Color3.fromRGB(240, 210, 210)
+    JumpSliderLabel.TextSize = 11
+    JumpSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+    JumpSliderLabel.ZIndex = 13
+    JumpSliderLabel.Parent = JumpSliderFrame
+
+    local JumpValueLabel = Instance.new("TextLabel")
+    JumpValueLabel.Size = UDim2.new(0, 50, 0, 20)
+    JumpValueLabel.Position = UDim2.new(1, -55, 0, 7)
+    JumpValueLabel.BackgroundTransparency = 1
+    JumpValueLabel.Font = Enum.Font.GothamBold
+    JumpValueLabel.Text = "50"
+    JumpValueLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+    JumpValueLabel.TextSize = 11
+    JumpValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    JumpValueLabel.ZIndex = 13
+    JumpValueLabel.Parent = JumpSliderFrame
+
+    local JumpSliderBar = Instance.new("Frame")
+    JumpSliderBar.Size = UDim2.new(1, -24, 0, 6)
+    JumpSliderBar.Position = UDim2.new(0, 12, 0, 34)
+    JumpSliderBar.BackgroundColor3 = Color3.fromRGB(50, 30, 30)
+    JumpSliderBar.BorderSizePixel = 0
+    JumpSliderBar.ZIndex = 13
+    JumpSliderBar.Parent = JumpSliderFrame
+    Instance.new("UICorner", JumpSliderBar).CornerRadius = UDim.new(1, 0)
+
+    local JumpSliderFill = Instance.new("Frame")
+    JumpSliderFill.Size = UDim2.new(0, 0, 1, 0)
+    JumpSliderFill.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
+    JumpSliderFill.BorderSizePixel = 0
+    JumpSliderFill.ZIndex = 14
+    JumpSliderFill.Parent = JumpSliderBar
+    Instance.new("UICorner", JumpSliderFill).CornerRadius = UDim.new(1, 0)
+
+    local JumpSliderButton = Instance.new("TextButton")
+    JumpSliderButton.Size = UDim2.new(1, 0, 1, 0)
+    JumpSliderButton.BackgroundTransparency = 1
+    JumpSliderButton.Text = ""
+    JumpSliderButton.ZIndex = 15
+    JumpSliderButton.Parent = JumpSliderBar
+
+    local draggingJumpSlider = false
+    local minJump, maxJump = 50, 300
+
+    local function UpdateJumpSlider(input)
+        local pos = math.clamp((input.Position.X - JumpSliderBar.AbsolutePosition.X) / JumpSliderBar.AbsoluteSize.X, 0, 1)
+        JumpSliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        jumpPowerValue = math.floor(minJump + (pos * (maxJump - minJump)))
+        JumpValueLabel.Text = tostring(jumpPowerValue)
+        if jumpPowerEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            local hum = LocalPlayer.Character.Humanoid
+            hum.UseJumpPower = true
+            hum.JumpPower = jumpPowerValue
+        end
+    end
+
+    JumpSliderButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then draggingJumpSlider = true UpdateJumpSlider(input) end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then draggingJumpSlider = false end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if draggingJumpSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateJumpSlider(input) end
+    end)
+
+    Tab2.AddToggle("Bật Độ Cao Nhảy", 10747383471, false, function(state)
+        jumpPowerEnabled = state
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            local hum = LocalPlayer.Character.Humanoid
+            hum.UseJumpPower = true
+            hum.JumpPower = jumpPowerEnabled and jumpPowerValue or 50
         end
     end)
 
-    -- 4. Thanh kéo thả tốc độ bay (FlySpeed Slider)
+    -- FlySpeed Slider & Toggle
     local flyEnabled = false
     local flySpeed = 50
     local bg, bv
@@ -760,22 +905,13 @@ local function LoadMainMenu()
     end
 
     FlySliderButton.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            draggingFlySlider = true
-            UpdateFlySlider(input)
-        end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then draggingFlySlider = true UpdateFlySlider(input) end
     end)
-
     UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            draggingFlySlider = false
-        end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then draggingFlySlider = false end
     end)
-
     UserInputService.InputChanged:Connect(function(input)
-        if draggingFlySlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            UpdateFlySlider(input)
-        end
+        if draggingFlySlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateFlySlider(input) end
     end)
 
     Tab2.AddToggle("Tính Năng Bay", 10747383471, false, function(state)
@@ -787,14 +923,8 @@ local function LoadMainMenu()
         
         if flyEnabled and root and humanoid then
             humanoid.PlatformStand = true
-            bg = Instance.new("BodyGyro", root)
-            bg.P = 9e4
-            bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-            bg.cframe = root.CFrame
-            
-            bv = Instance.new("BodyVelocity", root)
-            bv.velocity = Vector3.new(0, 0, 0)
-            bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+            bg = Instance.new("BodyGyro", root) bg.P = 9e4 bg.maxTorque = Vector3.new(9e9, 9e9, 9e9) bg.cframe = root.CFrame
+            bv = Instance.new("BodyVelocity", root) bv.velocity = Vector3.new(0, 0, 0) bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
             
             task.spawn(function()
                 while flyEnabled and char and root and humanoid do
@@ -816,33 +946,42 @@ local function LoadMainMenu()
         end
     end)
 
+    local clickTpEnabled = false
+    Tab2.AddToggle("📍 Click TP (Giữ Ctrl + Click chuột)", 10747383471, false, function(state)
+        clickTpEnabled = state
+    end)
+
+    UserInputService.InputBegan:Connect(function(input, gpe)
+        if gpe then return end
+        if clickTpEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+            local mouse = LocalPlayer:GetMouse()
+            if mouse and mouse.Hit and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = mouse.Hit + Vector3.new(0, 3, 0)
+            end
+        end
+    end)
+
     local invisEnabled = false
     Tab2.AddToggle("Tàng Hình", 10747383471, false, function(state)
         invisEnabled = state
         local char = LocalPlayer.Character
         if char then
             for _, part in pairs(char:GetDescendants()) do
-                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                    part.Transparency = invisEnabled and 1 or 0
-                elseif part:IsA("Decal") then
-                    part.Transparency = invisEnabled and 1 or 0
-                end
+                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then part.Transparency = invisEnabled and 1 or 0
+                elseif part:IsA("Decal") then part.Transparency = invisEnabled and 1 or 0 end
             end
         end
     end)
 
     local evadeEnabled = false
-    Tab2.AddToggle("Lướt Phím Z", 10747383471, false, function(state)
-        evadeEnabled = state
-    end)
+    Tab2.AddToggle("Lướt Phím Z", 10747383471, false, function(state) evadeEnabled = state end)
 
     UserInputService.InputBegan:Connect(function(input)
         if evadeEnabled and input.KeyCode == Enum.KeyCode.Z then
             local char = LocalPlayer.Character
             if char and char:FindFirstChild("HumanoidRootPart") then
                 local root = char.HumanoidRootPart
-                local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                local tween = TweenService:Create(root, tweenInfo, {CFrame = root.CFrame + (root.CFrame.LookVector * 25)})
+                local tween = TweenService:Create(root, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = root.CFrame + (root.CFrame.LookVector * 25)})
                 tween:Play()
             end
         end
@@ -893,39 +1032,24 @@ local function LoadMainMenu()
     Tab2.AddToggle("Nhìn Sáng (Fullbright)", 10747383471, false, function(state)
         fullbrightEnabled = state
         if fullbrightEnabled then
-            Lighting.Brightness = 2
-            Lighting.ClockTime = 14
-            Lighting.FogEnd = 100000
-            Lighting.GlobalShadows = false
+            Lighting.Brightness = 2 Lighting.ClockTime = 14 Lighting.FogEnd = 100000 Lighting.GlobalShadows = false
             fbConn = RunService.RenderStepped:Connect(function()
-                Lighting.Brightness = 2
-                Lighting.ClockTime = 14
-                Lighting.FogEnd = 100000
-                Lighting.GlobalShadows = false
+                Lighting.Brightness = 2 Lighting.ClockTime = 14 Lighting.FogEnd = 100000 Lighting.GlobalShadows = false
             end)
         else
             if fbConn then fbConn:Disconnect() end
-            Lighting.Brightness = 1
-            Lighting.GlobalShadows = true
+            Lighting.Brightness = 1 Lighting.GlobalShadows = true
         end
     end)
 
-    local blackScreenEnabled = false
-    Tab2.AddToggle("Black Screen (Treo máy)", 10747383471, false, function(state)
-        blackScreenEnabled = state
-        blackScreenFrame.Visible = blackScreenEnabled
-    end)
+    Tab2.AddToggle("Black Screen (Treo máy)", 10747383471, false, function(state) blackScreenFrame.Visible = state end)
 
     local antiAfkConn
     Tab2.AddToggle("Anti AFK (Chống treo máy)", 10747383471, true, function(state)
         if state then
             local vu = game:GetService("VirtualUser")
             antiAfkConn = LocalPlayer.Idled:Connect(function()
-                pcall(function()
-                    vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-                    task.wait(1)
-                    vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-                end)
+                pcall(function() vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame) task.wait(1) vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame) end)
             end)
         else
             if antiAfkConn then antiAfkConn:Disconnect(); antiAfkConn = nil end
@@ -948,13 +1072,8 @@ local function LoadMainMenu()
             currentRoot.CFrame = CFrame.new(voidFixedPosition)
             if hoverBodyPos then hoverBodyPos:Destroy() end
             if hoverBodyGyro then hoverBodyGyro:Destroy() end
-            hoverBodyPos = Instance.new("BodyPosition", currentRoot)
-            hoverBodyPos.Position = voidFixedPosition
-            hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            hoverBodyPos.P = 25000
-            hoverBodyGyro = Instance.new("BodyGyro", currentRoot)
-            hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-            hoverBodyGyro.CFrame = currentRoot.CFrame
+            hoverBodyPos = Instance.new("BodyPosition", currentRoot) hoverBodyPos.Position = voidFixedPosition hoverBodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9) hoverBodyPos.P = 25000
+            hoverBodyGyro = Instance.new("BodyGyro", currentRoot) hoverBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9) hoverBodyGyro.CFrame = currentRoot.CFrame
         end
     end
 
@@ -962,18 +1081,12 @@ local function LoadMainMenu()
         voidEnabled = state
         if voidEnabled then
             ApplyVoidMode()
-            if not respawnVoidConn then
-                respawnVoidConn = LocalPlayer.CharacterAdded:Connect(function()
-                    if voidEnabled then task.defer(ApplyVoidMode) end
-                end)
-            end
+            if not respawnVoidConn then respawnVoidConn = LocalPlayer.CharacterAdded:Connect(function() if voidEnabled then task.defer(ApplyVoidMode) end end) end
         else
             if hoverBodyPos then hoverBodyPos:Destroy() end
             if hoverBodyGyro then hoverBodyGyro:Destroy() end
             local char = LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") and originalPos then
-                char.HumanoidRootPart.CFrame = originalPos + Vector3.new(0, 2, 0)
-            end
+            if char and char:FindFirstChild("HumanoidRootPart") and originalPos then char.HumanoidRootPart.CFrame = originalPos + Vector3.new(0, 2, 0) end
             if respawnVoidConn then respawnVoidConn:Disconnect(); respawnVoidConn = nil end
         end
     end)
@@ -992,15 +1105,9 @@ local function LoadMainMenu()
                                 for _, desc in ipairs(screen:GetDescendants()) do
                                     if desc:IsA("TextButton") or desc:IsA("ImageButton") then
                                         local txt = desc.Name:lower()
-                                        for _, child in ipairs(desc:GetDescendants()) do
-                                            if child:IsA("TextLabel") then
-                                                txt = txt .. " " .. child.Text:lower()
-                                            end
-                                        end
+                                        for _, child in ipairs(desc:GetDescendants()) do if child:IsA("TextLabel") then txt = txt .. " " .. child.Text:lower() end end
                                         if txt:find("expert") or txt:find("hard") or txt:find("chuyên gia") or txt:find("khó") then
-                                            for _, conn in ipairs(getconnections(desc.MouseButton1Click)) do
-                                                conn:Fire()
-                                            end
+                                            for _, conn in ipairs(getconnections(desc.MouseButton1Click)) do conn:Fire() end
                                         end
                                     end
                                 end
@@ -1012,38 +1119,70 @@ local function LoadMainMenu()
         end)
     end)
 
+    local nextbotEspEnabled = false
+    local nextbotEspConn
+    Tab3.AddToggle("🤖 ESP Nextbot (Khung Vàng)", 10747362071, false, function(state)
+        nextbotEspEnabled = state
+        if nextbotEspEnabled then
+            nextbotEspConn = RunService.RenderStepped:Connect(function()
+                for _, obj in ipairs(Workspace:GetChildren()) do
+                    if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and not Players:GetPlayerFromCharacter(obj) then
+                        local highlight = obj:FindFirstChild("Nextbot_Highlight")
+                        if not highlight then
+                            highlight = Instance.new("Highlight")
+                            highlight.Name = "Nextbot_Highlight"
+                            highlight.Adornee = obj
+                            highlight.FillColor = Color3.fromRGB(255, 200, 0)
+                            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            highlight.Parent = obj
+                        end
+                    end
+                end
+            end)
+        else
+            if nextbotEspConn then nextbotEspConn:Disconnect() end
+            for _, obj in ipairs(Workspace:GetChildren()) do
+                if obj:FindFirstChild("Nextbot_Highlight") then obj.Nextbot_Highlight:Destroy() end
+            end
+        end
+    end)
+
+    local autoRespawnEnabled = false
+    Tab3.AddToggle("⚡ Auto Respawn (Hồi Sinh Nhanh)", 10747362071, false, function(state)
+        autoRespawnEnabled = state
+        task.spawn(function()
+            while autoRespawnEnabled do
+                task.wait(0.5)
+                pcall(function()
+                    local char = LocalPlayer.Character
+                    if char and char:FindFirstChild("Humanoid") and char.Humanoid.Health <= 0 then
+                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.R, false, game)
+                        task.wait(0.05)
+                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.R, false, game)
+                    end
+                end)
+            end
+        end)
+    end)
+
     -- TAB 4: HACK MM2
     local mm2EspEnabled = false
     local mm2EspConns = {}
-
     local function updateMm2Roles()
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character then
                 local highlight = p.Character:FindFirstChild("MM2_Highlight")
                 if not highlight and mm2EspEnabled then
-                    highlight = Instance.new("Highlight")
-                    highlight.Name = "MM2_Highlight"
-                    highlight.Adornee = p.Character
-                    highlight.Parent = p.Character
+                    highlight = Instance.new("Highlight") highlight.Name = "MM2_Highlight" highlight.Adornee = p.Character highlight.Parent = p.Character
                 end
-                
                 if highlight then
                     highlight.Enabled = mm2EspEnabled
-                    local backpack = p:FindFirstChild("Backpack")
-                    local char = p.Character
+                    local backpack = p:FindFirstChild("Backpack") local char = p.Character
                     local isMurderer = (backpack and backpack:FindFirstChild("Knife")) or (char and char:FindFirstChild("Knife"))
                     local isSheriff = (backpack and (backpack:FindFirstChild("Gun") or backpack:FindFirstChild("Revolver"))) or (char and (char:FindFirstChild("Gun") or char:FindFirstChild("Revolver")))
-                    
-                    if isMurderer then
-                        highlight.FillColor = Color3.fromRGB(255, 0, 0)
-                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    elseif isSheriff then
-                        highlight.FillColor = Color3.fromRGB(0, 100, 255)
-                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    else
-                        highlight.FillColor = Color3.fromRGB(0, 255, 0)
-                        highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
-                    end
+                    if isMurderer then highlight.FillColor = Color3.fromRGB(255, 0, 0) highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    elseif isSheriff then highlight.FillColor = Color3.fromRGB(0, 100, 255) highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    else highlight.FillColor = Color3.fromRGB(0, 255, 0) highlight.OutlineColor = Color3.fromRGB(0, 0, 0) end
                 end
             end
         end
@@ -1051,16 +1190,10 @@ local function LoadMainMenu()
 
     Tab4.AddToggle("ESP Vai Trò MM2", 10747384350, false, function(state)
         mm2EspEnabled = state
-        if mm2EspEnabled then
-            table.insert(mm2EspConns, RunService.RenderStepped:Connect(updateMm2Roles))
+        if mm2EspEnabled then table.insert(mm2EspConns, RunService.RenderStepped:Connect(updateMm2Roles))
         else
-            for _, conn in ipairs(mm2EspConns) do conn:Disconnect() end
-            mm2EspConns = {}
-            for _, p in ipairs(Players:GetPlayers()) do
-                if p.Character and p.Character:FindFirstChild("MM2_Highlight") then
-                    p.Character.MM2_Highlight:Destroy()
-                end
-            end
+            for _, conn in ipairs(mm2EspConns) do conn:Disconnect() end mm2EspConns = {}
+            for _, p in ipairs(Players:GetPlayers()) do if p.Character and p.Character:FindFirstChild("MM2_Highlight") then p.Character.MM2_Highlight:Destroy() end end
         end
     end)
 
@@ -1074,34 +1207,34 @@ local function LoadMainMenu()
                     if obj.Name == "GunDrop" and obj:IsA("BasePart") then
                         local billboard = obj:FindFirstChild("GunBillboard")
                         if not billboard then
-                            billboard = Instance.new("BillboardGui")
-                            billboard.Name = "GunBillboard"
-                            billboard.Size = UDim2.new(0, 100, 0, 40)
-                            billboard.StudsOffset = Vector3.new(0, 2, 0)
-                            billboard.AlwaysOnTop = true
-                            billboard.Parent = obj
-                            
-                            local text = Instance.new("TextLabel")
-                            text.Size = UDim2.new(1, 0, 1, 0)
-                            text.BackgroundTransparency = 1
-                            text.Font = Enum.Font.FredokaOne
-                            text.Text = "🔫 SÚNG RƠI!"
-                            text.TextColor3 = Color3.fromRGB(255, 255, 0)
-                            text.TextSize = 14
-                            text.Parent = billboard
+                            billboard = Instance.new("BillboardGui") billboard.Name = "GunBillboard" billboard.Size = UDim2.new(0, 100, 0, 40) billboard.StudsOffset = Vector3.new(0, 2, 0) billboard.AlwaysOnTop = true billboard.Parent = obj
+                            local text = Instance.new("TextLabel") text.Size = UDim2.new(1, 0, 1, 0) text.BackgroundTransparency = 1 text.Font = Enum.Font.FredokaOne text.Text = "🔫 SÚNG RƠI!" text.TextColor3 = Color3.fromRGB(255, 255, 0) text.TextSize = 14 text.Parent = billboard
                         end
                     end
                 end
             end)
         else
             if gunDropConn then gunDropConn:Disconnect() end
-            for _, obj in ipairs(Workspace:GetDescendants()) do
-                if obj.Name == "GunDrop" then
-                    local bb = obj:FindFirstChild("GunBillboard")
-                    if bb then bb:Destroy() end
-                end
-            end
+            for _, obj in ipairs(Workspace:GetDescendants()) do if obj.Name == "GunDrop" and obj:FindFirstChild("GunBillboard") then obj.GunBillboard:Destroy() end end
         end
+    end)
+
+    local autoGrabGun = false
+    Tab4.AddToggle("🎯 Auto Grab Gun (Tự Nhặt Súng Rơi)", 10747384350, false, function(state)
+        autoGrabGun = state
+        task.spawn(function()
+            while autoGrabGun do
+                task.wait(0.2)
+                pcall(function()
+                    for _, obj in ipairs(Workspace:GetDescendants()) do
+                        if obj.Name == "GunDrop" and obj:IsA("BasePart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            LocalPlayer.Character.HumanoidRootPart.CFrame = obj.CFrame
+                            break
+                        end
+                    end
+                end)
+            end
+        end)
     end)
 
     local autoFarmCoins = false
@@ -1131,49 +1264,49 @@ local function LoadMainMenu()
         end)
     end)
 
+    local killAllMurderer = false
+    Tab4.AddToggle("🔪 Kill All (Dành Cho Murderer)", 10747384350, false, function(state)
+        killAllMurderer = state
+        task.spawn(function()
+            while killAllMurderer do
+                task.wait(0.1)
+                pcall(function()
+                    local char = LocalPlayer.Character
+                    local knife = char and char:FindFirstChild("Knife")
+                    if knife and char:FindFirstChild("HumanoidRootPart") then
+                        for _, p in ipairs(Players:GetPlayers()) do
+                            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                                char.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1)
+                                knife:Activate()
+                                task.wait(0.05)
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+    end)
+
     -- TAB 5: STRONGEST BATTLEGROUNDS
     local sbbEspEnabled = false
     local sbbEspConns = {}
-
     local function updateSbbEsp()
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character then
                 local highlight = p.Character:FindFirstChild("SBB_Highlight")
                 local billboard = p.Character:FindFirstChild("SBB_Billboard")
-                
                 if sbbEspEnabled then
                     if not highlight then
-                        highlight = Instance.new("Highlight")
-                        highlight.Name = "SBB_Highlight"
-                        highlight.Adornee = p.Character
-                        highlight.FillColor = Color3.fromRGB(255, 50, 50)
-                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        highlight.Parent = p.Character
+                        highlight = Instance.new("Highlight") highlight.Name = "SBB_Highlight" highlight.Adornee = p.Character highlight.FillColor = Color3.fromRGB(255, 50, 50) highlight.OutlineColor = Color3.fromRGB(255, 255, 255) highlight.Parent = p.Character
                     end
                     if not billboard and p.Character:FindFirstChild("Head") then
-                        billboard = Instance.new("BillboardGui")
-                        billboard.Name = "SBB_Billboard"
-                        billboard.Size = UDim2.new(0, 120, 0, 50)
-                        billboard.StudsOffset = Vector3.new(0, 3, 0)
-                        billboard.AlwaysOnTop = true
-                        billboard.Parent = p.Character
-
-                        local txt = Instance.new("TextLabel")
-                        txt.Name = "Info"
-                        txt.Size = UDim2.new(1, 0, 1, 0)
-                        txt.BackgroundTransparency = 1
-                        txt.Font = Enum.Font.GothamBold
-                        txt.TextColor3 = Color3.fromRGB(255, 255, 255)
-                        txt.TextSize = 12
-                        txt.Parent = billboard
+                        billboard = Instance.new("BillboardGui") billboard.Name = "SBB_Billboard" billboard.Size = UDim2.new(0, 120, 0, 50) billboard.StudsOffset = Vector3.new(0, 3, 0) billboard.AlwaysOnTop = true billboard.Parent = p.Character
+                        local txt = Instance.new("TextLabel") txt.Name = "Info" txt.Size = UDim2.new(1, 0, 1, 0) txt.BackgroundTransparency = 1 txt.Font = Enum.Font.GothamBold txt.TextColor3 = Color3.fromRGB(255, 255, 255) txt.TextSize = 12 txt.Parent = billboard
                     end
-                    
                     if billboard and p.Character:FindFirstChild("Head") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                         local dist = math.floor((p.Character.Head.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude)
                         local txtLabel = billboard:FindFirstChild("Info")
-                        if txtLabel then
-                            txtLabel.Text = p.Name .. "\n[" .. dist .. "m]"
-                        end
+                        if txtLabel then txtLabel.Text = p.Name .. "\n[" .. dist .. "m]" end
                     end
                 else
                     if highlight then highlight:Destroy() end
@@ -1185,17 +1318,10 @@ local function LoadMainMenu()
 
     Tab5.AddToggle("ESP Địch + Khoảng Cách", 10747381084, false, function(state)
         sbbEspEnabled = state
-        if sbbEspEnabled then
-            table.insert(sbbEspConns, RunService.RenderStepped:Connect(updateSbbEsp))
+        if sbbEspEnabled then table.insert(sbbEspConns, RunService.RenderStepped:Connect(updateSbbEsp))
         else
-            for _, conn in ipairs(sbbEspConns) do conn:Disconnect() end
-            sbbEspConns = {}
-            for _, p in ipairs(Players:GetPlayers()) do
-                if p.Character then
-                    if p.Character:FindFirstChild("SBB_Highlight") then p.Character.SBB_Highlight:Destroy() end
-                    if p.Character:FindFirstChild("SBB_Billboard") then p.Character.SBB_Billboard:Destroy() end
-                end
-            end
+            for _, conn in ipairs(sbbEspConns) do conn:Disconnect() end sbbEspConns = {}
+            for _, p in ipairs(Players:GetPlayers()) do if p.Character then if p.Character:FindFirstChild("SBB_Highlight") then p.Character.SBB_Highlight:Destroy() end if p.Character:FindFirstChild("SBB_Billboard") then p.Character.SBB_Billboard:Destroy() end end end
         end
     end)
 
@@ -1213,9 +1339,7 @@ local function LoadMainMenu()
                             local root = p.Character:FindFirstChild("HumanoidRootPart")
                             local hum = p.Character:FindFirstChildOfClass("Humanoid")
                             if root and hum and hum.Health > 0 then
-                                hum.PlatformStand = true
-                                root.CFrame = myPos * CFrame.new(0, 0, -3.5)
-                                root.Velocity = Vector3.new(0, 0, 0)
+                                hum.PlatformStand = true root.CFrame = myPos * CFrame.new(0, 0, -3.5) root.Velocity = Vector3.new(0, 0, 0)
                             end
                         end
                     end
@@ -1223,12 +1347,7 @@ local function LoadMainMenu()
             end)
         else
             if bringConnection then bringConnection:Disconnect() bringConnection = nil end
-            for _, p in ipairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character then
-                    local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                    if hum then hum.PlatformStand = false end
-                end
-            end
+            for _, p in ipairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Humanoid") then p.Character.Humanoid.PlatformStand = false end end
         end
     end)
 
@@ -1240,97 +1359,54 @@ local function LoadMainMenu()
                 task.wait(0.03)
                 pcall(function()
                     local char = LocalPlayer.Character
-                    if char then
-                        local tool = char:FindFirstChildOfClass("Tool")
-                        if tool then
-                            tool:Activate()
-                        end
-                    end
+                    if char then local tool = char:FindFirstChildOfClass("Tool") if tool then tool:Activate() end end
                 end)
             end
         end)
     end)
 
-    local originalTransparency = {}
-    local function setInvisibility(state)
-        local char = LocalPlayer.Character
-        if not char then return end
-        for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") or part:IsA("Decal") then
-                if state then
-                    if part:IsA("BasePart") then originalTransparency[part] = part.Transparency end
-                    part.Transparency = 1
-                else
-                    if part:IsA("BasePart") then part.Transparency = originalTransparency[part] or 0 end
-                    part.Transparency = 0
-                end
-            end
-        end
-    end
-
-    local autoTrashKillEnabled = false
-    Tab5.AddToggle("🗑️ Auto Trash Kill (Tàng Hình)", 10747381084, false, function(state)
-        autoTrashKillEnabled = state
-        setInvisibility(state)
-        
+    local autoBlockEnabled = false
+    Tab5.AddToggle("🛡️ Auto Block F (Đỡ Đòn Khi Địch Lại Gần)", 10747381084, false, function(state)
+        autoBlockEnabled = state
         task.spawn(function()
-            while autoTrashKillEnabled do
-                task.wait(0.2)
+            while autoBlockEnabled do
+                task.wait(0.1)
                 pcall(function()
-                    local char = LocalPlayer.Character
-                    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-                    local myRoot = char.HumanoidRootPart
-                    
-                    local targetPlayer = nil
-                    for _, p in ipairs(Players:GetPlayers()) do
-                        if p ~= LocalPlayer and p.Character then
-                            local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                            if hum and hum.Health > 0 and (hum.Health / hum.MaxHealth) <= 0.4 then
-                                targetPlayer = p
-                                break
-                            end
-                        end
-                    end
-                    
-                    if targetPlayer and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                        local tRoot = targetPlayer.Character.HumanoidRootPart
-                        local heldTrash = char:FindFirstChildOfClass("Tool")
-                        
-                        if heldTrash and (heldTrash.Name:lower():find("trash") or heldTrash.Name:lower():find("bin") or heldTrash.Name:lower():find("garbage")) then
-                            myRoot.CFrame = tRoot.CFrame * CFrame.new(0, 0, 3)
-                            heldTrash:Activate()
-                        else
-                            local nearestTrash = nil
-                            local shortestDist = math.huge
-                            
-                            for _, obj in ipairs(Workspace:GetDescendants()) do
-                                if obj:IsA("BasePart") then
-                                    local name = obj.Name:lower()
-                                    if name:find("trash") or name:find("bin") or name:find("garbage") or name:find("dumpster") then
-                                        local dist = (myRoot.Position - obj.Position).Magnitude
-                                        if dist < shortestDist then
-                                            shortestDist = dist
-                                            nearestTrash = obj
-                                        end
-                                    end
+                    local myChar = LocalPlayer.Character
+                    if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                        local myPos = myChar.HumanoidRootPart.Position
+                        local isNear = false
+                        for _, p in ipairs(Players:GetPlayers()) do
+                            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                                if (myPos - p.Character.HumanoidRootPart.Position).Magnitude < 12 then
+                                    isNear = true break
                                 end
                             end
-
-                            if nearestTrash then
-                                myRoot.CFrame = nearestTrash.CFrame
-                                task.wait(0.05)
-                                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                                task.wait(0.02)
-                                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-                                VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-                                task.wait(0.02)
-                                VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-                            end
+                        end
+                        if isNear then
+                            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+                        else
+                            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.F, false, game)
                         end
                     end
                 end)
             end
-            if not autoTrashKillEnabled then setInvisibility(false) end
+            pcall(function() VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.F, false, game) end)
+        end)
+    end)
+
+    local infiniteDashEnabled = false
+    Tab5.AddToggle("💨 Infinite Dash Q (Lướt Liên Tục)", 10747381084, false, function(state)
+        infiniteDashEnabled = state
+        task.spawn(function()
+            while infiniteDashEnabled do
+                task.wait(0.15)
+                pcall(function()
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Q, false, game)
+                    task.wait(0.02)
+                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Q, false, game)
+                end)
+            end
         end)
     end)
 
@@ -1348,10 +1424,8 @@ local function LoadMainMenu()
                             if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                                 local targetRoot = p.Character.HumanoidRootPart
                                 if (myRoot.Position - targetRoot.Position).Magnitude < 6 then
-                                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Q, false, game)
-                                    task.wait(0.05)
-                                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Q, false, game)
-                                    task.wait(0.5)
+                                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Q, false, game) task.wait(0.05)
+                                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Q, false, game) task.wait(0.5)
                                 end
                             end
                         end
