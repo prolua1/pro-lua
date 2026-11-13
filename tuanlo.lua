@@ -1,6 +1,6 @@
 local LPH_Name = "Tuan Lo Pro Hub"
 local LPH_Developer = "Tuan Lo Developer"
-local LPH_Version = "v9.1 Ultimate Full Features"
+local LPH_Version = "v9.2 Max Speed 1000"
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -627,7 +627,7 @@ local function LoadMainMenu()
         end
     end)
 
-    -- WalkSpeed Slider
+    -- WalkSpeed Slider (Max 1000)
     local walkSpeedEnabled = false
     local walkSpeedValue = 16
     local WalkSliderFrame = Instance.new("Frame")
@@ -651,7 +651,7 @@ local function LoadMainMenu()
     WalkSliderLabel.Position = UDim2.new(0, 38, 0, 7)
     WalkSliderLabel.BackgroundTransparency = 1
     WalkSliderLabel.Font = Enum.Font.GothamBold
-    WalkSliderLabel.Text = "Tốc Độ Chạy (WalkSpeed)"
+    WalkSliderLabel.Text = "Tốc Độ Chạy (Max 1000)"
     WalkSliderLabel.TextColor3 = Color3.fromRGB(240, 210, 210)
     WalkSliderLabel.TextSize = 11
     WalkSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -680,7 +680,7 @@ local function LoadMainMenu()
     Instance.new("UICorner", WalkSliderBar).CornerRadius = UDim.new(1, 0)
 
     local WalkSliderFill = Instance.new("Frame")
-    WalkSliderFill.Size = UDim2.new(16/250, 0, 1, 0)
+    WalkSliderFill.Size = UDim2.new(16/1000, 0, 1, 0)
     WalkSliderFill.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
     WalkSliderFill.BorderSizePixel = 0
     WalkSliderFill.ZIndex = 14
@@ -695,7 +695,7 @@ local function LoadMainMenu()
     WalkSliderButton.Parent = WalkSliderBar
 
     local draggingWalkSlider = false
-    local minWalkSpeed, maxWalkSpeed = 16, 250
+    local minWalkSpeed, maxWalkSpeed = 16, 1000
 
     local function UpdateWalkSlider(input)
         local pos = math.clamp((input.Position.X - WalkSliderBar.AbsolutePosition.X) / WalkSliderBar.AbsoluteSize.X, 0, 1)
@@ -724,7 +724,7 @@ local function LoadMainMenu()
         end
     end)
 
-    -- JumpPower Slider
+    -- JumpPower Slider (Max 1000)
     local jumpPowerEnabled = false
     local jumpPowerValue = 50
     local JumpSliderFrame = Instance.new("Frame")
@@ -748,7 +748,7 @@ local function LoadMainMenu()
     JumpSliderLabel.Position = UDim2.new(0, 38, 0, 7)
     JumpSliderLabel.BackgroundTransparency = 1
     JumpSliderLabel.Font = Enum.Font.GothamBold
-    JumpSliderLabel.Text = "Độ Cao Nhảy (JumpPower)"
+    JumpSliderLabel.Text = "Độ Cao Nhảy (Max 1000)"
     JumpSliderLabel.TextColor3 = Color3.fromRGB(240, 210, 210)
     JumpSliderLabel.TextSize = 11
     JumpSliderLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -792,7 +792,7 @@ local function LoadMainMenu()
     JumpSliderButton.Parent = JumpSliderBar
 
     local draggingJumpSlider = false
-    local minJump, maxJump = 50, 300
+    local minJump, maxJump = 50, 1000
 
     local function UpdateJumpSlider(input)
         local pos = math.clamp((input.Position.X - JumpSliderBar.AbsolutePosition.X) / JumpSliderBar.AbsoluteSize.X, 0, 1)
@@ -825,7 +825,7 @@ local function LoadMainMenu()
         end
     end)
 
-    -- FlySpeed Slider & Toggle
+    -- FlySpeed Slider & Toggle (Max 1000)
     local flyEnabled = false
     local flySpeed = 50
     local bg, bv
@@ -851,7 +851,7 @@ local function LoadMainMenu()
     FlySliderLabel.Position = UDim2.new(0, 38, 0, 7)
     FlySliderLabel.BackgroundTransparency = 1
     FlySliderLabel.Font = Enum.Font.GothamBold
-    FlySliderLabel.Text = "Tốc Độ Bay"
+    FlySliderLabel.Text = "Tốc Độ Bay (Max 1000)"
     FlySliderLabel.TextColor3 = Color3.fromRGB(240, 210, 210)
     FlySliderLabel.TextSize = 11
     FlySliderLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -880,7 +880,7 @@ local function LoadMainMenu()
     Instance.new("UICorner", FlySliderBar).CornerRadius = UDim.new(1, 0)
 
     local FlySliderFill = Instance.new("Frame")
-    FlySliderFill.Size = UDim2.new(50/400, 0, 1, 0)
+    FlySliderFill.Size = UDim2.new(50/1000, 0, 1, 0)
     FlySliderFill.BackgroundColor3 = Color3.fromRGB(255, 30, 30)
     FlySliderFill.BorderSizePixel = 0
     FlySliderFill.ZIndex = 14
@@ -895,7 +895,7 @@ local function LoadMainMenu()
     FlySliderButton.Parent = FlySliderBar
 
     local draggingFlySlider = false
-    local minFlySpeed, maxFlySpeed = 10, 400
+    local minFlySpeed, maxFlySpeed = 10, 1000
 
     local function UpdateFlySlider(input)
         local pos = math.clamp((input.Position.X - FlySliderBar.AbsolutePosition.X) / FlySliderBar.AbsoluteSize.X, 0, 1)
@@ -943,6 +943,16 @@ local function LoadMainMenu()
             if humanoid then humanoid.PlatformStand = false end
             if bg then bg:Destroy() end
             if bv then bv:Destroy() end
+        end
+    end)
+
+    -- Tự động áp dụng lại tốc độ chạy/nhảy khi nhân vật hồi sinh
+    LocalPlayer.CharacterAdded:Connect(function(newChar)
+        task.wait(0.5)
+        local hum = newChar:FindFirstChildOfClass("Humanoid")
+        if hum then
+            if walkSpeedEnabled then hum.WalkSpeed = walkSpeedValue end
+            if jumpPowerEnabled then hum.UseJumpPower = true hum.JumpPower = jumpPowerValue end
         end
     end)
 
@@ -1347,7 +1357,7 @@ local function LoadMainMenu()
             end)
         else
             if bringConnection then bringConnection:Disconnect() bringConnection = nil end
-            for _, p in ipairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Humanoid") then p.Character.Humanoid.PlatformStand = false end end
+            for _, p in ipairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character and p.Character:FindFirstChildOfClass("Humanoid") then p.Character.Humanoid.PlatformStand = false end end
         end
     end)
 
