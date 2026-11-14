@@ -1,6 +1,6 @@
 local LPH_Name = "Tuan Lo Pro Hub"
 local LPH_Developer = "Tuan Lo Developer"
-local LPH_Version = "v9.2 Max Speed 1000"
+local LPH_Version = "v9.6 with Driving Empire"
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -427,6 +427,7 @@ local function LoadMainMenu()
     local Tab3 = CreateTab("🎮 Hack Evade", 10747362071)
     local Tab4 = CreateTab("🔪 Hack MM2", 10747384350)
     local Tab5 = CreateTab("💪 Strongest BB", 10747381084)
+    local Tab6 = CreateTab("🏎️ Driving Empire", 10747383471)
 
     Tab1.Select()
 
@@ -540,6 +541,52 @@ local function LoadMainMenu()
         end
     end)
 
+    -- Thêm nút Join Server Ping Thấp Nhất
+    Tab1.AddButton("🌐 Join Server Ping Thấp Nhất", 10747373999, function()
+        pcall(function()
+            local placeId = game.PlaceId
+            local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100")).data
+            local bestServer = nil
+            local lowestPing = 99999
+            for _, s in ipairs(servers) do
+                if s.ping and s.ping < lowestPing and s.playing < s.maxPlayers and s.id ~= game.JobId then
+                    lowestPing = s.ping
+                    bestServer = s.id
+                end
+            end
+            if bestServer then
+                TeleportService:TeleportToPlaceInstance(placeId, bestServer)
+            else
+                -- Fallback sang server đầu tiên nếu API không trả về ping trực tiếp
+                for _, s in ipairs(servers) do
+                    if s.playing < s.maxPlayers and s.id ~= game.JobId then
+                        TeleportService:TeleportToPlaceInstance(placeId, s.id)
+                        break
+                    end
+                end
+            end
+        end)
+    end)
+
+    -- Thêm nút Join Server Ít Người Nhất
+    Tab1.AddButton("👥 Join Server Ít Người Nhất", 10747373999, function()
+        pcall(function()
+            local placeId = game.PlaceId
+            local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100")).data
+            local targetServer = nil
+            local minPlayers = 9999
+            for _, s in ipairs(servers) do
+                if s.playing < minPlayers and s.playing > 0 and s.id ~= game.JobId then
+                    minPlayers = s.playing
+                    targetServer = s.id
+                end
+            end
+            if targetServer then
+                TeleportService:TeleportToPlaceInstance(placeId, targetServer)
+            end
+        end)
+    end)
+
     -- TAB 2: ALL HACK
     Tab2.AddToggle("⚡ Fix Lag (Tăng FPS)", 10747383471, false, function(state)
         if state then
@@ -554,7 +601,6 @@ local function LoadMainMenu()
         end
     end)
 
-    -- Hiện Vị Trí (Tô Đỏ + Tên + Khoảng Cách mét)
     local espRedEnabled = false
     local espRedConns = {}
     local function updateEspRed()
@@ -627,7 +673,6 @@ local function LoadMainMenu()
         end
     end)
 
-    -- WalkSpeed Slider (Max 1000)
     local walkSpeedEnabled = false
     local walkSpeedValue = 16
     local WalkSliderFrame = Instance.new("Frame")
@@ -724,7 +769,6 @@ local function LoadMainMenu()
         end
     end)
 
-    -- JumpPower Slider (Max 1000)
     local jumpPowerEnabled = false
     local jumpPowerValue = 50
     local JumpSliderFrame = Instance.new("Frame")
@@ -738,7 +782,7 @@ local function LoadMainMenu()
     JumpSliderIcon.Size = UDim2.new(0, 18, 0, 18)
     JumpSliderIcon.Position = UDim2.new(0, 10, 0, 8)
     JumpSliderIcon.BackgroundTransparency = 1
-    JumpSliderIcon.Image = "rbxassetid://10747383471"
+    JumpSliderIcon.Image = "rbxassetid://" .. tostring(10747383471)
     JumpSliderIcon.ImageColor3 = Color3.fromRGB(200, 150, 150)
     JumpSliderIcon.ZIndex = 13
     JumpSliderIcon.Parent = JumpSliderFrame
@@ -825,7 +869,6 @@ local function LoadMainMenu()
         end
     end)
 
-    -- FlySpeed Slider & Toggle (Max 1000)
     local flyEnabled = false
     local flySpeed = 50
     local bg, bv
@@ -841,7 +884,7 @@ local function LoadMainMenu()
     FlySliderIcon.Size = UDim2.new(0, 18, 0, 18)
     FlySliderIcon.Position = UDim2.new(0, 10, 0, 8)
     FlySliderIcon.BackgroundTransparency = 1
-    FlySliderIcon.Image = "rbxassetid://10747383471"
+    FlySliderIcon.Image = "rbxassetid://" .. tostring(10747383471)
     FlySliderIcon.ImageColor3 = Color3.fromRGB(200, 150, 150)
     FlySliderIcon.ZIndex = 13
     FlySliderIcon.Parent = FlySliderFrame
@@ -946,7 +989,6 @@ local function LoadMainMenu()
         end
     end)
 
-    -- Tự động áp dụng lại tốc độ chạy/nhảy khi nhân vật hồi sinh
     LocalPlayer.CharacterAdded:Connect(function(newChar)
         task.wait(0.5)
         local hum = newChar:FindFirstChildOfClass("Humanoid")
@@ -1443,6 +1485,152 @@ local function LoadMainMenu()
                 end)
             end
         end)
+    end)
+
+    -- TAB 6: DRIVING EMPIRE (Teleport to Money Vault + Dropdown Player Selector + Loop Teleport)
+    local selectedTargetPlayer = nil
+
+    Tab6.AddButton("💰 Dịch Chuyển Đến Chỗ Cất Tiền", 10747383471, function()
+        pcall(function()
+            local myChar = LocalPlayer.Character
+            if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                myChar.HumanoidRootPart.CFrame = CFrame.new(-2542.6, 14.6 + 3, 4029.9)
+            end
+        end)
+    end)
+
+    local DropdownContainer = Instance.new("Frame")
+    DropdownContainer.Size = UDim2.new(1, -8, 0, 45)
+    DropdownContainer.BackgroundColor3 = Color3.fromRGB(25, 15, 15)
+    DropdownContainer.ZIndex = 50
+    DropdownContainer.Parent = Tab6.Page
+    Instance.new("UICorner", DropdownContainer).CornerRadius = UDim.new(0, 6)
+
+    local DropdownLabel = Instance.new("TextLabel")
+    DropdownLabel.Size = UDim2.new(1, -40, 1, 0)
+    DropdownLabel.Position = UDim2.new(0, 10, 0, 0)
+    DropdownLabel.BackgroundTransparency = 1
+    DropdownLabel.Font = Enum.Font.GothamBold
+    DropdownLabel.Text = "Chọn Mục tiêu: [ Chưa chọn ]"
+    DropdownLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+    DropdownLabel.TextSize = 11
+    DropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DropdownLabel.ZIndex = 51
+    DropdownLabel.Parent = DropdownContainer
+
+    local ArrowIcon = Instance.new("TextLabel")
+    ArrowIcon.Size = UDim2.new(0, 30, 1, 0)
+    ArrowIcon.Position = UDim2.new(1, -35, 0, 0)
+    ArrowIcon.BackgroundTransparency = 1
+    ArrowIcon.Font = Enum.Font.GothamBold
+    ArrowIcon.Text = "▼"
+    ArrowIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ArrowIcon.TextSize = 12
+    ArrowIcon.ZIndex = 51
+    ArrowIcon.Parent = DropdownContainer
+
+    local MainToggleBtn = Instance.new("TextButton")
+    MainToggleBtn.Size = UDim2.new(1, 0, 1, 0)
+    MainToggleBtn.BackgroundTransparency = 1
+    MainToggleBtn.Text = ""
+    MainToggleBtn.ZIndex = 52
+    MainToggleBtn.Parent = DropdownContainer
+
+    local ListFrame = Instance.new("ScrollingFrame")
+    ListFrame.Size = UDim2.new(1, 0, 0, 0)
+    ListFrame.Position = UDim2.new(0, 0, 1, 4)
+    ListFrame.BackgroundColor3 = Color3.fromRGB(20, 10, 10)
+    ListFrame.BorderSizePixel = 0
+    ListFrame.Visible = false
+    ListFrame.ZIndex = 100
+    ListFrame.ScrollBarThickness = 3
+    ListFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 30, 30)
+    ListFrame.Parent = DropdownContainer
+    Instance.new("UICorner", ListFrame).CornerRadius = UDim.new(0, 6)
+    local ListLayout = Instance.new("UIListLayout", ListFrame)
+    ListLayout.Padding = UDim.new(0, 2)
+    ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+    local isDropdownOpen = false
+
+    local function RefreshPlayerList()
+        for _, child in ipairs(ListFrame:GetChildren()) do
+            if child:IsA("TextButton") then
+                child:Destroy()
+            end
+        end
+
+        local players = Players:GetPlayers()
+        local count = 0
+        for _, p in ipairs(players) do
+            if p ~= LocalPlayer then
+                count = count + 1
+                local pBtn = Instance.new("TextButton")
+                pBtn.Size = UDim2.new(1, -6, 0, 30)
+                pBtn.BackgroundColor3 = Color3.fromRGB(35, 20, 20)
+                pBtn.Font = Enum.Font.GothamBold
+                pBtn.Text = "   " .. p.Name
+                pBtn.TextColor3 = Color3.fromRGB(240, 210, 210)
+                pBtn.TextSize = 11
+                pBtn.TextXAlignment = Enum.TextXAlignment.Left
+                pBtn.ZIndex = 101
+                pBtn.Parent = ListFrame
+                Instance.new("UICorner", pBtn).CornerRadius = UDim.new(0, 4)
+
+                pBtn.MouseButton1Click:Connect(function()
+                    selectedTargetPlayer = p
+                    DropdownLabel.Text = "Chọn Mục tiêu: " .. p.Name
+                    ListFrame.Visible = false
+                    isDropdownOpen = false
+                    ArrowIcon.Text = "▼"
+                end)
+            end
+        end
+
+        ListFrame.CanvasSize = UDim2.new(0, 0, 0, count * 32 + 5)
+        if count > 4 then
+            ListFrame.Size = UDim2.new(1, 0, 0, 120)
+        else
+            ListFrame.Size = UDim2.new(1, 0, 0, math.max(count * 32 + 5, 35))
+        end
+    end
+
+    MainToggleBtn.MouseButton1Click:Connect(function()
+        isDropdownOpen = not isDropdownOpen
+        ListFrame.Visible = isDropdownOpen
+        ArrowIcon.Text = isDropdownOpen and "▲" or "▼"
+        if isDropdownOpen then
+            RefreshPlayerList()
+        end
+    end)
+
+    Tab6.AddButton("🔄 Cập Nhật Lại Danh Sách Người Chơi", 10747383471, function()
+        RefreshPlayerList()
+    end)
+
+    Tab6.AddToggle("🚀 Bật/Tắt Dịch Chuyển Liên Tục", 10747383471, false, function(state)
+        if state then
+            task.spawn(function()
+                while _G.LoopTeleportActive == true do
+                    task.wait()
+                end
+                _G.LoopTeleportActive = true
+                while _G.LoopTeleportActive do
+                    pcall(function()
+                        if selectedTargetPlayer and selectedTargetPlayer.Character and selectedTargetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            local targetRoot = selectedTargetPlayer.Character.HumanoidRootPart
+                            local myChar = LocalPlayer.Character
+                            if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                                myChar.HumanoidRootPart.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
+                            end
+                        end
+                    end)
+                    task.wait(0.15)
+                end
+            end)
+        else
+            _G.LoopTeleportActive = false
+        end
     end)
 end
 
